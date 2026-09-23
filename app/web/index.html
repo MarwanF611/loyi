@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Loyi: your digital loyalty cards.">
+  <meta name="theme-color" content="#E8553D">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Loyi">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Loyi</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    /* Shown while Flutter loads (first visit after a tag tap). */
+    html, body { margin: 0; height: 100%; background: #fff8f6; font-family: -apple-system, system-ui, sans-serif; }
+    #loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; color: #3b2a26; }
+    #loader .logo { font-size: 44px; font-weight: 800; color: #E8553D; letter-spacing: -1px; }
+    #loader .dots span { display: inline-block; width: 10px; height: 10px; margin: 0 4px; border-radius: 50%; background: #E8553D; animation: pulse 1s infinite ease-in-out; }
+    #loader .dots span:nth-child(2) { animation-delay: .15s; }
+    #loader .dots span:nth-child(3) { animation-delay: .3s; }
+    @keyframes pulse { 0%, 100% { opacity: .25; transform: scale(.8); } 50% { opacity: 1; transform: scale(1); } }
+    @media (prefers-color-scheme: dark) { html, body { background: #1a1110; } #loader { color: #f1dfda; } }
+  </style>
+</head>
+<body>
+  <div id="loader" aria-live="polite">
+    <div class="logo">Loyi</div>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </div>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
