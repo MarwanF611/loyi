@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../models.dart';
+import '../theme.dart';
+import 'stamp_icons.dart';
+import 'ui.dart';
+
 /// The visual stamp card, shared by clients (live data) and businesses (preview).
 class LoyaltyCardView extends StatelessWidget {
   const LoyaltyCardView({
     super.key,
     required this.businessName,
     required this.programName,
-    required this.color,
+    required this.design,
     required this.stamps,
     required this.stampsRequired,
+    this.logoUrl,
     this.rewardsAvailable = 0,
     this.animateLatestStamp = false,
     this.onTap,
@@ -16,7 +22,8 @@ class LoyaltyCardView extends StatelessWidget {
 
   final String businessName;
   final String programName;
-  final Color color;
+  final CardDesign design;
+  final String? logoUrl;
   final int stamps;
   final int stampsRequired;
   final int rewardsAvailable;
@@ -26,57 +33,169 @@ class LoyaltyCardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final dark = Color.lerp(color, Colors.black, 0.25)!;
-    return Material(
-      borderRadius: BorderRadius.circular(24),
-      clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      child: Ink(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color, dark]),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: DefaultTextStyle.merge(
-              style: const TextStyle(color: Colors.white),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              businessName,
-                              style: text.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(programName, style: text.bodyMedium?.copyWith(color: Colors.white70)),
-                          ],
+    final fg = design.textColor;
+    final remaining = stampsRequired - stamps;
+    const radius = BorderRadius.all(Radius.circular(28));
+    final card = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        // Coloured glow instead of a grey shadow.
+        boxShadow: [
+          BoxShadow(color: design.backgroundColor.withValues(alpha: 0.35), blurRadius: 28, offset: const Offset(0, 14)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 3, offset: const Offset(0, 1)),
+        ],
+      ),
+      child: Material(
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        color: design.backgroundColor,
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: design.style == CardStyle.solid
+                ? null
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [design.backgroundColor, design.secondaryColor],
+                  ),
+          ),
+          child: CustomPaint(
+            painter: _Sheen(pattern: design.style == CardStyle.pattern ? fg.withValues(alpha: 0.08) : null),
+            child: InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        BusinessLogo(url: logoUrl, name: businessName, size: 46),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                businessName,
+                                style: text.titleLarge?.copyWith(color: fg, fontWeight: FontWeight.w800),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                programName,
+                                style: text.labelMedium?.copyWith(color: fg.withValues(alpha: 0.72)),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      if (rewardsAvailable > 0) _RewardBadge(count: rewardsAvailable),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  StampGrid(stamps: stamps, total: stampsRequired, color: color, animateLatest: animateLatestStamp),
-                  const SizedBox(height: 12),
-                  Text(
-                    '$stamps / $stampsRequired stamps',
-                    style: text.labelLarge?.copyWith(color: Colors.white.withValues(alpha: 0.9)),
-                  ),
-                ],
+                        if (rewardsAvailable > 0) _RewardBadge(count: rewardsAvailable),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    StampGrid(stamps: stamps, total: stampsRequired, design: design, animateLatest: animateLatestStamp),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Text(
+                          '$stamps',
+                          style: text.titleLarge?.copyWith(color: fg, fontWeight: FontWeight.w800, height: 1),
+                        ),
+                        Text(
+                          ' / $stampsRequired stamps',
+                          style: text.labelMedium?.copyWith(color: fg.withValues(alpha: 0.72)),
+                        ),
+                        const Spacer(),
+                        if (remaining > 0 && stamps > 0)
+                          Text(
+                            '$remaining to go',
+                            style: text.labelMedium?.copyWith(color: fg.withValues(alpha: 0.72)),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
     );
+    return Semantics(
+      label:
+          '$businessName, $programName: $stamps of $stampsRequired stamps'
+          '${rewardsAvailable > 0 ? ', $rewardsAvailable rewards ready' : ''}',
+      button: onTap != null,
+      child: onTap == null ? card : Pressable(onTap: onTap, child: card),
+    );
   }
+}
+
+/// The business logo in a rounded white tile, or its initial when there is no logo.
+class BusinessLogo extends StatelessWidget {
+  const BusinessLogo({super.key, required this.url, required this.name, this.size = 40});
+
+  final String? url;
+  final String name;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final initial = Center(
+      child: Text(
+        name.isEmpty ? '?' : name.characters.first.toUpperCase(),
+        style: TextStyle(fontSize: size * 0.45, fontWeight: FontWeight.w700, color: Colors.black87),
+      ),
+    );
+    return Container(
+      width: size,
+      height: size,
+      padding: EdgeInsets.all(url == null ? 0 : size * 0.08),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(size * 0.25)),
+      clipBehavior: Clip.antiAlias,
+      child: url == null
+          ? initial
+          : Image.network(
+              url!,
+              fit: BoxFit.contain,
+              // Falls back to an <img> element if the bucket has no CORS config.
+              webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+              errorBuilder: (_, _, _) => initial,
+            ),
+    );
+  }
+}
+
+/// A soft light sheen in the top-left corner, plus an optional dot pattern.
+class _Sheen extends CustomPainter {
+  _Sheen({this.pattern});
+
+  final Color? pattern;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(-1.1, -1.3),
+          radius: 1.4,
+          colors: [Colors.white.withValues(alpha: 0.16), Colors.white.withValues(alpha: 0)],
+        ).createShader(rect),
+    );
+    if (pattern == null) return;
+    final paint = Paint()..color = pattern!;
+    const gap = 22.0;
+    for (var y = 0.0, row = 0; y < size.height + gap; y += gap, row++) {
+      for (var x = row.isEven ? 0.0 : gap / 2; x < size.width + gap; x += gap) {
+        canvas.drawCircle(Offset(x, y), 3, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_Sheen old) => old.pattern != pattern;
 }
 
 class _RewardBadge extends StatelessWidget {
@@ -86,16 +205,20 @@ class _RewardBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(99)),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+    decoration: BoxDecoration(
+      color: LoyiPalette.light.sun,
+      borderRadius: BorderRadius.circular(99),
+      boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 2))],
+    ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.card_giftcard, size: 16, color: Colors.black87),
+        const Icon(Icons.redeem_rounded, size: 16, color: Color(0xFF17161C)),
         const SizedBox(width: 6),
         Text(
           count == 1 ? '1 reward' : '$count rewards',
-          style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+          style: const TextStyle(color: Color(0xFF17161C), fontWeight: FontWeight.w800, fontSize: 13),
         ),
       ],
     ),
@@ -107,13 +230,13 @@ class StampGrid extends StatelessWidget {
     super.key,
     required this.stamps,
     required this.total,
-    required this.color,
+    required this.design,
     this.animateLatest = false,
   });
 
   final int stamps;
   final int total;
-  final Color color;
+  final CardDesign design;
   final bool animateLatest;
 
   @override
@@ -133,7 +256,7 @@ class StampGrid extends StatelessWidget {
               spacing: spacing,
               children: [
                 for (var i = row * perRow; i < total && i < (row + 1) * perRow; i++)
-                  _StampDot(size: size, filled: i < stamps, color: color, animate: animateLatest && i == stamps - 1),
+                  _StampDot(size: size, filled: i < stamps, design: design, animate: animateLatest && i == stamps - 1),
               ],
             ),
         ],
@@ -143,11 +266,11 @@ class StampGrid extends StatelessWidget {
 }
 
 class _StampDot extends StatelessWidget {
-  const _StampDot({required this.size, required this.filled, required this.color, required this.animate});
+  const _StampDot({required this.size, required this.filled, required this.design, required this.animate});
 
   final double size;
   final bool filled;
-  final Color color;
+  final CardDesign design;
   final bool animate;
 
   @override
@@ -157,7 +280,7 @@ class _StampDot extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withValues(alpha: 0.55), width: 2),
+        border: Border.all(color: design.textColor.withValues(alpha: 0.45), width: 2),
       ),
     );
     if (!filled) return empty;
@@ -165,8 +288,8 @@ class _StampDot extends StatelessWidget {
     final stamp = Container(
       width: size,
       height: size,
-      decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
-      child: Icon(Icons.check_rounded, color: color, size: size * 0.6),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: design.stampFill),
+      child: Icon(stampIconData(design.stampIcon), color: design.stampIconColor, size: size * 0.58),
     );
     if (!animate) return stamp;
 

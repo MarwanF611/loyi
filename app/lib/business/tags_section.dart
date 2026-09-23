@@ -6,6 +6,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../config.dart';
 import '../models.dart';
 import '../services/repo.dart';
+import '../theme.dart';
+import '../widgets/ui.dart';
 
 /// Lists a program's NFC tags and lets the business create new ones.
 /// Each tag is just a URL (`/t/<tagId>`) written onto an NFC sticker.
@@ -48,12 +50,10 @@ class _TagsSectionState extends State<TagsSection> {
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('NFC tags', style: text.titleLarge),
-        const SizedBox(height: 8),
+        const SectionHeader(title: 'NFC tags', subtitle: 'Every tag is a link. Write it onto an NFC sticker.'),
         const _HowTo(),
         const SizedBox(height: 16),
         StreamBuilder<List<LoyiTag>>(
@@ -63,29 +63,31 @@ class _TagsSectionState extends State<TagsSection> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final tag in tags) ...[_TagTile(tag: tag), const SizedBox(height: 8)],
+                for (final tag in tags) ...[_TagTile(tag: tag), const SizedBox(height: 12)],
                 if (snap.hasData && tags.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 8),
-                    child: Text('No tags yet. Create one join tag and one stamp tag to get started.'),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      'No tags yet. Create one join tag and one stamp tag to get started.',
+                      style: context.text.bodyMedium,
+                    ),
                   ),
               ],
             );
           },
         ),
-        const SizedBox(height: 8),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: 10,
+          runSpacing: 10,
           children: [
             OutlinedButton.icon(
               onPressed: () => _addTag(TagType.join),
-              icon: const Icon(Icons.person_add_alt),
+              icon: const Icon(Icons.person_add_alt_rounded),
               label: const Text('Add join tag'),
             ),
             OutlinedButton.icon(
               onPressed: () => _addTag(TagType.stamp),
-              icon: const Icon(Icons.approval),
+              icon: const Icon(Icons.approval_rounded),
               label: const Text('Add stamp tag'),
             ),
           ],
@@ -99,30 +101,47 @@ class _HowTo extends StatelessWidget {
   const _HowTo();
 
   @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: DefaultTextStyle.merge(
-        style: Theme.of(context).textTheme.bodyMedium,
-        child: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('• Join tag: place it where clients can see it (door, counter). Tapping it adds the card.'),
-            SizedBox(height: 6),
-            Text(
-              '• Stamp tag: keep it behind the counter and hold it out after a purchase. '
-              'Every tap gives one stamp.',
+  Widget build(BuildContext context) {
+    final p = context.loyi;
+    Widget step(int n, String title, String body) => Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 14,
+            backgroundColor: p.ink,
+            child: Text('$n', style: context.text.labelMedium?.copyWith(color: p.canvas)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: context.text.titleSmall),
+                Text(body, style: context.text.bodySmall),
+              ],
             ),
-            SizedBox(height: 6),
-            Text(
-              '• To program a sticker (NTAG213/215), copy the link and write it as a URL record '
-              'with a free app like "NFC Tools".',
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
-  );
+    );
+    return Panel(
+      color: p.surfaceMuted,
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 4),
+      child: Column(
+        children: [
+          step(1, 'Join tag, where clients can see it', 'At the door or on the counter. Tapping it adds the card.'),
+          step(2, 'Stamp tag, behind the counter', 'Hold it out after a purchase. Every tap gives one stamp.'),
+          step(
+            3,
+            'Program the stickers',
+            'Use NTAG213/215 stickers. Copy the link and write it as a URL record with a free app like NFC Tools.',
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _TagTile extends StatelessWidget {
@@ -132,44 +151,53 @@ class _TagTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final p = context.loyi;
     final url = tagUrl(tag.id);
     final isJoin = tag.type == TagType.join;
     final lastTap = tag.lastTapAt == null ? 'never' : DateFormat('d MMM HH:mm').format(tag.lastTapAt!);
-    return Card.outlined(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(isJoin ? Icons.person_add_alt : Icons.approval),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${isJoin ? 'Join' : 'Stamp'} tag · ${tag.label}',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      Text('${tag.tapCount} taps · last: $lastTap', style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
+    return Panel(
+      padding: const EdgeInsets.fromLTRB(18, 16, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              IconBadge(
+                icon: isJoin ? Icons.person_add_alt_rounded : Icons.approval_rounded,
+                background: isJoin ? p.accentSoft : p.mintSoft,
+                foreground: isJoin ? p.accent : p.mint,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${isJoin ? 'Join' : 'Stamp'} tag · ${tag.label}', style: context.text.titleMedium),
+                    Text('${tag.tapCount} taps · last $lastTap', style: context.text.bodySmall),
+                  ],
                 ),
-                Switch(
+              ),
+              Tooltip(
+                message: tag.active ? 'Active' : 'Disabled',
+                child: Switch(
                   value: tag.active,
                   onChanged: (v) => repo.setTagActive(tag, active: v),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.only(left: 14),
+            decoration: BoxDecoration(color: p.surfaceMuted, borderRadius: BorderRadius.circular(Radii.sm)),
+            child: Row(
               children: [
-                Expanded(child: SelectableText(url, style: Theme.of(context).textTheme.bodySmall)),
+                Expanded(
+                  child: SelectableText(url, maxLines: 1, style: context.text.bodySmall?.copyWith(color: p.ink)),
+                ),
                 IconButton(
                   tooltip: 'Copy link',
-                  icon: const Icon(Icons.copy),
+                  icon: const Icon(Icons.copy_rounded, size: 20),
                   onPressed: () async {
                     await Clipboard.setData(ClipboardData(text: url));
                     if (context.mounted) {
@@ -181,24 +209,33 @@ class _TagTile extends StatelessWidget {
                 if (isJoin)
                   IconButton(
                     tooltip: 'Show QR code',
-                    icon: const Icon(Icons.qr_code_2),
-                    onPressed: () => showDialog<void>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Join QR code'),
-                        content: SizedBox(
-                          width: 260,
-                          height: 260,
-                          child: QrImageView(data: url, backgroundColor: Colors.white),
-                        ),
-                        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))],
+                    icon: const Icon(Icons.qr_code_2_rounded, size: 22),
+                    onPressed: () => showLoyiSheet<void>(
+                      context,
+                      builder: (context) => Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Join QR code', style: context.text.headlineSmall),
+                          const SizedBox(height: 4),
+                          Text('Print it for clients without NFC.', style: context.text.bodyMedium),
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(Radii.lg),
+                              border: Border.all(color: p.line),
+                            ),
+                            child: SizedBox(width: 240, height: 240, child: QrImageView(data: url)),
+                          ),
+                        ],
                       ),
                     ),
                   ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

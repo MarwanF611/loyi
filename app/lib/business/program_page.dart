@@ -7,6 +7,8 @@ import '../services/repo.dart';
 import '../theme.dart';
 import '../widgets/loyalty_card_view.dart';
 import 'business_scope.dart';
+import '../widgets/ui.dart';
+import 'design_editor.dart';
 import 'tags_section.dart';
 
 /// Create (`programId == null`) or edit a loyalty card, and manage its NFC tags.
@@ -84,6 +86,7 @@ class _ProgramEditorState extends State<_ProgramEditor> {
   late int _stampsRequired = widget.initial?.stampsRequired ?? 10;
   late int _cooldown = widget.initial?.stampCooldownMinutes ?? 30;
   late bool _active = widget.initial?.active ?? true;
+  late CardDesign _design = widget.initial?.designFor(widget.business) ?? CardDesign(background: widget.business.color);
   late final List<_RewardRow> _rewards = [
     for (final r in widget.initial?.rewards ?? const <Reward>[]) _RewardRow(r.id, r.title, r.active),
     if (widget.initial == null) _RewardRow(repo.newId(), '', true),
@@ -129,6 +132,7 @@ class _ProgramEditorState extends State<_ProgramEditor> {
           stampCooldownMinutes: _cooldown,
           rewards: rewards,
           active: _active,
+          design: _design,
         ),
       );
       if (!mounted) return;
@@ -147,147 +151,207 @@ class _ProgramEditorState extends State<_ProgramEditor> {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
 
+    final preview = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LoyaltyCardView(
+          businessName: widget.business.name,
+          programName: _name.text.isEmpty ? 'Your card name' : _name.text,
+          design: _design,
+          logoUrl: widget.business.logoUrl,
+          stamps: (_stampsRequired / 3).ceil(),
+          stampsRequired: _stampsRequired,
+        ),
+        const SizedBox(height: 8),
+        Text('Preview', style: text.bodySmall, textAlign: TextAlign.center),
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_isNew ? 'New loyalty card' : 'Edit loyalty card'),
         leading: BackButton(onPressed: () => context.go('/business')),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          PageBody(
-            maxWidth: 640,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                LoyaltyCardView(
-                  businessName: widget.business.name,
-                  programName: _name.text.isEmpty ? 'Your card name' : _name.text,
-                  color: Color(widget.business.color),
-                  stamps: (_stampsRequired / 3).floor(),
-                  stampsRequired: _stampsRequired,
-                ),
-                const SizedBox(height: 8),
-                Text('Preview', style: text.bodySmall, textAlign: TextAlign.center),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: _name,
-                  maxLength: 60,
-                  decoration: const InputDecoration(labelText: 'Card name', hintText: 'e.g. Coffee card'),
-                ),
-                const SizedBox(height: 8),
-                _Section(
-                  title: 'Stamps for a full card',
-                  child: Row(
-                    children: [
-                      IconButton.outlined(
-                        tooltip: 'Fewer stamps',
-                        onPressed: _stampsRequired > 1 ? () => setState(() => _stampsRequired--) : null,
-                        icon: const Icon(Icons.remove),
-                      ),
-                      SizedBox(
-                        width: 64,
-                        child: Text('$_stampsRequired', style: text.headlineMedium, textAlign: TextAlign.center),
-                      ),
-                      IconButton.outlined(
-                        tooltip: 'More stamps',
-                        onPressed: _stampsRequired < 50 ? () => setState(() => _stampsRequired++) : null,
-                        icon: const Icon(Icons.add),
-                      ),
-                    ],
-                  ),
-                ),
-                _Section(
-                  title: 'Rewards',
-                  subtitle:
-                      'Clients with a full card choose one of the active rewards. '
-                      'Switch rewards on or off anytime, e.g. a different reward each week.',
-                  child: Column(
-                    children: [
-                      for (final r in _rewards)
-                        Padding(
-                          key: ObjectKey(r),
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: r.title,
-                                  maxLength: 60,
-                                  onChanged: (_) => _rebuild(),
-                                  decoration: const InputDecoration(
-                                    hintText: 'e.g. Free coffee',
-                                    counterText: '',
-                                    isDense: true,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Tooltip(
-                                message: r.active ? 'Active' : 'Hidden from clients',
-                                child: Switch(value: r.active, onChanged: (v) => setState(() => r.active = v)),
-                              ),
-                              IconButton(
-                                tooltip: 'Remove',
-                                icon: const Icon(Icons.delete_outline),
-                                onPressed: () {
-                                  setState(() => _rewards.remove(r));
-                                  WidgetsBinding.instance.addPostFrameCallback((_) => r.title.dispose());
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton.icon(
-                          onPressed: _rewards.length >= 20
-                              ? null
-                              : () => setState(() => _rewards.add(_RewardRow(repo.newId(), '', true))),
-                          icon: const Icon(Icons.add),
-                          label: const Text('Add reward'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _Section(
-                  title: 'Time between stamps',
-                  subtitle: 'The minimum wait before the same client can get another stamp. Stops double taps.',
-                  child: DropdownButtonFormField<int>(
-                    initialValue: _cooldownOptions.containsKey(_cooldown) ? _cooldown : 30,
-                    items: [
-                      for (final e in _cooldownOptions.entries) DropdownMenuItem(value: e.key, child: Text(e.value)),
-                    ],
-                    onChanged: (v) => setState(() => _cooldown = v ?? 0),
-                  ),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Card is live'),
-                  subtitle: const Text('When paused, taps are refused but clients keep their stamps.'),
-                  value: _active,
-                  onChanged: (v) => setState(() => _active = v),
-                ),
-                if (_error != null) ...[
-                  const SizedBox(height: 8),
-                  Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                ],
-                const SizedBox(height: 16),
-                FilledButton(onPressed: _saving ? null : _save, child: Text(_isNew ? 'Create card' : 'Save changes')),
-                if (!_isNew) ...[
-                  const SizedBox(height: 40),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  TagsSection(program: widget.initial!),
-                ],
-              ],
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FilledButton(
+              style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+              onPressed: _saving ? null : _save,
+              child: Text(_isNew ? 'Create' : 'Save'),
             ),
           ),
         ],
       ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Wide screens: form on the left, preview stays visible on the right.
+          final wide = constraints.maxWidth >= 1000;
+          final form = ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              PageBody(
+                maxWidth: 640,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!wide) ...[preview, const SizedBox(height: 24)],
+                    ..._formFields(text),
+                  ],
+                ),
+              ),
+            ],
+          );
+          if (!wide) return form;
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: form),
+              SizedBox(
+                width: 420,
+                child: Padding(padding: const EdgeInsets.fromLTRB(8, 16, 32, 16), child: preview),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
+
+  List<Widget> _formFields(TextTheme text) => [
+    _Section(
+      title: 'Card name',
+      subtitle: 'Short and descriptive; clients see it under your business name.',
+      child: TextField(
+        controller: _name,
+        maxLength: 30,
+        decoration: const InputDecoration(hintText: 'e.g. Koffiekaart'),
+      ),
+    ),
+    _Section(
+      title: 'Design',
+      child: DesignEditor(design: _design, onChanged: (d) => setState(() => _design = d)),
+    ),
+    _Section(
+      title: 'Stamps for a full card',
+      subtitle: '6 to 10 stamps feels achievable for most clients; more can feel out of reach.',
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton.filledTonal(
+                tooltip: 'Fewer stamps',
+                onPressed: _stampsRequired > 1 ? () => setState(() => _stampsRequired--) : null,
+                icon: const Icon(Icons.remove_rounded),
+              ),
+              Container(
+                width: 72,
+                alignment: Alignment.center,
+                child: Text('$_stampsRequired', style: text.headlineLarge),
+              ),
+              IconButton.filledTonal(
+                tooltip: 'More stamps',
+                onPressed: _stampsRequired < 50 ? () => setState(() => _stampsRequired++) : null,
+                icon: const Icon(Icons.add_rounded),
+              ),
+            ],
+          ),
+          for (final n in const [5, 8, 10])
+            ChoiceChip(
+              label: Text('$n'),
+              selected: _stampsRequired == n,
+              onSelected: (_) => setState(() => _stampsRequired = n),
+            ),
+        ],
+      ),
+    ),
+    _Section(
+      title: 'Rewards',
+      subtitle:
+          'Clients with a full card choose one of the active rewards. '
+          'Switch rewards on or off anytime, e.g. a different reward each week.',
+      child: Column(
+        children: [
+          for (final r in _rewards)
+            Padding(
+              key: ObjectKey(r),
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: r.title,
+                      maxLength: 60,
+                      onChanged: (_) => _rebuild(),
+                      decoration: const InputDecoration(hintText: 'e.g. Free coffee', counterText: '', isDense: true),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Tooltip(
+                    message: r.active ? 'Active' : 'Hidden from clients',
+                    child: Switch(value: r.active, onChanged: (v) => setState(() => r.active = v)),
+                  ),
+                  IconButton(
+                    tooltip: 'Remove',
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () {
+                      setState(() => _rewards.remove(r));
+                      WidgetsBinding.instance.addPostFrameCallback((_) => r.title.dispose());
+                    },
+                  ),
+                ],
+              ),
+            ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: _rewards.length >= 20
+                  ? null
+                  : () => setState(() => _rewards.add(_RewardRow(repo.newId(), '', true))),
+              icon: const Icon(Icons.add),
+              label: const Text('Add reward'),
+            ),
+          ),
+        ],
+      ),
+    ),
+    _Section(
+      title: 'Time between stamps',
+      subtitle: 'The minimum wait before the same client can get another stamp. Stops double taps.',
+      child: DropdownButtonFormField<int>(
+        initialValue: _cooldownOptions.containsKey(_cooldown) ? _cooldown : 30,
+        items: [for (final e in _cooldownOptions.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
+        onChanged: (v) => setState(() => _cooldown = v ?? 0),
+      ),
+    ),
+    Panel(
+      padding: const EdgeInsets.fromLTRB(22, 14, 14, 14),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Card is live', style: text.titleLarge),
+                Text('When paused, taps are refused but clients keep their stamps.', style: text.bodySmall),
+              ],
+            ),
+          ),
+          Switch(value: _active, onChanged: (v) => setState(() => _active = v)),
+        ],
+      ),
+    ),
+    if (_error != null) ...[
+      const SizedBox(height: 8),
+      Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+    ],
+    const SizedBox(height: 16),
+    FilledButton(onPressed: _saving ? null : _save, child: Text(_isNew ? 'Create card' : 'Save changes')),
+    if (!_isNew) ...[const SizedBox(height: 36), TagsSection(program: widget.initial!)],
+  ];
 }
 
 class _Section extends StatelessWidget {
@@ -298,19 +362,19 @@ class _Section extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 16),
+    child: Panel(
+      padding: const EdgeInsets.all(22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: text.titleMedium),
-          if (subtitle != null) ...[const SizedBox(height: 2), Text(subtitle!, style: text.bodySmall)],
-          const SizedBox(height: 12),
+          Text(title, style: context.text.titleLarge),
+          if (subtitle != null) ...[const SizedBox(height: 4), Text(subtitle!, style: context.text.bodySmall)],
+          const SizedBox(height: 16),
           child,
         ],
       ),
-    );
-  }
+    ),
+  );
 }

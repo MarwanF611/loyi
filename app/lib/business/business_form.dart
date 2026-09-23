@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
+import '../widgets/color_picker.dart';
 
-/// Name + card colour. Used for onboarding and for editing the business.
+/// Name + brand colour. Used for onboarding and in business settings.
 class BusinessForm extends StatefulWidget {
   const BusinessForm({
     super.key,
@@ -23,7 +23,7 @@ class BusinessForm extends StatefulWidget {
 
 class _BusinessFormState extends State<BusinessForm> {
   late final _name = TextEditingController(text: widget.initialName);
-  late int _color = widget.initialColor ?? businessColors.first.toARGB32();
+  late int _color = widget.initialColor ?? cardPalette.first.toARGB32();
   bool _busy = false;
   String? _error;
 
@@ -62,28 +62,10 @@ class _BusinessFormState extends State<BusinessForm> {
         decoration: InputDecoration(labelText: 'Business name', hintText: 'e.g. Bakkerij Peeters', errorText: _error),
       ),
       const SizedBox(height: 8),
-      Text('Card colour', style: Theme.of(context).textTheme.labelLarge),
-      const SizedBox(height: 8),
-      Wrap(
-        spacing: 10,
-        runSpacing: 10,
-        children: [
-          for (final c in businessColors)
-            Semantics(
-              button: true,
-              selected: c.toARGB32() == _color,
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: () => setState(() => _color = c.toARGB32()),
-                child: CircleAvatar(
-                  radius: 20,
-                  backgroundColor: c,
-                  child: c.toARGB32() == _color ? const Icon(Icons.check, color: Colors.white) : null,
-                ),
-              ),
-            ),
-        ],
-      ),
+      Text('Brand colour', style: Theme.of(context).textTheme.titleSmall),
+      Text('Used as the starting colour for new cards.', style: Theme.of(context).textTheme.bodySmall),
+      const SizedBox(height: 12),
+      ColorPickerRow(value: _color, onChanged: (c) => setState(() => _color = c)),
       const SizedBox(height: 24),
       FilledButton(onPressed: _busy ? null : _submit, child: Text(widget.submitLabel)),
     ],

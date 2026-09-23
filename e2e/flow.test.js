@@ -29,6 +29,7 @@ import {
   where,
 } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions, httpsCallable } from "firebase/functions";
+import { connectStorageEmulator, getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 
 const PROJECT = "demo-loyi";
 const AUTH_PORT = 9099;
@@ -36,7 +37,10 @@ const run = Date.now();
 const apps = [];
 
 function client(name) {
-  const app = initializeApp({ apiKey: "demo-api-key", projectId: PROJECT, authDomain: `${PROJECT}.firebaseapp.com` }, `${name}-${run}`);
+  const app = initializeApp(
+    { apiKey: "demo-api-key", projectId: PROJECT, authDomain: `${PROJECT}.firebaseapp.com`, storageBucket: `${PROJECT}.appspot.com` },
+    `${name}-${run}`,
+  );
   apps.push(app);
   const auth = getAuth(app);
   connectAuthEmulator(auth, `http://127.0.0.1:${AUTH_PORT}`, { disableWarnings: true });
@@ -44,8 +48,10 @@ function client(name) {
   connectFirestoreEmulator(db, "127.0.0.1", 8085);
   const fns = getFunctions(app, "europe-west1");
   connectFunctionsEmulator(fns, "127.0.0.1", 5001);
+  const storage = getStorage(app);
+  connectStorageEmulator(storage, "127.0.0.1", 9199);
   const call = (fn) => async (data) => (await httpsCallable(fns, fn)(data)).data;
-  return { auth, db, tap: (tagId) => call("tap")({ tagId }), redeem: call("redeem"), merge: call("mergeAccount") };
+  return { auth, db, storage, tap: (tagId) => call("tap")({ tagId }), redeem: call("redeem"), merge: call("mergeAccount") };
 }
 
 async function rejects(promise, code) {
@@ -185,6 +191,64 @@ test("business → client → reward flow", async (t) => {
     assert.equal((await getCountFromServer(owned("stampEvents"))).data().count, 5);
     const redemptions = await getDocs(owned("redemptions"));
     assert.deepEqual(redemptions.docs.map((d) => d.get("rewardTitle")), ["Free coffee"]);
+  });
+
+  await t.test("card design validation", async () => {
+    const design = { background: 0xff6d4c41, background2: null, style: "pattern", stampColor: 0xffffffff, stampIcon: "coffee" };
+    await updateDoc(programRef, { design });
+    await rejects(updateDoc(programRef, { design: { ...design, style: "neon" } }), "permission-denied");
+    await rejects(updateDoc(programRef, { design: { ...design, script: "<b>" } }), "permission-denied");
+    await rejects(updateDoc(programRef, { design: { ...design, background: "brown" } }), "permission-denied");
+    assert.deepEqual((await getDoc(programRef)).get("design"), design);
+  });
+
+  await t.test("logo upload rules", async () => {
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]);
+    const path = `logos/${bizRef.id}/${run}.png`;
+    await uploadBytes(ref(biz.storage, path), png, { contentType: "image/png" });
+    const url = await getDownloadURL(ref(biz.storage, path));
+    await updateDoc(bizRef, { logoUrl: url, logoPath: path });
+    assert.equal((await getDoc(doc(alice.db, "businesses", bizRef.id))).get("logoUrl"), url); // public
+
+    // Other businesses, clients, wrong types and huge files are refused.
+    await rejects(uploadBytes(ref(other.storage, `logos/${bizRef.id}/x.png`), png, { contentType: "image/png" }), "unauthorized");
+    await rejects(uploadBytes(ref(alice.storage, `logos/${bizRef.id}/x.png`), png, { contentType: "image/png" }), "unauthorized");
+    await rejects(uploadBytes(ref(biz.storage, `logos/${bizRef.id}/x.svg`), png, { contentType: "image/svg+xml" }), "unauthorized");
+    await rejects(
+      uploadBytes(ref(biz.storage, `logos/${bizRef.id}/big.png`), new Uint8Array(1024 * 1024 + 1), { contentType: "image/png" }),
+      "unauthorized",
+    );
+    // logoUrl must point at our own bucket.
+    await rejects(updateDoc(bizRef, { logoUrl: "https://evil.example/pixel.gif", logoPath: path }), "permission-denied");
+  });
+
+  await t.test("one client, cards from several shops", async () => {
+    const biz2 = client("biz2");
+    const owner2 = (await createUserWithEmailAndPassword(biz2.auth, `owner2-${run}@test.be`, "test1234")).user;
+    const shop2 = await addDoc(collection(biz2.db, "businesses"), { ownerUid: owner2.uid, name: "Koffiebar Mokka", color: 0xff6d4c41 });
+    const program2 = await addDoc(collection(biz2.db, "programs"), { ...program, businessId: shop2.id, ownerUid: owner2.uid, name: "Koffiekaart" });
+    const stamp2 = await addDoc(collection(biz2.db, "tags"), {
+      businessId: shop2.id,
+      ownerUid: owner2.uid,
+      programId: program2.id,
+      type: "stamp",
+      label: "Counter",
+      active: true,
+      tapCount: 0,
+    });
+
+    const r = await alice.tap(stamp2.id);
+    assert.equal(r.outcome, "stamped");
+    assert.equal(r.stamps, 1);
+
+    const mine = await getDocs(query(collection(alice.db, "cards"), where("clientUid", "==", alice.auth.currentUser.uid)));
+    assert.deepEqual(new Set(mine.docs.map((d) => d.get("businessId"))), new Set([bizRef.id, shop2.id]));
+
+    // Each shop only sees its own clients' cards.
+    const cardsOf = (c, uid, bid) => query(collection(c.db, "cards"), where("ownerUid", "==", uid), where("businessId", "==", bid));
+    assert.equal((await getCountFromServer(cardsOf(biz, owner.uid, bizRef.id))).data().count, 1);
+    assert.equal((await getCountFromServer(cardsOf(biz2, owner2.uid, shop2.id))).data().count, 1);
+    await rejects(getDoc(doc(biz2.db, "cards", aliceCardId)), "permission-denied");
   });
 
   await t.test("save cards with email and merge devices", async () => {

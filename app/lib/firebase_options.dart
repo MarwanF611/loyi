@@ -18,6 +18,7 @@ class DefaultFirebaseOptions {
       messagingSenderId: '000000000000',
       projectId: 'demo-loyi',
       authDomain: 'demo-loyi.firebaseapp.com',
+      storageBucket: 'demo-loyi.appspot.com',
       iosBundleId: 'be.loyi.loyi',
     );
   }

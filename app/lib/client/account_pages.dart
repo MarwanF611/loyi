@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../services/api.dart';
 import '../services/auth_service.dart';
 import '../theme.dart';
+import '../widgets/ui.dart';
 
 /// Lets an anonymous client attach an email (magic link) so cards survive a new phone.
 class AccountPage extends StatefulWidget {
@@ -48,24 +49,49 @@ class _AccountPageState extends State<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
+    final p = context.loyi;
     final user = auth.user;
     final signedInEmail = user != null && !user.isAnonymous ? user.email : null;
 
+    Widget header(IconData icon, Color bg, Color fg, String title, String body) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        IconBadge(icon: icon, background: bg, foreground: fg, size: 56),
+        const SizedBox(height: 18),
+        Text(title, style: context.text.headlineLarge),
+        const SizedBox(height: 8),
+        Text(body, style: context.text.bodyMedium),
+        const SizedBox(height: 24),
+      ],
+    );
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Account')),
+      appBar: AppBar(),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
           PageBody(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (signedInEmail != null) ...[
-                  Text('Your cards are saved', style: text.headlineSmall),
-                  const SizedBox(height: 8),
-                  Text('Signed in as $signedInEmail'),
-                  const SizedBox(height: 24),
+                  header(
+                    Icons.verified_user_rounded,
+                    p.mintSoft,
+                    p.mint,
+                    'Your cards are saved',
+                    'Open Loyi on any device and sign in with this email to see your cards.',
+                  ),
+                  Panel(
+                    child: Row(
+                      children: [
+                        Icon(Icons.mail_outline_rounded, color: p.inkMuted),
+                        const SizedBox(width: 12),
+                        Expanded(child: Text(signedInEmail, style: context.text.titleMedium)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   OutlinedButton(
                     onPressed: () async {
                       await auth.signOut();
@@ -74,31 +100,44 @@ class _AccountPageState extends State<AccountPage> {
                     child: const Text('Sign out'),
                   ),
                 ] else if (_sentTo != null) ...[
-                  const Icon(Icons.mark_email_read_outlined, size: 56),
-                  const SizedBox(height: 16),
-                  Text('Check your inbox', style: text.headlineSmall, textAlign: TextAlign.center),
-                  const SizedBox(height: 8),
-                  Text(
+                  header(
+                    Icons.mark_email_read_rounded,
+                    p.accentSoft,
+                    p.accent,
+                    'Check your inbox',
                     'We sent a sign-in link to $_sentTo. Open it on this phone to save your cards.',
-                    textAlign: TextAlign.center,
                   ),
+                  TextButton(onPressed: () => setState(() => _sentTo = null), child: const Text('Use another email')),
                 ] else ...[
-                  Text('Keep your cards safe', style: text.headlineSmall),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "Your stamps are stored on this phone. Add your email and we'll send you a link. "
-                    'No password needed. You can then open your cards on any device.',
+                  header(
+                    Icons.cloud_done_rounded,
+                    p.mintSoft,
+                    p.mint,
+                    'Keep your cards safe',
+                    "Your stamps are stored in this browser. Add your email and we'll send you a link: "
+                        'no password needed, and your cards follow you to any device.',
                   ),
-                  const SizedBox(height: 24),
-                  TextField(
-                    controller: _email,
-                    keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
-                    decoration: InputDecoration(labelText: 'Email', errorText: _error),
-                    onSubmitted: (_) => _send(),
+                  Panel(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextField(
+                          controller: _email,
+                          keyboardType: TextInputType.emailAddress,
+                          autofillHints: const [AutofillHints.email],
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            prefixIcon: const Icon(Icons.alternate_email_rounded),
+                            errorText: _error,
+                          ),
+                          onSubmitted: (_) => _send(),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton(onPressed: _busy ? null : _send, child: const Text('Send me a link')),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  FilledButton(onPressed: _busy ? null : _send, child: const Text('Send me a link')),
                 ],
               ],
             ),

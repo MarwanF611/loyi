@@ -44,6 +44,8 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   shared_preferences: ^2.5.5
+  firebase_storage: ^13.6.0
+  image_picker: ^1.2.3
 
 dev_dependencies:
   flutter_test:
@@ -66,6 +68,22 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Plus Jakarta Sans (SIL OFL 1.1, see assets/fonts/OFL.txt), bundled so the
+  # client page doesn't wait on a font download at the counter.
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
 
   # To add assets to your application, add an assets section, like this:
   # assets:

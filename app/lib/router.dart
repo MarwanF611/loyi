@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'business/dashboard_page.dart';
 import 'business/login_page.dart';
 import 'business/program_page.dart';
+import 'business/settings_page.dart';
 import 'client/account_pages.dart';
 import 'client/card_page.dart';
 import 'client/my_cards_page.dart';
@@ -57,6 +58,7 @@ GoRouter buildRouter() => GoRouter(
       path: '/business',
       builder: (_, _) => const DashboardPage(),
       routes: [
+        GoRoute(path: 'settings', builder: (_, _) => const BusinessSettingsPage()),
         GoRoute(path: 'programs/new', builder: (_, _) => const ProgramPage()),
         GoRoute(
           path: 'programs/:programId',

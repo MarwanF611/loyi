@@ -1,14 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart' show Color, Colors;
 
 DateTime? _date(Object? value) => value is Timestamp ? value.toDate() : null;
 
 class Business {
-  const Business({required this.id, required this.name, required this.ownerUid, required this.color});
+  const Business({
+    required this.id,
+    required this.name,
+    required this.ownerUid,
+    required this.color,
+    this.logoUrl,
+    this.logoPath,
+  });
 
   final String id;
   final String name;
   final String ownerUid;
+
+  /// Brand colour; the default for new cards and for cards without a design.
   final int color;
+  final String? logoUrl;
+
+  /// Storage path of the current logo, so it can be replaced/removed.
+  final String? logoPath;
 
   factory Business.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final d = doc.data()!;
@@ -16,10 +30,80 @@ class Business {
       id: doc.id,
       name: d['name'] as String? ?? '',
       ownerUid: d['ownerUid'] as String? ?? '',
-      color: d['color'] as int? ?? 0xFFE8553D,
+      color: d['color'] as int? ?? 0xFFFF5A3C,
+      logoUrl: d['logoUrl'] as String?,
+      logoPath: d['logoPath'] as String?,
     );
   }
 }
+
+enum CardStyle { solid, gradient, pattern }
+
+/// How a loyalty card looks. Kept to colours + an icon so the same design can
+/// later be rendered as an Apple/Google Wallet pass.
+class CardDesign {
+  const CardDesign({
+    required this.background,
+    this.background2,
+    this.style = CardStyle.gradient,
+    this.stampColor = 0xFFFFFFFF,
+    this.stampIcon = 'check',
+  });
+
+  final int background;
+
+  /// Gradient end colour; derived from [background] when null.
+  final int? background2;
+  final CardStyle style;
+  final int stampColor;
+
+  /// Key into `stampIcons` (widgets/stamp_icons.dart).
+  final String stampIcon;
+
+  Color get backgroundColor => Color(background);
+  Color get secondaryColor =>
+      background2 != null ? Color(background2!) : Color.lerp(backgroundColor, Colors.black, 0.25)!;
+  Color get stampFill => Color(stampColor);
+  Color get textColor => readableOn(backgroundColor);
+
+  /// On a light stamp the card colour is used for the icon, unless the card is light too.
+  Color get stampIconColor => stampFill.computeLuminance() > 0.6 && backgroundColor.computeLuminance() < 0.5
+      ? backgroundColor
+      : readableOn(stampFill);
+
+  CardDesign copyWith({
+    int? background,
+    int? Function()? background2,
+    CardStyle? style,
+    int? stampColor,
+    String? stampIcon,
+  }) => CardDesign(
+    background: background ?? this.background,
+    background2: background2 != null ? background2() : this.background2,
+    style: style ?? this.style,
+    stampColor: stampColor ?? this.stampColor,
+    stampIcon: stampIcon ?? this.stampIcon,
+  );
+
+  factory CardDesign.fromMap(Map<String, dynamic> m) => CardDesign(
+    background: m['background'] as int,
+    background2: m['background2'] as int?,
+    style: CardStyle.values.asNameMap()[m['style']] ?? CardStyle.gradient,
+    stampColor: m['stampColor'] as int? ?? 0xFFFFFFFF,
+    stampIcon: m['stampIcon'] as String? ?? 'check',
+  );
+
+  Map<String, dynamic> toMap() => {
+    'background': background,
+    'background2': background2,
+    'style': style.name,
+    'stampColor': stampColor,
+    'stampIcon': stampIcon,
+  };
+}
+
+/// Black or white, whichever reads better on [background].
+Color readableOn(Color background) => background.computeLuminance() > 0.5 ? const Color(0xDD000000) : Colors.white;
 
 class Reward {
   const Reward({required this.id, required this.title, this.active = true});
@@ -47,6 +131,7 @@ class Program {
     required this.stampCooldownMinutes,
     required this.rewards,
     required this.active,
+    this.design,
     this.createdAt,
   });
 
@@ -58,7 +143,12 @@ class Program {
   final int stampCooldownMinutes;
   final List<Reward> rewards;
   final bool active;
+
+  /// Null for cards created before designs existed; see [designFor].
+  final CardDesign? design;
   final DateTime? createdAt;
+
+  CardDesign designFor(Business business) => design ?? CardDesign(background: business.color);
 
   List<Reward> get activeRewards => rewards.where((r) => r.active).toList();
 
@@ -75,6 +165,7 @@ class Program {
         for (final r in (d['rewards'] as List? ?? const [])) Reward.fromMap(Map<String, dynamic>.from(r as Map)),
       ],
       active: d['active'] as bool? ?? true,
+      design: d['design'] is Map ? CardDesign.fromMap(Map<String, dynamic>.from(d['design'] as Map)) : null,
       createdAt: _date(d['createdAt']),
     );
   }
@@ -87,6 +178,7 @@ class Program {
     'stampCooldownMinutes': stampCooldownMinutes,
     'rewards': [for (final r in rewards) r.toMap()],
     'active': active,
+    if (design != null) 'design': design!.toMap(),
   };
 }
 

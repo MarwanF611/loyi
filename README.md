@@ -19,13 +19,13 @@ current rewards to use, now or on a later visit.
 | Flutter app: business app (iOS/Android/web) and client pages (web) | `app/` |
 | Cloud Functions: `tap`, `redeem`, `mergeAccount` (europe-west1) | `functions/src/index.ts` |
 | Stamp maths (pure, unit tested) | `functions/src/stamping.ts` |
-| Security rules | `firestore.rules` |
+| Security rules | `firestore.rules`, `storage.rules` |
 | End-to-end tests against the emulators, plus demo seed data | `e2e/` |
 
 **Data model (Firestore)**
 
-- `businesses/{id}`: name, colour, ownerUid (one business per owner in the MVP)
-- `programs/{id}`: a loyalty card: `stampsRequired`, `rewards[]` (each can be switched on or off), `stampCooldownMinutes`, `active`
+- `businesses/{id}`: name, brand colour, `logoUrl`, ownerUid (one business per owner in the MVP). Logos are stored in Storage under `logos/{businessId}/`
+- `programs/{id}`: a loyalty card: `stampsRequired`, `rewards[]` (each can be switched on or off), `stampCooldownMinutes`, `active`, and `design` (card colour, optional second colour, style `solid | gradient | pattern`, stamp colour, stamp icon). Designs are limited to colours, an icon and the logo, so the same design can later become an Apple/Google Wallet pass
 - `tags/{id}`: `type: join | stamp`, linked to one program. The tag's URL is `/t/<id>`
 - `cards/{programId_clientUid}`: a client's progress: `stamps`, `rewardsAvailable` (banked full cards)
 - `stampEvents`, `redemptions`: the log behind the business dashboard
@@ -34,7 +34,27 @@ current rewards to use, now or on a later visit.
 counter). They can add an email magic link from the card page. If they then sign
 in on another phone, `mergeAccount` combines the stamps from both devices.
 
-**Businesses** sign in with email and password. The native app opens on `/business`.
+**Several shops, one client:** a client's cards from every shop live under the same client ID, so *My cards* shows them all. Cards with a reward ready come first. Each shop only ever sees its own clients' cards.
+
+**Businesses** sign in with email and password. The native app opens on `/business`. Under *Business settings* they upload a logo and pick a brand colour. In each card's editor they choose the card's colours, style and stamp icon, with a live preview.
+
+## Design system ("Coral & Ink")
+
+All styling lives in `app/lib/theme.dart` (colour tokens, typography, component themes) and
+`app/lib/widgets/ui.dart` (shared building blocks).
+
+| Token | Light | Use |
+| --- | --- | --- |
+| canvas / surface | `#F7F5F2` / `#FFFFFF` | warm off-white page, white panels |
+| ink / inkMuted | `#17161C` / `#6E6A73` | text |
+| accent / accentSoft | `#FF5A3C` / `#FFE9E3` | primary actions, highlights |
+| sun / sunSoft | `#FFC83D` / `#FFF4D6` | rewards |
+| mint / mintSoft | `#1FB57A` / `#DDF5EA` | success, stamps, switches |
+
+- **Type:** Plus Jakarta Sans (bundled in `app/assets/fonts`, SIL OFL), bold headings with tight tracking.
+- **Surfaces:** white `Panel`s with soft layered shadows instead of Material's tinted elevation. Pill-shaped 56px buttons.
+- **Patterns:** a bento grid on the dashboard, the primary action in a bottom bar within thumb reach, bottom sheets for choices, a frosted app bar only where content scrolls under it, shimmering loading placeholders, a press-scale on tappable cards, haptics when a stamp lands, and confetti when a card fills up (skipped when "reduce motion" is on).
+- **Dark mode:** its own palette (`LoyiPalette.dark`), not an inversion.
 
 ## Run locally (no Firebase account needed)
 
@@ -47,10 +67,10 @@ firebase emulators:start --project demo-loyi
 Then, in another terminal:
 
 ```bash
-cd e2e && npm install && node seed.js   # prints a demo login + tag URLs
+cd e2e && npm install && node seed.js   # two branded demo shops; prints logins + tag URLs
 ```
 
-- Business: <http://localhost:5050/business>, sign in with `demo@loyi.test` / `demo1234`
+- Business: <http://localhost:5050/business>, sign in with `demo@loyi.test` or `mokka@loyi.test` (password `demo1234`)
 - Client: open the printed `/t/...` URLs, which act as tag taps
 - Emulator UI (data, auth users, email links): <http://localhost:4000>
 
@@ -62,6 +82,8 @@ On an Android emulator, add `--dart-define=EMULATOR_HOST=10.0.2.2`.
 > restores the saved user before `useAuthEmulator` runs, so the app falls back
 > to production auth, which then fails with "API key not valid". Use `flutter run`
 > (debug), a private window, or clear site data. Production is not affected.
+> Also, `flutter build web --profile` builds hang on startup with FlutterFire web
+> auth, so use a debug or release build.
 
 ## Tests
 
@@ -74,9 +96,10 @@ cd e2e && npm test               # full flow + security rules, needs emulators r
 ## Deploy (when ready)
 
 1. Create a Firebase project (Blaze plan, required for Functions), with Firestore in `europe-west1`.
-2. Enable **Authentication → Anonymous**, **Email/Password** and **Email link** sign-in.
+2. Enable **Authentication → Anonymous**, **Email/Password** and **Email link** sign-in, and enable **Storage**.
 3. `flutterfire configure --project=<id>` in `app/` (this regenerates `firebase_options.dart`), and set the project in `.firebaserc`.
 4. `cd app && flutter build web` then `firebase deploy`.
+   Allow the web app to load logos from the bucket: `gsutil cors set cors.json gs://<bucket>` (edit the origins in `cors.json` first).
 5. Add the hosting domain (e.g. `loyi.be`) to Auth's authorised domains and point the tags at it.
 
 ## Programming NFC tags

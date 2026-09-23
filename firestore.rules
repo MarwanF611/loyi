@@ -28,16 +28,43 @@ service cloud.firestore {
                 && resource.data.businessId == request.resource.data.businessId));
     }
 
+    // Logos must live in our own Storage bucket (or the local emulator).
+    function validLogo(data) {
+      return !('logoUrl' in data)
+        || (data.logoUrl is string
+            && data.logoUrl.matches('^(https://firebasestorage[.]googleapis[.]com|http://(localhost|127[.]0[.]0[.]1):9199)/.*')
+            && data.logoPath is string
+            && data.logoPath.matches('^logos/[^/]+/[^/]+$'));
+    }
+
+    function validBusiness(data) {
+      return data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 80
+        && data.color is int
+        && validLogo(data);
+    }
+
+    function validDesign(d) {
+      return d is map
+        && d.keys().hasOnly(['background', 'background2', 'style', 'stampColor', 'stampIcon'])
+        && d.background is int
+        && (d.get('background2', null) == null || d.background2 is int)
+        && d.style in ['solid', 'gradient', 'pattern']
+        && d.stampColor is int
+        && d.stampIcon is string
+        && d.stampIcon.size() <= 30;
+    }
+
     match /businesses/{businessId} {
-      allow read: if true; // name + colour are shown on client cards
+      allow read: if true; // name, colour and logo are shown on client cards
       allow create: if isBusinessUser()
         && request.resource.data.ownerUid == request.auth.uid
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 80;
+        && validBusiness(request.resource.data);
       allow update: if isBusinessUser()
         && resource.data.ownerUid == request.auth.uid
-        && request.resource.data.ownerUid == request.auth.uid;
+        && request.resource.data.ownerUid == request.auth.uid
+        && validBusiness(request.resource.data);
       allow delete: if false;
     }
 
@@ -50,7 +77,8 @@ service cloud.firestore {
         && request.resource.data.stampCooldownMinutes is int
         && request.resource.data.stampCooldownMinutes >= 0
         && request.resource.data.rewards is list
-        && request.resource.data.rewards.size() <= 20;
+        && request.resource.data.rewards.size() <= 20
+        && (!('design' in request.resource.data) || validDesign(request.resource.data.design));
       allow delete: if false; // deactivate instead, cards reference programs
     }
 
