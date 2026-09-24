@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 import '../models.dart';
 
@@ -35,32 +34,40 @@ class Repo {
   Future<void> updateBusiness(String id, {required String name, required int color}) =>
       _businesses.doc(id).update({'name': name, 'color': color});
 
-  /// Uploads a new logo (PNG/JPEG/WebP, max 1 MB) and removes the previous one.
+  static const maxLogoBytes = 200 * 1024;
+
+  /// Stores the logo in `logos/{businessId}` (PNG/JPEG/WebP, max 200 KB) and bumps
+  /// `logoVersion` so every client reloads it. Firestore instead of Storage keeps
+  /// Loyi on the free Spark plan.
   Future<void> uploadLogo(Business business, Uint8List bytes) async {
     final type = imageContentType(bytes);
     if (type == null) throw const FormatException('Use a PNG, JPG or WebP image.');
-    if (bytes.length > 1024 * 1024) throw const FormatException('The logo must be smaller than 1 MB.');
-
-    final path = 'logos/${business.id}/${DateTime.now().millisecondsSinceEpoch}.${type.split('/').last}';
-    final ref = FirebaseStorage.instance.ref(path);
-    await ref.putData(bytes, SettableMetadata(contentType: type, cacheControl: 'public, max-age=31536000'));
-    await _businesses.doc(business.id).update({'logoUrl': await ref.getDownloadURL(), 'logoPath': path});
-    await _deleteQuietly(business.logoPath);
+    if (bytes.length > maxLogoBytes) throw const FormatException('The logo must be smaller than 200 KB.');
+    final batch = _db.batch()
+      ..set(_db.doc('logos/${business.id}'), {
+        'data': Blob(bytes),
+        'contentType': type,
+        'updatedAt': FieldValue.serverTimestamp(),
+      })
+      ..update(_businesses.doc(business.id), {'logoVersion': DateTime.now().millisecondsSinceEpoch});
+    await batch.commit();
   }
 
   Future<void> removeLogo(Business business) async {
-    await _businesses.doc(business.id).update({'logoUrl': FieldValue.delete(), 'logoPath': FieldValue.delete()});
-    await _deleteQuietly(business.logoPath);
+    final batch = _db.batch()
+      ..update(_businesses.doc(business.id), {'logoVersion': FieldValue.delete()})
+      ..delete(_db.doc('logos/${business.id}'));
+    await batch.commit();
   }
 
-  Future<void> _deleteQuietly(String? path) async {
-    if (path == null) return;
-    try {
-      await FirebaseStorage.instance.ref(path).delete();
-    } catch (_) {
-      // An orphaned old logo is harmless.
-    }
-  }
+  final _logoCache = <LogoRef, Future<Uint8List?>>{};
+
+  /// Logo image bytes, fetched once per logo version.
+  Future<Uint8List?> logoBytes(LogoRef ref) => _logoCache[ref] ??= _db
+      .doc('logos/${ref.businessId}')
+      .get()
+      .then((d) => (d.data()?['data'] as Blob?)?.bytes)
+      .catchError((Object _) => null);
 
   // ── Programs (loyalty cards the business offers) ─────────────────────────
 

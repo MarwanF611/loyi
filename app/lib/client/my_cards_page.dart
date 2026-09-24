@@ -147,7 +147,7 @@ class _CardListState extends State<_CardList> {
                           businessName: business.name,
                           programName: program.name,
                           design: program.designFor(business),
-                          logoUrl: business.logoUrl,
+                          logo: business.logo,
                           stamps: progress.stamps,
                           stampsRequired: program.stampsRequired,
                           rewardsAvailable: progress.rewards,

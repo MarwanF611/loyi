@@ -1,12 +1,21 @@
 rules_version = '2';
 
-// Stamps, cards and redemptions are only ever written by Cloud Functions
-// (admin SDK bypasses these rules), so clients can never award themselves stamps.
+// Loyi runs on the free Spark plan, so there are no Cloud Functions: clients
+// write stamps, rewards and account merges themselves, and these rules are the
+// server-side referee. Every write must be exactly what the app would do:
+// +1 stamp from an active stamp tag of that card, cooldown respected, one log
+// entry per stamp, a reward only when one is available, and so on.
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ── Helpers ────────────────────────────────────────────────────────────
+
     function signedIn() {
       return request.auth != null;
+    }
+
+    function uid() {
+      return request.auth.uid;
     }
 
     // Business owners must use a real account, not an anonymous client session.
@@ -16,33 +25,45 @@ service cloud.firestore {
 
     function ownsBusiness(businessId) {
       return isBusinessUser()
-        && get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUid == request.auth.uid;
+        && get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUid == uid();
     }
 
     // Writes to business-owned docs must keep ownerUid/businessId consistent and owned.
     function validOwnedWrite() {
-      return request.resource.data.ownerUid == request.auth.uid
+      return request.resource.data.ownerUid == uid()
         && ownsBusiness(request.resource.data.businessId)
         && (resource == null
-            || (resource.data.ownerUid == request.auth.uid
+            || (resource.data.ownerUid == uid()
                 && resource.data.businessId == request.resource.data.businessId));
     }
 
-    // Logos must live in our own Storage bucket (or the local emulator).
-    function validLogo(data) {
-      return !('logoUrl' in data)
-        || (data.logoUrl is string
-            && data.logoUrl.matches('^(https://firebasestorage[.]googleapis[.]com|http://(localhost|127[.]0[.]0[.]1):9199)/.*')
-            && data.logoPath is string
-            && data.logoPath.matches('^logos/[^/]+/[^/]+$'));
+    function cardPath(cardId) {
+      return /databases/$(database)/documents/cards/$(cardId);
     }
 
+    function programOf(programId) {
+      return get(/databases/$(database)/documents/programs/$(programId)).data;
+    }
+
+    function tagOf(tagId) {
+      return get(/databases/$(database)/documents/tags/$(tagId)).data;
+    }
+
+    // The anonymous account `fromUid` handed its cards to the signed-in user.
+    function transferredToMe(fromUid) {
+      let path = /databases/$(database)/documents/transfers/$(fromUid);
+      return exists(path) && get(path).data.toUid == uid();
+    }
+
+    // ── Businesses, programs, logos ────────────────────────────────────────
+
     function validBusiness(data) {
-      return data.name is string
+      return data.keys().hasOnly(['ownerUid', 'name', 'color', 'logoVersion', 'createdAt'])
+        && data.name is string
         && data.name.size() > 0
         && data.name.size() <= 80
         && data.color is int
-        && validLogo(data);
+        && (!('logoVersion' in data) || data.logoVersion is int);
     }
 
     function validDesign(d) {
@@ -59,13 +80,24 @@ service cloud.firestore {
     match /businesses/{businessId} {
       allow read: if true; // name, colour and logo are shown on client cards
       allow create: if isBusinessUser()
-        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == uid()
         && validBusiness(request.resource.data);
       allow update: if isBusinessUser()
-        && resource.data.ownerUid == request.auth.uid
-        && request.resource.data.ownerUid == request.auth.uid
+        && resource.data.ownerUid == uid()
+        && request.resource.data.ownerUid == uid()
         && validBusiness(request.resource.data);
       allow delete: if false;
+    }
+
+    // Logos live in Firestore (no Cloud Storage on Spark): one small image per business.
+    match /logos/{businessId} {
+      allow read: if true;
+      allow create, update: if ownsBusiness(businessId)
+        && request.resource.data.keys().hasOnly(['data', 'contentType', 'updatedAt'])
+        && request.resource.data.data is bytes
+        && request.resource.data.data.size() <= 200 * 1024
+        && request.resource.data.contentType in ['image/png', 'image/jpeg', 'image/webp'];
+      allow delete: if ownsBusiness(businessId);
     }
 
     match /programs/{programId} {
@@ -82,33 +114,200 @@ service cloud.firestore {
       allow delete: if false; // deactivate instead, cards reference programs
     }
 
+    // ── Tags ───────────────────────────────────────────────────────────────
+
     match /tags/{tagId} {
-      // Clients never read tags directly; the `tap` function resolves them.
-      allow read: if isBusinessUser() && resource.data.ownerUid == request.auth.uid;
+      // Anyone holding a tag id (from tapping it) may look it up; listing is owner-only.
+      allow get: if signedIn();
+      allow list: if isBusinessUser() && resource.data.ownerUid == uid();
       allow create: if validOwnedWrite()
         && request.resource.data.type in ['join', 'stamp']
         && get(/databases/$(database)/documents/programs/$(request.resource.data.programId)).data.businessId
            == request.resource.data.businessId;
-      allow update: if validOwnedWrite()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'label']);
+      allow update: if
+        // Owner: rename or (de)activate.
+        (validOwnedWrite() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'label']))
+        // Client tapping an active tag: tap counter +1.
+        || (signedIn()
+            && resource.data.active
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['tapCount', 'lastTapAt'])
+            && request.resource.data.tapCount == resource.data.tapCount + 1
+            && request.resource.data.lastTapAt == request.time);
       allow delete: if false;
     }
 
+    // ── Cards ──────────────────────────────────────────────────────────────
+
+    function cardKeys() {
+      return ['clientUid', 'businessId', 'ownerUid', 'programId', 'stamps', 'rewardsAvailable', 'totalStamps',
+              'totalRedeemed', 'lastStampAt', 'lastTagId', 'mergedFrom', 'createdAt', 'updatedAt'];
+    }
+
+    // First tap on any tag of a program creates the card (a stamp tag also gives the first stamp).
+    function validJoin(cardId) {
+      let d = request.resource.data;
+      let tag = tagOf(d.lastTagId);
+      let p = programOf(d.programId);
+      return d.keys().hasOnly(cardKeys())
+        && !('mergedFrom' in d)
+        && d.clientUid == uid()
+        && cardId == d.programId + '_' + uid()
+        && tag.active && tag.programId == d.programId
+        && p.active && d.businessId == p.businessId && d.ownerUid == p.ownerUid
+        && d.totalRedeemed == 0
+        && d.createdAt == request.time && d.updatedAt == request.time
+        && (tag.type == 'join'
+            ? d.stamps == 0 && d.rewardsAvailable == 0 && d.totalStamps == 0 && d.lastStampAt == null
+            : d.totalStamps == 1
+              && d.stamps == 1 % p.stampsRequired
+              && d.rewardsAvailable == math.floor(1 / p.stampsRequired)
+              && d.lastStampAt == request.time);
+    }
+
+    // Exactly one stamp from an active stamp tag of this card, after the cooldown.
+    function validStamp() {
+      let old = resource.data;
+      let d = request.resource.data;
+      let tag = tagOf(d.lastTagId);
+      let p = programOf(old.programId);
+      let next = old.stamps + 1;
+      return d.diff(old).affectedKeys().hasOnly(['stamps', 'rewardsAvailable', 'totalStamps', 'lastStampAt', 'lastTagId', 'updatedAt'])
+        && tag.type == 'stamp' && tag.active && tag.programId == old.programId
+        && p.active
+        && (old.lastStampAt == null
+            || request.time >= old.lastStampAt + duration.value(p.stampCooldownMinutes * 60, 's'))
+        && d.totalStamps == old.totalStamps + 1
+        && d.stamps == next % p.stampsRequired
+        && d.rewardsAvailable == old.rewardsAvailable + math.floor(next / p.stampsRequired)
+        && d.lastStampAt == request.time
+        && d.updatedAt == request.time;
+    }
+
+    // One banked full card spent, always together with its redemption record.
+    function validRedeem(cardId) {
+      let old = resource.data;
+      let d = request.resource.data;
+      return d.diff(old).affectedKeys().hasOnly(['rewardsAvailable', 'totalRedeemed', 'updatedAt'])
+        && old.rewardsAvailable >= 1
+        && d.rewardsAvailable == old.rewardsAvailable - 1
+        && d.totalRedeemed == old.totalRedeemed + 1
+        && d.updatedAt == request.time
+        && existsAfter(/databases/$(database)/documents/redemptions/$(cardId + '_r' + string(d.totalRedeemed)));
+    }
+
+    // Merge an anonymous device's card (source, deleted in the same write) into this account's card.
+    function validMergeCreate(cardId) {
+      let d = request.resource.data;
+      let srcPath = cardPath(d.programId + '_' + d.mergedFrom);
+      let src = get(srcPath).data;
+      return d.keys().hasOnly(cardKeys())
+        && transferredToMe(d.mergedFrom)
+        && !existsAfter(srcPath)
+        && d.clientUid == uid()
+        && cardId == d.programId + '_' + uid()
+        && d.businessId == src.businessId && d.ownerUid == src.ownerUid
+        && d.stamps == src.stamps && d.rewardsAvailable == src.rewardsAvailable
+        && d.totalStamps == src.totalStamps && d.totalRedeemed == src.totalRedeemed
+        && d.lastStampAt == src.lastStampAt
+        && !('lastTagId' in d)
+        && d.createdAt == request.time && d.updatedAt == request.time;
+    }
+
+    function validMergeUpdate() {
+      let old = resource.data;
+      let d = request.resource.data;
+      let srcPath = cardPath(old.programId + '_' + d.mergedFrom);
+      let src = get(srcPath).data;
+      let p = programOf(old.programId);
+      let sum = old.stamps + src.stamps;
+      return d.diff(old).affectedKeys().hasOnly(['stamps', 'rewardsAvailable', 'totalStamps', 'totalRedeemed', 'mergedFrom', 'updatedAt'])
+        && transferredToMe(d.mergedFrom)
+        && !existsAfter(srcPath)
+        && d.stamps == sum % p.stampsRequired
+        && d.rewardsAvailable == old.rewardsAvailable + src.rewardsAvailable + math.floor(sum / p.stampsRequired)
+        && d.totalStamps == old.totalStamps + src.totalStamps
+        && d.totalRedeemed == old.totalRedeemed + src.totalRedeemed
+        && d.updatedAt == request.time;
+    }
+
     match /cards/{cardId} {
-      allow read: if signedIn()
-        && (resource.data.clientUid == request.auth.uid || resource.data.ownerUid == request.auth.uid);
-      allow write: if false;
+      // A card that doesn't exist yet may be read by its future owner (<programId>_<uid>).
+      allow get: if signedIn()
+        && (resource == null
+            ? cardId.matches('^[^_]+_' + uid() + '$')
+            : (resource.data.clientUid == uid()
+               || resource.data.ownerUid == uid()
+               || transferredToMe(resource.data.clientUid)));
+      allow list: if signedIn()
+        && (resource.data.clientUid == uid() || resource.data.ownerUid == uid());
+      allow create: if signedIn()
+        && (validJoin(cardId) || ('mergedFrom' in request.resource.data && validMergeCreate(cardId)));
+      allow update: if signedIn()
+        && resource.data.clientUid == uid()
+        && request.resource.data.clientUid == uid()
+        && (validStamp()
+            || validRedeem(cardId)
+            || ('mergedFrom' in request.resource.data && validMergeUpdate()));
+      // Only the merge target may remove a merged source card.
+      allow delete: if signedIn()
+        && transferredToMe(resource.data.clientUid)
+        && getAfter(cardPath(resource.data.programId + '_' + uid())).data.mergedFrom == resource.data.clientUid;
+    }
+
+    // ── Logs ───────────────────────────────────────────────────────────────
+
+    // One event per stamp (id = <cardId>_<totalStamps>), only in the same write as that stamp.
+    function validStampEvent(eventId) {
+      let d = request.resource.data;
+      let card = getAfter(cardPath(d.cardId)).data;
+      return d.keys().hasOnly(['businessId', 'ownerUid', 'programId', 'cardId', 'clientUid', 'tagId', 'createdAt'])
+        && d.clientUid == uid() && card.clientUid == uid()
+        && eventId == d.cardId + '_' + string(card.totalStamps)
+        && card.lastStampAt == request.time
+        && card.lastTagId == d.tagId
+        && d.businessId == card.businessId && d.ownerUid == card.ownerUid && d.programId == card.programId
+        && d.createdAt == request.time;
+    }
+
+    match /stampEvents/{eventId} {
+      allow read: if isBusinessUser() && resource.data.ownerUid == uid();
+      allow create: if signedIn() && validStampEvent(eventId);
+      allow update, delete: if false;
+    }
+
+    // One record per redeemed reward (id = <cardId>_r<totalRedeemed>), with an active reward of the program.
+    function validRedemption(redemptionId) {
+      let d = request.resource.data;
+      let card = getAfter(cardPath(d.cardId)).data;
+      let before = get(cardPath(d.cardId)).data;
+      return d.keys().hasOnly(['businessId', 'ownerUid', 'programId', 'cardId', 'clientUid', 'rewardId', 'rewardTitle', 'createdAt'])
+        && d.clientUid == uid() && card.clientUid == uid()
+        && redemptionId == d.cardId + '_r' + string(card.totalRedeemed)
+        && card.totalRedeemed == before.totalRedeemed + 1
+        && d.businessId == card.businessId && d.ownerUid == card.ownerUid && d.programId == card.programId
+        && {'id': d.rewardId, 'title': d.rewardTitle, 'active': true} in programOf(d.programId).rewards
+        && d.createdAt == request.time;
     }
 
     match /redemptions/{redemptionId} {
       allow read: if signedIn()
-        && (resource.data.clientUid == request.auth.uid || resource.data.ownerUid == request.auth.uid);
-      allow write: if false;
+        && (resource.data.clientUid == uid() || resource.data.ownerUid == uid());
+      allow create: if signedIn() && validRedemption(redemptionId);
+      allow update, delete: if false;
     }
 
-    match /stampEvents/{eventId} {
-      allow read: if isBusinessUser() && resource.data.ownerUid == request.auth.uid;
-      allow write: if false;
+    // ── Account merge hand-off ─────────────────────────────────────────────
+
+    // An anonymous device session names the account it hands its cards to.
+    match /transfers/{fromUid} {
+      allow get: if signedIn() && (uid() == fromUid || resource.data.toUid == uid());
+      allow create, update: if signedIn()
+        && uid() == fromUid
+        && request.auth.token.firebase.sign_in_provider == 'anonymous'
+        && request.resource.data.keys().hasOnly(['toUid', 'createdAt'])
+        && request.resource.data.toUid is string
+        && request.resource.data.toUid != fromUid
+        && request.resource.data.createdAt == request.time;
     }
   }
 }

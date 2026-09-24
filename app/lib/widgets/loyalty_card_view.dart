@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../models.dart';
+import '../services/repo.dart';
 import '../theme.dart';
 import 'stamp_icons.dart';
 import 'ui.dart';
@@ -14,7 +16,7 @@ class LoyaltyCardView extends StatelessWidget {
     required this.design,
     required this.stamps,
     required this.stampsRequired,
-    this.logoUrl,
+    this.logo,
     this.rewardsAvailable = 0,
     this.animateLatestStamp = false,
     this.onTap,
@@ -23,7 +25,7 @@ class LoyaltyCardView extends StatelessWidget {
   final String businessName;
   final String programName;
   final CardDesign design;
-  final String? logoUrl;
+  final LogoRef? logo;
   final int stamps;
   final int stampsRequired;
   final int rewardsAvailable;
@@ -70,7 +72,7 @@ class LoyaltyCardView extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        BusinessLogo(url: logoUrl, name: businessName, size: 46),
+                        BusinessLogo(logo: logo, name: businessName, size: 46),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -133,9 +135,9 @@ class LoyaltyCardView extends StatelessWidget {
 
 /// The business logo in a rounded white tile, or its initial when there is no logo.
 class BusinessLogo extends StatelessWidget {
-  const BusinessLogo({super.key, required this.url, required this.name, this.size = 40});
+  const BusinessLogo({super.key, required this.logo, required this.name, this.size = 40});
 
-  final String? url;
+  final LogoRef? logo;
   final String name;
   final double size;
 
@@ -147,20 +149,27 @@ class BusinessLogo extends StatelessWidget {
         style: TextStyle(fontSize: size * 0.45, fontWeight: FontWeight.w700, color: Colors.black87),
       ),
     );
+    final ref = logo;
     return Container(
       width: size,
       height: size,
-      padding: EdgeInsets.all(url == null ? 0 : size * 0.08),
+      padding: EdgeInsets.all(ref == null ? 0 : size * 0.08),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(size * 0.25)),
       clipBehavior: Clip.antiAlias,
-      child: url == null
+      child: ref == null
           ? initial
-          : Image.network(
-              url!,
-              fit: BoxFit.contain,
-              // Falls back to an <img> element if the bucket has no CORS config.
-              webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
-              errorBuilder: (_, _, _) => initial,
+          : FutureBuilder<Uint8List?>(
+              future: repo.logoBytes(ref),
+              builder: (context, snap) {
+                final bytes = snap.data;
+                if (bytes == null) return snap.connectionState == ConnectionState.done ? initial : const SizedBox();
+                return Image.memory(
+                  bytes,
+                  fit: BoxFit.contain,
+                  gaplessPlayback: true,
+                  errorBuilder: (_, _, _) => initial,
+                );
+              },
             ),
     );
   }

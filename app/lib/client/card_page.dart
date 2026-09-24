@@ -145,7 +145,7 @@ class _CardDetailsState extends State<_CardDetails> {
       extra: RedeemedArgs(
         cardId: widget.card.id,
         businessName: widget.business.name,
-        logoUrl: widget.business.logoUrl,
+        logo: widget.business.logo,
         rewardTitle: result.rewardTitle,
         redeemedAt: result.redeemedAt,
         design: widget.program.designFor(widget.business),
@@ -177,7 +177,7 @@ class _CardDetailsState extends State<_CardDetails> {
                     businessName: widget.business.name,
                     programName: program.name,
                     design: design,
-                    logoUrl: widget.business.logoUrl,
+                    logo: widget.business.logo,
                     stamps: progress.stamps,
                     stampsRequired: program.stampsRequired,
                     rewardsAvailable: progress.rewards,

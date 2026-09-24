@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "demo-loyi"
+    "default": "loyi-b530b",
+    "demo": "demo-loyi"
   }
 }

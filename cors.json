@@ -1,7 +1,0 @@
-[
-  {
-    "origin": ["https://loyi.web.app", "https://loyi.be", "http://localhost:5050"],
-    "method": ["GET"],
-    "maxAgeSeconds": 3600
-  }
-]

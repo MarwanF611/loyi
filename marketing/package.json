@@ -1,0 +1,15 @@
+{
+  "name": "marketing",
+  "version": "1.0.0",
+  "description": "Store screenshots and pitch visuals for Loyi, generated from the running app",
+  "scripts": {
+    "capture": "node capture.js",
+    "compose": "node compose.js",
+    "all": "node capture.js && node compose.js"
+  },
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "puppeteer-core": "^25.12.0"
+  }
+}

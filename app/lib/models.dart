@@ -4,14 +4,7 @@ import 'package:flutter/material.dart' show Color, Colors;
 DateTime? _date(Object? value) => value is Timestamp ? value.toDate() : null;
 
 class Business {
-  const Business({
-    required this.id,
-    required this.name,
-    required this.ownerUid,
-    required this.color,
-    this.logoUrl,
-    this.logoPath,
-  });
+  const Business({required this.id, required this.name, required this.ownerUid, required this.color, this.logoVersion});
 
   final String id;
   final String name;
@@ -19,10 +12,11 @@ class Business {
 
   /// Brand colour; the default for new cards and for cards without a design.
   final int color;
-  final String? logoUrl;
 
-  /// Storage path of the current logo, so it can be replaced/removed.
-  final String? logoPath;
+  /// Bumped on every logo upload; null when the business has no logo.
+  final int? logoVersion;
+
+  LogoRef? get logo => logoVersion == null ? null : LogoRef(businessId: id, version: logoVersion!);
 
   factory Business.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final d = doc.data()!;
@@ -31,10 +25,23 @@ class Business {
       name: d['name'] as String? ?? '',
       ownerUid: d['ownerUid'] as String? ?? '',
       color: d['color'] as int? ?? 0xFFFF5A3C,
-      logoUrl: d['logoUrl'] as String?,
-      logoPath: d['logoPath'] as String?,
+      logoVersion: d['logoVersion'] as int?,
     );
   }
+}
+
+/// Points at a business logo stored in `logos/{businessId}`; the version busts caches.
+class LogoRef {
+  const LogoRef({required this.businessId, required this.version});
+
+  final String businessId;
+  final int version;
+
+  @override
+  bool operator ==(Object other) => other is LogoRef && other.businessId == businessId && other.version == version;
+
+  @override
+  int get hashCode => Object.hash(businessId, version);
 }
 
 enum CardStyle { solid, gradient, pattern }
@@ -223,10 +230,12 @@ class LoyaltyCard {
     required this.clientUid,
     required this.businessId,
     required this.programId,
+    this.ownerUid = '',
     required this.stamps,
     required this.rewardsAvailable,
     required this.totalStamps,
     required this.totalRedeemed,
+    this.lastStampAt,
     this.updatedAt,
   });
 
@@ -234,14 +243,16 @@ class LoyaltyCard {
   final String clientUid;
   final String businessId;
   final String programId;
+  final String ownerUid;
   final int stamps;
   final int rewardsAvailable;
   final int totalStamps;
   final int totalRedeemed;
+  final DateTime? lastStampAt;
   final DateTime? updatedAt;
 
-  /// The server rolls stamps over on the next tap; mirror that here in case
-  /// the business lowered `stampsRequired` in the meantime.
+  /// Stamps roll over on the next tap; mirror that here in case the business
+  /// lowered `stampsRequired` in the meantime.
   ({int stamps, int rewards}) progressFor(int stampsRequired) =>
       (stamps: stamps % stampsRequired, rewards: rewardsAvailable + stamps ~/ stampsRequired);
 
@@ -252,10 +263,12 @@ class LoyaltyCard {
       clientUid: d['clientUid'] as String,
       businessId: d['businessId'] as String,
       programId: d['programId'] as String,
+      ownerUid: d['ownerUid'] as String? ?? '',
       stamps: d['stamps'] as int? ?? 0,
       rewardsAvailable: d['rewardsAvailable'] as int? ?? 0,
       totalStamps: d['totalStamps'] as int? ?? 0,
       totalRedeemed: d['totalRedeemed'] as int? ?? 0,
+      lastStampAt: _date(d['lastStampAt']),
       updatedAt: _date(d['updatedAt']),
     );
   }

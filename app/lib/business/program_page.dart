@@ -158,7 +158,7 @@ class _ProgramEditorState extends State<_ProgramEditor> {
           businessName: widget.business.name,
           programName: _name.text.isEmpty ? 'Your card name' : _name.text,
           design: _design,
-          logoUrl: widget.business.logoUrl,
+          logo: widget.business.logo,
           stamps: (_stampsRequired / 3).ceil(),
           stampsRequired: _stampsRequired,
         ),

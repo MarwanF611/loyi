@@ -121,7 +121,7 @@ class _DashboardState extends State<_Dashboard> {
                         _Header(business: b),
                         const SizedBox(height: 24),
                         _Bento(stats: _stats, week: _week),
-                        if (b.logoUrl == null) ...[
+                        if (b.logo == null) ...[
                           const SizedBox(height: 16),
                           Panel(
                             onTap: () => context.go('/business/settings'),
@@ -190,7 +190,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      BusinessLogo(url: business.logoUrl, name: business.name, size: 52),
+      BusinessLogo(logo: business.logo, name: business.name, size: 52),
       const SizedBox(width: 14),
       Expanded(
         child: Column(

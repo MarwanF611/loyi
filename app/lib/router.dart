@@ -50,7 +50,6 @@ GoRouter buildRouter() => GoRouter(
       builder: (_, s) => RedeemedPage(args: s.extra! as RedeemedArgs),
     ),
     GoRoute(path: '/account', builder: (_, _) => const AccountPage()),
-    GoRoute(path: '/account/finish', builder: (_, _) => const FinishAccountPage()),
 
     // ── Businesses ─────────────────────────────────────────────────────────
     GoRoute(path: '/business/login', builder: (_, _) => const BusinessLoginPage()),

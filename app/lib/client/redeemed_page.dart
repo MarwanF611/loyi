@@ -17,12 +17,12 @@ class RedeemedArgs {
     required this.rewardTitle,
     required this.redeemedAt,
     required this.design,
-    this.logoUrl,
+    this.logo,
   });
 
   final String cardId;
   final String businessName;
-  final String? logoUrl;
+  final LogoRef? logo;
   final String rewardTitle;
   final DateTime redeemedAt;
   final CardDesign design;
@@ -109,7 +109,7 @@ class _RedeemedPageState extends State<RedeemedPage> with SingleTickerProviderSt
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          BusinessLogo(url: a.logoUrl, name: a.businessName, size: 32),
+                          BusinessLogo(logo: a.logo, name: a.businessName, size: 32),
                           const SizedBox(width: 10),
                           Flexible(child: Text(a.businessName, style: text.titleLarge?.merge(white))),
                         ],

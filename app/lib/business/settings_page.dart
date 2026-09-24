@@ -110,12 +110,12 @@ class _LogoEditorState extends State<_LogoEditor> {
   }
 
   Future<void> _pick() async {
-    // Downscaled on the device so uploads stay small.
+    // Downscaled on the device: logos are stored in Firestore (max 200 KB).
     final file = await ImagePicker().pickImage(
       source: ImageSource.gallery,
-      maxWidth: 512,
-      maxHeight: 512,
-      imageQuality: 90,
+      maxWidth: 256,
+      maxHeight: 256,
+      imageQuality: 85,
     );
     if (file == null) return;
     await _run(() async => repo.uploadLogo(widget.business, await file.readAsBytes()));
@@ -123,13 +123,13 @@ class _LogoEditorState extends State<_LogoEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final hasLogo = widget.business.logoUrl != null;
+    final hasLogo = widget.business.logo != null;
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(color: context.loyi.surfaceMuted, borderRadius: BorderRadius.circular(26)),
-          child: BusinessLogo(url: widget.business.logoUrl, name: widget.business.name, size: 84),
+          child: BusinessLogo(logo: widget.business.logo, name: widget.business.name, size: 84),
         ),
         const SizedBox(width: 20),
         Expanded(

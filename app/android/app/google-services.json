@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "245035248880",
+    "project_id": "loyi-b530b",
+    "storage_bucket": "loyi-b530b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:245035248880:android:e85b269681555e98a7a635",
+        "android_client_info": {
+          "package_name": "be.loyi.loyi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9qyqwnGzew5pnE2f2A9tlINZ9MbO6LLw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
