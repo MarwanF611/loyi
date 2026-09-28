@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/api.dart';
 import '../widgets/color_picker.dart';
 
 /// Name + brand colour. Used for onboarding and in business settings.
@@ -45,6 +46,8 @@ class _BusinessFormState extends State<BusinessForm> {
     });
     try {
       await widget.onSubmit(name, _color);
+    } catch (e) {
+      if (mounted) setState(() => _error = friendlyError(e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -58,6 +61,7 @@ class _BusinessFormState extends State<BusinessForm> {
       TextField(
         controller: _name,
         maxLength: 80,
+        autocorrect: false,
         textCapitalization: TextCapitalization.words,
         decoration: InputDecoration(labelText: 'Business name', hintText: 'e.g. Bakkerij Peeters', errorText: _error),
       ),

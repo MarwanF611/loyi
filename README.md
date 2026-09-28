@@ -122,11 +122,14 @@ Status (free Spark plan, no billing):
 
 - [x] Android, iOS and web apps registered
 - [x] Firestore `(default)` in **europe-west1**, delete protection on, rules and indexes deployed
-- [ ] Authentication: enable **Anonymous**, **Email/Password** and **Google** sign-in in the console
-- [ ] Hosting: `cd app && flutter build web && cd .. && firebase deploy --only hosting`
+- [x] Authentication: Anonymous and Email/Password enabled
+- [ ] Authentication: enable **Google** sign-in in the console (clients' "Continue with Google")
+- [x] Hosting: live at **https://loyi-b530b.web.app**. Deploy updates with `./scripts/deploy-web.sh` (builds production, deploys, then restores the local emulator build)
 - [ ] Custom domain (loyi.be) in Hosting and Auth's authorised domains; build with `--dart-define=PUBLIC_BASE_URL=https://loyi.be`
 
-Deploy rules after changing them: `firebase deploy --only firestore`. Never deploy to a
+Deploy rules after changing them: `firebase deploy --only firestore`. The emulators **don't
+enforce indexes**, so after adding or changing a query, add its index to
+`firestore.indexes.json` and check the screen once against the real project. Never deploy to a
 project whose database doesn't exist yet: firebase-tools would create it in the US
 (nam5). Create it first with `firebase firestore:databases:create "(default)" --location=europe-west1`.
 

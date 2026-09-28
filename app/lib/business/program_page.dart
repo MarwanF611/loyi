@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models.dart';
+import '../services/api.dart';
 import '../services/auth_service.dart';
 import '../services/repo.dart';
 import '../theme.dart';
@@ -141,7 +142,7 @@ class _ProgramEditorState extends State<_ProgramEditor> {
       ).showSnackBar(SnackBar(content: Text(_isNew ? 'Card created. Now add your NFC tags below.' : 'Saved')));
       if (_isNew) context.go('/business/programs/$id');
     } catch (e) {
-      setState(() => _error = 'Could not save: $e');
+      setState(() => _error = 'Could not save. ${friendlyError(e)}');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -224,6 +225,8 @@ class _ProgramEditorState extends State<_ProgramEditor> {
       child: TextField(
         controller: _name,
         maxLength: 30,
+        autocorrect: false,
+        textCapitalization: TextCapitalization.sentences,
         decoration: const InputDecoration(hintText: 'e.g. Koffiekaart'),
       ),
     ),
@@ -285,6 +288,8 @@ class _ProgramEditorState extends State<_ProgramEditor> {
                     child: TextField(
                       controller: r.title,
                       maxLength: 60,
+                      autocorrect: false,
+                      textCapitalization: TextCapitalization.sentences,
                       onChanged: (_) => _rebuild(),
                       decoration: const InputDecoration(hintText: 'e.g. Free coffee', counterText: '', isDense: true),
                     ),

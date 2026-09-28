@@ -23,6 +23,7 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
   bool _busy = false;
   bool _showPassword = false;
   String? _error;
+  String? _info;
 
   @override
   void dispose() {
@@ -59,6 +60,28 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
     }
   }
 
+  Future<void> _resetPassword() async {
+    final email = _email.text.trim();
+    if (!email.contains('@')) {
+      setState(() => _error = 'Enter your email address first.');
+      return;
+    }
+    setState(() {
+      _error = null;
+      _info = null;
+    });
+    try {
+      await auth.sendPasswordReset(email);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-email') {
+        setState(() => _error = 'Enter a valid email address.');
+        return;
+      }
+      // Other errors (e.g. unknown email) get the same answer, so accounts can't be probed.
+    }
+    if (mounted) setState(() => _info = 'If $email has an account, a link to reset the password is on its way.');
+  }
+
   Widget _form(BuildContext context) {
     final p = context.loyi;
     return AutofillGroup(
@@ -85,6 +108,7 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
             onSelectionChanged: (s) => setState(() {
               _signUp = s.first;
               _error = null;
+              _info = null;
             }),
           ),
           const SizedBox(height: 20),
@@ -111,6 +135,26 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
             ),
             onSubmitted: (_) => _submit(),
           ),
+          if (!_signUp)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(onPressed: _resetPassword, child: const Text('Forgot password?')),
+            ),
+          if (_info != null) ...[
+            const SizedBox(height: 8),
+            Panel(
+              color: p.mintSoft,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              radius: Radii.md,
+              child: Row(
+                children: [
+                  Icon(Icons.mark_email_read_outlined, color: p.mint, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(_info!, style: context.text.labelMedium)),
+                ],
+              ),
+            ),
+          ],
           if (_error != null) ...[
             const SizedBox(height: 14),
             Panel(

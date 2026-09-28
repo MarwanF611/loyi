@@ -208,5 +208,6 @@ final api = Api();
 String friendlyError(Object error) => switch (error) {
   LoyiException(:final message) => message,
   FirebaseException(code: 'unavailable') => 'No connection. Check your internet and try again.',
+  FirebaseException(code: 'permission-denied') => "You don't have permission to do that.",
   _ => 'Something went wrong. Please try again.',
 };

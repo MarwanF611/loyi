@@ -30,6 +30,7 @@ class DesignEditor extends StatelessWidget {
         ),
         label('Style'),
         SegmentedButton<CardStyle>(
+          showSelectedIcon: false, // the dark fill already marks the choice; keeps labels on one line
           segments: const [
             ButtonSegment(value: CardStyle.solid, icon: Icon(Icons.square_rounded), label: Text('Solid')),
             ButtonSegment(value: CardStyle.gradient, icon: Icon(Icons.gradient), label: Text('Gradient')),

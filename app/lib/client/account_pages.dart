@@ -22,6 +22,7 @@ class _AccountPageState extends State<AccountPage> {
   bool _existing = false;
   bool _busy = false;
   String? _error;
+  String? _info;
 
   @override
   void dispose() {
@@ -57,6 +58,25 @@ class _AccountPageState extends State<AccountPage> {
       setState(() => _error = friendlyError(e));
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _resetPassword() async {
+    final email = _email.text.trim();
+    if (!email.contains('@')) {
+      setState(() => _error = 'Enter your email address first.');
+      return;
+    }
+    try {
+      await auth.sendPasswordReset(email);
+    } on FirebaseAuthException catch (_) {
+      // Same answer for unknown emails, so accounts can't be probed.
+    }
+    if (mounted) {
+      setState(() {
+        _error = null;
+        _info = 'If $email has an account, a link to reset the password is on its way.';
+      });
     }
   }
 
@@ -162,6 +182,7 @@ class _AccountPageState extends State<AccountPage> {
                             onSelectionChanged: (s) => setState(() {
                               _existing = s.first;
                               _error = null;
+                              _info = null;
                             }),
                           ),
                           const SizedBox(height: 16),
@@ -186,6 +207,11 @@ class _AccountPageState extends State<AccountPage> {
                             ),
                             onSubmitted: (_) => _submitPassword(),
                           ),
+                          if (_existing)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(onPressed: _resetPassword, child: const Text('Forgot password?')),
+                            ),
                           const SizedBox(height: 16),
                           FilledButton(
                             onPressed: _busy ? null : _submitPassword,
@@ -201,6 +227,10 @@ class _AccountPageState extends State<AccountPage> {
                       ),
                     ),
                   ),
+                  if (_info != null) ...[
+                    const SizedBox(height: 14),
+                    Text(_info!, style: context.text.labelMedium?.copyWith(color: p.mint)),
+                  ],
                   if (_error != null) ...[
                     const SizedBox(height: 14),
                     Text(

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "test:ui": "node ui-walkthrough.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +16,7 @@
     "firebase": "^12.19.0"
   },
   "devDependencies": {
-    "firebase-admin": "^13.10.0"
+    "firebase-admin": "^13.10.0",
+    "puppeteer-core": "^25.12.0"
   }
 }

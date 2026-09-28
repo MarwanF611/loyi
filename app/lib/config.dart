@@ -12,6 +12,6 @@ const _configuredBaseUrl = String.fromEnvironment('PUBLIC_BASE_URL');
 /// Base URL written onto NFC tags, e.g. `--dart-define=PUBLIC_BASE_URL=https://loyi.be`.
 /// Without it, web uses wherever the app is served from.
 String get publicBaseUrl =>
-    _configuredBaseUrl.isNotEmpty ? _configuredBaseUrl : (kIsWeb ? Uri.base.origin : 'https://loyi.web.app');
+    _configuredBaseUrl.isNotEmpty ? _configuredBaseUrl : (kIsWeb ? Uri.base.origin : 'https://loyi-b530b.web.app');
 
 String tagUrl(String tagId) => '$publicBaseUrl/t/$tagId';

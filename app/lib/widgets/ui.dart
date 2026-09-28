@@ -256,12 +256,15 @@ class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
     leading: leading,
     leadingWidth: leadingWidth,
     actions: actions,
-    backgroundColor: Colors.transparent,
+    // The tint is the bar's own background, not the blur's child: iOS Safari
+    // drops the BackdropFilter layer (and anything inside it), so the bar must
+    // stay readable without the blur.
+    backgroundColor: context.loyi.canvas.withValues(alpha: 0.9),
     automaticallyImplyLeading: false,
     flexibleSpace: ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-        child: ColoredBox(color: context.loyi.canvas.withValues(alpha: 0.78)),
+        child: const SizedBox.expand(),
       ),
     ),
   );

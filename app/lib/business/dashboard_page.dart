@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -87,6 +88,36 @@ class _DashboardState extends State<_Dashboard> {
   late final Stream<List<ActivityItem>> _redemptions = repo.recentRedemptions(_uid, widget.business.id);
   late Future<({int clients, int stampsToday, int redeemed})> _stats = repo.stats(_uid, widget.business.id);
   late Future<List<int>> _week = repo.stampsPerDay(_uid, widget.business.id);
+  final _subscriptions = <StreamSubscription<Object?>>[];
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    // Refresh the counts whenever a client stamps or redeems (skip the initial snapshot).
+    for (final stream in [
+      repo.recentStamps(_uid, widget.business.id),
+      repo.recentRedemptions(_uid, widget.business.id),
+    ]) {
+      _subscriptions.add(stream.skip(1).listen((_) => _scheduleRefresh(), onError: (_) {}));
+    }
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    for (final s in _subscriptions) {
+      s.cancel();
+    }
+    super.dispose();
+  }
+
+  void _scheduleRefresh() {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 800), () {
+      if (mounted) _refresh();
+    });
+  }
 
   Future<void> _refresh() async {
     setState(() {

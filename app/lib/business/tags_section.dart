@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../config.dart';
 import '../models.dart';
+import '../services/api.dart';
 import '../services/repo.dart';
 import '../theme.dart';
 import '../widgets/ui.dart';
@@ -27,25 +28,16 @@ class _TagsSectionState extends State<TagsSection> {
   );
 
   Future<void> _addTag(TagType type) async {
-    final label = TextEditingController(text: type == TagType.join ? 'Entrance' : 'Counter');
-    final confirmed = await showDialog<bool>(
+    final label = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(type == TagType.join ? 'New join tag' : 'New stamp tag'),
-        content: TextField(
-          controller: label,
-          autofocus: true,
-          decoration: const InputDecoration(labelText: 'Where is this tag?'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Create')),
-        ],
-      ),
+      builder: (_) => _TagLabelDialog(type: type),
     );
-    final text = label.text.trim();
-    label.dispose();
-    if (confirmed == true) await repo.createTag(widget.program, type, text.isEmpty ? type.name : text);
+    if (label == null) return;
+    try {
+      await repo.createTag(widget.program, type, label.isEmpty ? type.name : label);
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+    }
   }
 
   @override
@@ -181,7 +173,11 @@ class _TagTile extends StatelessWidget {
                 message: tag.active ? 'Active' : 'Disabled',
                 child: Switch(
                   value: tag.active,
-                  onChanged: (v) => repo.setTagActive(tag, active: v),
+                  onChanged: (v) => repo.setTagActive(tag, active: v).catchError((Object e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+                    }
+                  }),
                 ),
               ),
             ],
@@ -239,4 +235,44 @@ class _TagTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Asks where a new tag will be placed. Owns its text controller, so it is only
+/// disposed after the dialog has fully closed.
+class _TagLabelDialog extends StatefulWidget {
+  const _TagLabelDialog({required this.type});
+
+  final TagType type;
+
+  @override
+  State<_TagLabelDialog> createState() => _TagLabelDialogState();
+}
+
+class _TagLabelDialogState extends State<_TagLabelDialog> {
+  late final _label = TextEditingController(text: widget.type == TagType.join ? 'Entrance' : 'Counter');
+
+  @override
+  void dispose() {
+    _label.dispose();
+    super.dispose();
+  }
+
+  void _create() => Navigator.pop(context, _label.text.trim());
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(widget.type == TagType.join ? 'New join tag' : 'New stamp tag'),
+    content: TextField(
+      controller: _label,
+      autofocus: true,
+      autocorrect: false,
+      textCapitalization: TextCapitalization.sentences,
+      decoration: const InputDecoration(labelText: 'Where is this tag?'),
+      onSubmitted: (_) => _create(),
+    ),
+    actions: [
+      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+      FilledButton(onPressed: _create, child: const Text('Create')),
+    ],
+  );
 }

@@ -32,6 +32,9 @@ class AuthService {
 
   Future<void> signOut() => _auth.signOut();
 
+  /// Email with a link to choose a new password (Spark: 150 emails/day).
+  Future<void> sendPasswordReset(String email) => _auth.sendPasswordResetEmail(email: email);
+
   // ── Client: keep cards beyond this browser ─────────────────────────────────
 
   /// Links this device's anonymous account to Google (same user id, nothing to
