@@ -1,0 +1,13 @@
+# Cloudflare Worker that turns RevenueCat webhooks into Firestore subscription
+# records. Free tier (100k requests/day) is far more than Loyi needs.
+# Deploy: see README.md in this folder.
+name = "loyi-billing"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+FIREBASE_PROJECT_ID = "loyi-b530b"
+ENTITLEMENT_ID = "business"
+# Apple reviews in-app purchases in the sandbox, so sandbox purchases must unlock
+# tags too. Only TestFlight/review builds can make sandbox purchases.
+ALLOW_SANDBOX = "true"

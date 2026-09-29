@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models.dart';
 import 'auth_service.dart';
+import 'repo.dart';
 import 'stamping.dart';
 
 enum TapOutcome { joined, alreadyMember, stamped, cooldown }
@@ -67,6 +68,9 @@ class Api {
     if (!programSnap.exists) throw const LoyiException('This tag is not active.');
     final program = Program.fromDoc(programSnap);
     if (!program.active) throw const LoyiException('This loyalty card is paused.');
+    if (!await repo.isSubscribed(program.ownerUid)) {
+      throw const LoyiException("This shop's Loyi cards aren't active right now. Your stamps are safe.");
+    }
 
     final cardId = '${program.id}_$uid';
     final cardRef = _db.doc('cards/$cardId');

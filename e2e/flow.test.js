@@ -10,6 +10,7 @@ import { deleteApp, initializeApp } from "firebase/app";
 import { connectAuthEmulator, createUserWithEmailAndPassword, getAuth, signInAnonymously } from "firebase/auth";
 import {
   Bytes,
+  Timestamp as ClientTimestamp,
   addDoc,
   collection,
   connectFirestoreEmulator,
@@ -26,9 +27,17 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
+import { initializeApp as initializeAdmin } from "firebase-admin/app";
+import { Timestamp, getFirestore as getAdminFirestore } from "firebase-admin/firestore";
 import { mergeCard, redeem, tap, writeTransfer } from "./client-ops.js";
 
 const PROJECT = "demo-loyi";
+process.env.FIRESTORE_EMULATOR_HOST ??= "127.0.0.1:8085";
+// Stands in for the billing webhook, which writes subscriptions with a service account.
+const admin = getAdminFirestore(initializeAdmin({ projectId: PROJECT }, `admin-${Date.now()}`));
+const DAY = 24 * 60 * 60 * 1000;
+const subscribe = (ownerUid, days = 30) =>
+  admin.doc(`subscriptions/${ownerUid}`).set({ expiresAt: Timestamp.fromMillis(Date.now() + days * DAY) });
 const run = Date.now();
 const apps = [];
 
@@ -87,6 +96,7 @@ test("Loyi rules: full flow and abuse attempts", async (t) => {
       tapCount: 0,
       createdAt: serverTimestamp(),
     });
+  await subscribe(owner.uid);
   const joinTag = await newTag("join");
   const stampTag = await newTag("stamp");
   const offTag = await newTag("stamp", false);
@@ -308,6 +318,110 @@ test("Loyi rules: full flow and abuse attempts", async (t) => {
     await denied(setDoc(logoRef, logo(Bytes.fromUint8Array(new Uint8Array(200 * 1024 + 1)))));
     await denied(updateDoc(bizRef, { logoVersion: "x" }));
     await deleteDoc(logoRef);
+  });
+
+  await t.test("subscriptions: tags only work while the business is subscribed", async () => {
+    const zoe = client("zoe");
+    const zoeUid = (await createUserWithEmailAndPassword(zoe.auth, `zoe-${run}@test.be`, "test1234")).user.uid;
+    const shop = await addDoc(collection(zoe.db, "businesses"), { ownerUid: zoeUid, name: "Zoe", color: 1 });
+    const prog = await addDoc(collection(zoe.db, "programs"), {
+      ...program,
+      businessId: shop.id,
+      ownerUid: zoeUid,
+      stampsRequired: 1,
+    });
+    const tag = (type) =>
+      addDoc(collection(zoe.db, "tags"), {
+        businessId: shop.id,
+        ownerUid: zoeUid,
+        programId: prog.id,
+        type,
+        label: type,
+        active: true,
+        tapCount: 0,
+        createdAt: serverTimestamp(),
+      });
+    const join = await tag("join");
+    const stamp = await tag("stamp");
+    const eve = client("eve");
+    await signInAnonymously(eve.auth);
+
+    // Set up but never subscribed: no joining, no stamps.
+    await denied(tap(eve.db, eve.uid(), join.id));
+    await denied(tap(eve.db, eve.uid(), stamp.id));
+
+    // Nobody but the webhook can grant a subscription, and nobody can list them.
+    const fake = { expiresAt: ClientTimestamp.fromMillis(Date.now() + 365 * DAY) };
+    await denied(setDoc(doc(zoe.db, "subscriptions", zoeUid), fake));
+    await denied(setDoc(doc(eve.db, "subscriptions", zoeUid), fake));
+    await denied(getDocs(collection(zoe.db, "subscriptions")));
+
+    await subscribe(zoeUid);
+    assert.equal((await tap(eve.db, eve.uid(), stamp.id)).rewardsAvailable, 1); // 1-stamp card: full
+
+    // Expired: tags pause, but a reward the client already earned can still be used.
+    await subscribe(zoeUid, -1);
+    assert.equal((await getDoc(doc(eve.db, "subscriptions", zoeUid))).exists(), true); // readable
+    await denied(tap(eve.db, eve.uid(), stamp.id));
+    assert.equal(await redeem(eve.db, `${prog.id}_${eve.uid()}`, "broodje"), "Gratis broodje");
+  });
+
+  await t.test("brand colours: 1 to 3 colour values", async () => {
+    await updateDoc(bizRef, { colors: [0xffff5a3c, 0xff263238, 0xffffffff], color: 0xffff5a3c });
+    await denied(updateDoc(bizRef, { colors: [] }));
+    await denied(updateDoc(bizRef, { colors: [1, 2, 3, 4] }));
+    await denied(updateDoc(bizRef, { colors: ["red"] }));
+    await denied(updateDoc(bizRef, { colors: [1, "red"] }));
+  });
+
+  await t.test("data export: a client reads their own stamps, not someone else's", async () => {
+    const mine = await getDocs(query(collection(alice.db, "stampEvents"), where("clientUid", "==", alice.uid())));
+    assert.ok(mine.size >= 5);
+    await denied(getDocs(query(collection(alice.db, "stampEvents"), where("clientUid", "==", bob.uid()))));
+  });
+
+  await t.test("abuse: programs and tags only accept known fields", async () => {
+    await denied(updateDoc(programRef, { name: "x".repeat(61) }));
+    await denied(updateDoc(programRef, { active: "yes" }));
+    await denied(updateDoc(programRef, { secret: true }));
+    await denied(
+      addDoc(collection(biz.db, "tags"), {
+        businessId: bizRef.id,
+        ownerUid: owner.uid,
+        programId: programRef.id,
+        type: "stamp",
+        label: "Counter",
+        active: true,
+        tapCount: 500, // fake popularity
+        createdAt: serverTimestamp(),
+      }),
+    );
+    await denied(updateDoc(doc(biz.db, "tags", stampTag.id), { label: "" }));
+  });
+
+  await t.test("account deletion: clients and businesses remove only their own data", async () => {
+    // A client deletes their own card; nobody else can.
+    const bobCard = doc(bob.db, "cards", `${programRef.id}_${bob.uid()}`);
+    await denied(deleteDoc(doc(alice.db, "cards", bobCard.id)));
+    await deleteDoc(bobCard);
+
+    // Another business can't delete this business's data.
+    await denied(deleteDoc(doc(other.db, "businesses", bizRef.id)));
+    await denied(deleteDoc(doc(other.db, "programs", programRef.id)));
+    await denied(deleteDoc(doc(other.db, "tags", joinTag.id)));
+    await denied(deleteDoc(doc(other.db, "cards", aliceCard.id)));
+    await denied(deleteDoc(doc(alice.db, "stampEvents", `${aliceCard.id}_1`))); // clients can't erase the log
+
+    // The owner deletes everything, logs first and the business last.
+    const mine = async (c) => (await getDocs(query(collection(biz.db, c), where("ownerUid", "==", owner.uid)))).docs;
+    for (const c of ["stampEvents", "redemptions", "cards", "tags", "programs"]) {
+      const batch = writeBatch(biz.db);
+      for (const d of await mine(c)) batch.delete(d.ref);
+      await batch.commit();
+      assert.equal((await mine(c)).length, 0, c);
+    }
+    await deleteDoc(bizRef);
+    assert.equal((await getDoc(bizRef)).exists(), false);
   });
 });
 

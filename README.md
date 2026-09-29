@@ -35,19 +35,43 @@ referee. A write is only accepted if it's exactly what the app would do:
 | Stamp maths (pure, unit tested; mirrored in the rules) | `app/lib/services/stamping.dart` |
 | Security rules | `firestore.rules` |
 | End-to-end rules tests, plus demo seed data | `e2e/` |
+| Business sign-up steps (name, colours, payment) | `app/lib/business/onboarding.dart` |
+| Subscriptions (RevenueCat) and the paywall | `app/lib/services/billing.dart`, `app/lib/business/subscribe_page.dart` |
+| RevenueCat webhook → Firestore (Cloudflare Worker, free tier) | `billing-worker/` |
+| Account & privacy: data export, email/password, deletion | `app/lib/account/`, `app/lib/services/data_export.dart` |
+| Privacy policy, terms, account deletion pages | `app/web/*.html` |
+| Store launch checklist | [`docs/LAUNCH.md`](docs/LAUNCH.md) |
+
+**Business sign-up** works in the app and in the browser, in three steps: (1) business name, email and
+password, (2) up to three brand colours with a live card preview, (3) the €19/month subscription through
+RevenueCat (App Store or Google Play in the app, Stripe via RevenueCat Web Billing in the browser). The
+dashboard only opens once the payment is confirmed; leaving halfway continues at the same step on the next
+sign-in. Clients find the way in through **I have a business** on their cards page.
+
+**How payment switches a shop on.** `subscriptions/{ownerUid}.expiresAt` must be in the future for the
+dashboard to open and for tags to work (`firestore.rules` checks it on every join and stamp; clients can
+always use rewards they already earned). Only `billing-worker/` writes that document (a service account),
+when RevenueCat reports a purchase, renewal, cancellation or expiry. The Worker ignores the webhook body's
+claims and reads the real status from RevenueCat's API, so a forged webhook grants nothing. Pilot shops and
+the App Review demo account get access with `billing-worker/grant-access.js`.
+
+**Account & privacy (GDPR).** Shops (avatar on the dashboard) and clients (avatar on My cards) see what is
+stored, download all of it as JSON (art. 15/20), change their email or password (art. 16), and delete their
+account and data (art. 17). `/delete-account` explains the same for Google Play.
 
 **Data model (Firestore)**
 
-- `businesses/{id}`: name, brand colour, `logoVersion`, ownerUid (one business per owner in the MVP)
+- `businesses/{id}`: name, `colors` (1–3 brand colours; `color` is the first), `logoVersion`, ownerUid (one business per owner in the MVP)
 - `logos/{businessId}`: the logo image itself (max 200 KB, 256 px), public
 - `programs/{id}`: a loyalty card: `stampsRequired`, `rewards[]` (each can be switched on or off), `stampCooldownMinutes`, `active`, and `design` (card colour, optional second colour, style `solid | gradient | pattern`, stamp colour, stamp icon). Designs are limited to colours, an icon and the logo, so the same design can later become an Apple/Google Wallet pass
 - `tags/{id}`: `type: join | stamp`, linked to one program. The tag's URL is `/t/<id>`
 - `cards/{programId_clientUid}`: a client's progress: `stamps`, `rewardsAvailable` (banked full cards)
 - `stampEvents/{cardId}_{n}`, `redemptions/{cardId}_r{n}`: the log behind the business dashboard
 - `transfers/{anonUid}`: hand-off used when merging a device's cards into an account
+- `subscriptions/{ownerUid}`: `expiresAt`, `store`, `willRenew`, `billingIssue`, `source` (`revenuecat` or `grant`). Written only by the billing Worker or `grant-access.js`
 
 **Clients** start as anonymous Firebase users (nothing to sign up for at the
-counter). They can save their cards with **Google** or **email + password**. This
+counter). They can save their cards with **Google**, **Apple** or **email + password**. This
 links the anonymous account, so the user id and cards stay the same. Signing
 into an account that already exists (for example on a second phone) merges that
 device's cards into it. Email sign-in links aren't used, because Spark allows
@@ -55,7 +79,7 @@ only 5 of those emails per day.
 
 **Several shops, one client:** a client's cards from every shop live under the same client ID, so *My cards* shows them all. Cards with a reward ready come first. Each shop only ever sees its own clients' cards.
 
-**Businesses** sign in with email and password. The native app opens on `/business`. Under *Business settings* they upload a logo and pick a brand colour. In each card's editor they choose the card's colours, style and stamp icon, with a live preview.
+**Businesses** sign in with email and password (or Sign in with Apple). The native app opens on `/business`. Under *Business settings* they upload a logo and change their name and brand colours. In each card's editor they choose the card's colours, style and stamp icon, with a live preview.
 
 ## Design system ("Coral & Ink")
 
@@ -123,7 +147,7 @@ Status (free Spark plan, no billing):
 - [x] Android, iOS and web apps registered
 - [x] Firestore `(default)` in **europe-west1**, delete protection on, rules and indexes deployed
 - [x] Authentication: Anonymous and Email/Password enabled
-- [ ] Authentication: enable **Google** sign-in in the console (clients' "Continue with Google")
+- [x] Authentication: Google sign-in enabled (clients' "Continue with Google")
 - [x] Hosting: live at **https://loyi-b530b.web.app**. Deploy updates with `./scripts/deploy-web.sh` (builds production, deploys, then restores the local emulator build)
 - [ ] Custom domain (loyi.be) in Hosting and Auth's authorised domains; build with `--dart-define=PUBLIC_BASE_URL=https://loyi.be`
 

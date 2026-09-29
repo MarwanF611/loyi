@@ -49,6 +49,14 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/tags/$(tagId)).data;
     }
 
+    // Tags only work while the business owner has an active subscription.
+    // subscriptions/{ownerUid} is written by the billing webhook (billing-worker/),
+    // never by the app.
+    function subscribed(ownerUid) {
+      let path = /databases/$(database)/documents/subscriptions/$(ownerUid);
+      return exists(path) && get(path).data.expiresAt > request.time;
+    }
+
     // The anonymous account `fromUid` handed its cards to the signed-in user.
     function transferredToMe(fromUid) {
       let path = /databases/$(database)/documents/transfers/$(fromUid);
@@ -58,12 +66,21 @@ service cloud.firestore {
     // ── Businesses, programs, logos ────────────────────────────────────────
 
     function validBusiness(data) {
-      return data.keys().hasOnly(['ownerUid', 'name', 'color', 'logoVersion', 'createdAt'])
+      return data.keys().hasOnly(['ownerUid', 'name', 'color', 'colors', 'logoVersion', 'createdAt'])
         && data.name is string
         && data.name.size() > 0
         && data.name.size() <= 80
         && data.color is int
+        && (!('colors' in data) || validBrandColors(data.colors))
         && (!('logoVersion' in data) || data.logoVersion is int);
+    }
+
+    // 1 to 3 brand colours (ARGB ints), chosen during sign-up.
+    function validBrandColors(c) {
+      return c is list && c.size() >= 1 && c.size() <= 3
+        && c[0] is int
+        && (c.size() < 2 || c[1] is int)
+        && (c.size() < 3 || c[2] is int);
     }
 
     function validDesign(d) {
@@ -86,7 +103,8 @@ service cloud.firestore {
         && resource.data.ownerUid == uid()
         && request.resource.data.ownerUid == uid()
         && validBusiness(request.resource.data);
-      allow delete: if false;
+      // Account deletion; the app removes programs, tags and logs first.
+      allow delete: if isBusinessUser() && resource.data.ownerUid == uid();
     }
 
     // Logos live in Firestore (no Cloud Storage on Spark): one small image per business.
@@ -100,40 +118,63 @@ service cloud.firestore {
       allow delete: if ownsBusiness(businessId);
     }
 
+    function validProgram(d) {
+      return d.keys().hasOnly(['businessId', 'ownerUid', 'name', 'stampsRequired', 'stampCooldownMinutes',
+                               'rewards', 'active', 'design', 'createdAt'])
+        && d.name is string
+        && d.name.size() > 0
+        && d.name.size() <= 60
+        && d.active is bool
+        && d.stampsRequired is int
+        && d.stampsRequired >= 1
+        && d.stampsRequired <= 50
+        && d.stampCooldownMinutes is int
+        && d.stampCooldownMinutes >= 0
+        && d.stampCooldownMinutes <= 7 * 24 * 60
+        && d.rewards is list
+        && d.rewards.size() <= 20
+        && (!('design' in d) || validDesign(d.design));
+    }
+
     match /programs/{programId} {
       allow read: if true; // clients need the name, stamp count and rewards
-      allow create, update: if validOwnedWrite()
-        && request.resource.data.stampsRequired is int
-        && request.resource.data.stampsRequired >= 1
-        && request.resource.data.stampsRequired <= 50
-        && request.resource.data.stampCooldownMinutes is int
-        && request.resource.data.stampCooldownMinutes >= 0
-        && request.resource.data.rewards is list
-        && request.resource.data.rewards.size() <= 20
-        && (!('design' in request.resource.data) || validDesign(request.resource.data.design));
-      allow delete: if false; // deactivate instead, cards reference programs
+      allow create, update: if validOwnedWrite() && validProgram(request.resource.data);
+      // Only for account deletion (the app pauses cards instead of deleting them).
+      allow delete: if isBusinessUser() && resource.data.ownerUid == uid();
     }
 
     // ── Tags ───────────────────────────────────────────────────────────────
+
+    function validTagLabel(label) {
+      return label is string && label.size() > 0 && label.size() <= 40;
+    }
 
     match /tags/{tagId} {
       // Anyone holding a tag id (from tapping it) may look it up; listing is owner-only.
       allow get: if signedIn();
       allow list: if isBusinessUser() && resource.data.ownerUid == uid();
       allow create: if validOwnedWrite()
+        && request.resource.data.keys().hasOnly(['businessId', 'ownerUid', 'programId', 'type', 'label', 'active',
+                                                 'tapCount', 'createdAt'])
         && request.resource.data.type in ['join', 'stamp']
+        && validTagLabel(request.resource.data.label)
+        && request.resource.data.active is bool
+        && request.resource.data.tapCount == 0
         && get(/databases/$(database)/documents/programs/$(request.resource.data.programId)).data.businessId
            == request.resource.data.businessId;
       allow update: if
         // Owner: rename or (de)activate.
-        (validOwnedWrite() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'label']))
+        (validOwnedWrite()
+         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'label'])
+         && request.resource.data.active is bool
+         && validTagLabel(request.resource.data.label))
         // Client tapping an active tag: tap counter +1.
         || (signedIn()
             && resource.data.active
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['tapCount', 'lastTapAt'])
             && request.resource.data.tapCount == resource.data.tapCount + 1
             && request.resource.data.lastTapAt == request.time);
-      allow delete: if false;
+      allow delete: if isBusinessUser() && resource.data.ownerUid == uid(); // account deletion
     }
 
     // ── Cards ──────────────────────────────────────────────────────────────
@@ -154,6 +195,7 @@ service cloud.firestore {
         && cardId == d.programId + '_' + uid()
         && tag.active && tag.programId == d.programId
         && p.active && d.businessId == p.businessId && d.ownerUid == p.ownerUid
+        && subscribed(p.ownerUid)
         && d.totalRedeemed == 0
         && d.createdAt == request.time && d.updatedAt == request.time
         && (tag.type == 'join'
@@ -174,6 +216,7 @@ service cloud.firestore {
       return d.diff(old).affectedKeys().hasOnly(['stamps', 'rewardsAvailable', 'totalStamps', 'lastStampAt', 'lastTagId', 'updatedAt'])
         && tag.type == 'stamp' && tag.active && tag.programId == old.programId
         && p.active
+        && subscribed(old.ownerUid)
         && (old.lastStampAt == null
             || request.time >= old.lastStampAt + duration.value(p.stampCooldownMinutes * 60, 's'))
         && d.totalStamps == old.totalStamps + 1
@@ -184,6 +227,7 @@ service cloud.firestore {
     }
 
     // One banked full card spent, always together with its redemption record.
+    // Deliberately not gated on the subscription: clients keep rewards they earned.
     function validRedeem(cardId) {
       let old = resource.data;
       let d = request.resource.data;
@@ -248,10 +292,14 @@ service cloud.firestore {
         && (validStamp()
             || validRedeem(cardId)
             || ('mergedFrom' in request.resource.data && validMergeUpdate()));
-      // Only the merge target may remove a merged source card.
       allow delete: if signedIn()
-        && transferredToMe(resource.data.clientUid)
-        && getAfter(cardPath(resource.data.programId + '_' + uid())).data.mergedFrom == resource.data.clientUid;
+        && (
+          // The merge target removes a merged source card.
+          (transferredToMe(resource.data.clientUid)
+           && getAfter(cardPath(resource.data.programId + '_' + uid())).data.mergedFrom == resource.data.clientUid)
+          // Account deletion: a client removes their own cards, a business the cards of its programs.
+          || resource.data.clientUid == uid()
+          || (isBusinessUser() && resource.data.ownerUid == uid()));
     }
 
     // ── Logs ───────────────────────────────────────────────────────────────
@@ -270,9 +318,12 @@ service cloud.firestore {
     }
 
     match /stampEvents/{eventId} {
-      allow read: if isBusinessUser() && resource.data.ownerUid == uid();
+      // The business reads its log; a client reads their own stamps (GDPR data export).
+      allow read: if (isBusinessUser() && resource.data.ownerUid == uid())
+        || (signedIn() && resource.data.clientUid == uid());
       allow create: if signedIn() && validStampEvent(eventId);
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if isBusinessUser() && resource.data.ownerUid == uid(); // account deletion
     }
 
     // One record per redeemed reward (id = <cardId>_r<totalRedeemed>), with an active reward of the program.
@@ -293,7 +344,8 @@ service cloud.firestore {
       allow read: if signedIn()
         && (resource.data.clientUid == uid() || resource.data.ownerUid == uid());
       allow create: if signedIn() && validRedemption(redemptionId);
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if isBusinessUser() && resource.data.ownerUid == uid(); // account deletion
     }
 
     // ── Account merge hand-off ─────────────────────────────────────────────
@@ -308,6 +360,17 @@ service cloud.firestore {
         && request.resource.data.toUid is string
         && request.resource.data.toUid != fromUid
         && request.resource.data.createdAt == request.time;
+      allow delete: if signedIn() && uid() == fromUid;
+    }
+
+    // ── Subscriptions ──────────────────────────────────────────────────────
+
+    // {expiresAt, ...} per business owner, written only by the billing webhook
+    // (service account, bypasses these rules). Readable so a client's tap can
+    // explain why a shop's tags are paused.
+    match /subscriptions/{ownerUid} {
+      allow get: if true;
+      allow list, write: if false;
     }
   }
 }

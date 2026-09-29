@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../models.dart';
 import '../services/repo.dart';
+import '../theme.dart';
+import '../widgets/ui.dart';
 
 /// Streams the program and business behind a card and hands them to [builder]
 /// once both are available.
@@ -45,11 +47,31 @@ class _CardDataState extends State<CardData> {
       builder: (context, businessSnap) {
         final program = programSnap.data;
         final business = businessSnap.data;
+        final loaded =
+            programSnap.connectionState == ConnectionState.active &&
+            businessSnap.connectionState == ConnectionState.active;
+        if (loaded && (program == null || business == null)) return const _ShopGone();
         if (program == null || business == null) {
           return widget.placeholder ?? const SizedBox(height: 180, child: Center(child: CircularProgressIndicator()));
         }
         return widget.builder(context, program, business);
       },
+    ),
+  );
+}
+
+/// The shop deleted its Loyi account, so its card no longer exists.
+class _ShopGone extends StatelessWidget {
+  const _ShopGone();
+
+  @override
+  Widget build(BuildContext context) => Panel(
+    child: Row(
+      children: [
+        Icon(Icons.storefront_outlined, color: context.loyi.inkMuted),
+        const SizedBox(width: 12),
+        Expanded(child: Text('This shop no longer uses Loyi.', style: context.text.bodyMedium)),
+      ],
     ),
   );
 }

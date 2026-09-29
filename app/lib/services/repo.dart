@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models.dart';
 
 /// Firestore reads, plus the business-side writes that security rules allow.
-/// Everything that changes stamps goes through [Api] (Cloud Functions) instead.
+/// Everything that changes stamps goes through [Api] instead.
 class Repo {
   FirebaseFirestore get _db => FirebaseFirestore.instance;
 
@@ -28,11 +28,19 @@ class Repo {
   Stream<Business?> business(String id) =>
       _businesses.doc(id).snapshots().map((d) => d.exists ? Business.fromDoc(d) : null);
 
-  Future<void> createBusiness({required String ownerUid, required String name, required int color}) =>
-      _businesses.add({'ownerUid': ownerUid, 'name': name, 'color': color, 'createdAt': FieldValue.serverTimestamp()});
+  /// Step 1 of sign-up. Brand colours follow in step 2 ([setBrandColors]).
+  Future<void> createBusiness({required String ownerUid, required String name}) => _businesses.add({
+    'ownerUid': ownerUid,
+    'name': name,
+    'color': 0xFFFF5A3C,
+    'createdAt': FieldValue.serverTimestamp(),
+  });
 
-  Future<void> updateBusiness(String id, {required String name, required int color}) =>
-      _businesses.doc(id).update({'name': name, 'color': color});
+  Future<void> setBrandColors(String id, List<int> colors) =>
+      _businesses.doc(id).update({'colors': colors, 'color': colors.first});
+
+  Future<void> updateBusiness(String id, {required String name, required List<int> colors}) =>
+      _businesses.doc(id).update({'name': name, 'colors': colors, 'color': colors.first});
 
   static const maxLogoBytes = 200 * 1024;
 
@@ -128,6 +136,51 @@ class Repo {
   Stream<LoyaltyCard?> card(String id) =>
       _cards.doc(id).snapshots().map((d) => d.exists ? LoyaltyCard.fromDoc(d) : null);
 
+  // ── Subscription ──────────────────────────────────────────────────────────
+
+  /// Null when the owner never subscribed.
+  Stream<Subscription?> subscription(String ownerUid) =>
+      _db.doc('subscriptions/$ownerUid').snapshots().map((d) => d.exists ? Subscription.fromDoc(d) : null);
+
+  Future<bool> isSubscribed(String ownerUid) async {
+    final d = await _db.doc('subscriptions/$ownerUid').get();
+    return d.exists && Subscription.fromDoc(d).isActive;
+  }
+
+  // ── Account deletion ──────────────────────────────────────────────────────
+
+  /// Removes everything a business owner created: its clients' cards, the
+  /// logs, tags, cards (programs), logo and the business. The business goes
+  /// last because the rules for the logo check who owns it.
+  Future<void> deleteBusinessData(String ownerUid) async {
+    for (final c in ['stampEvents', 'redemptions', 'cards', 'tags', 'programs']) {
+      await _deleteAll(_db.collection(c).where('ownerUid', isEqualTo: ownerUid));
+    }
+    final businesses = await _businesses.where('ownerUid', isEqualTo: ownerUid).get();
+    for (final b in businesses.docs) {
+      await _db.doc('logos/${b.id}').delete();
+      await b.reference.delete();
+    }
+  }
+
+  /// Removes a client's own cards and device hand-off.
+  Future<void> deleteClientData(String uid) async {
+    await _deleteAll(_cards.where('clientUid', isEqualTo: uid));
+    await _db.doc('transfers/$uid').delete().catchError((Object _) {}); // usually never written
+  }
+
+  Future<void> _deleteAll(Query<Map<String, dynamic>> query) async {
+    while (true) {
+      final page = await query.limit(400).get();
+      if (page.docs.isEmpty) return;
+      final batch = _db.batch();
+      for (final d in page.docs) {
+        batch.delete(d.reference);
+      }
+      await batch.commit();
+    }
+  }
+
   // ── Business insights ─────────────────────────────────────────────────────
 
   Query<Map<String, dynamic>> _owned(String collection, String ownerUid, String businessId) =>
@@ -158,6 +211,13 @@ class Repo {
     ]);
     return [for (final c in counts) c.count ?? 0];
   }
+
+  /// Emits when a client joins (the newest card changes), so the dashboard can refresh its counts.
+  Stream<Object?> newestCard(String ownerUid, String businessId) => _owned(
+    'cards',
+    ownerUid,
+    businessId,
+  ).orderBy('createdAt', descending: true).limit(1).snapshots().map((s) => s.docs.firstOrNull?.id);
 
   Stream<List<ActivityItem>> recentStamps(String ownerUid, String businessId) =>
       _owned('stampEvents', ownerUid, businessId)

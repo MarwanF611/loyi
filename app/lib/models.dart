@@ -4,14 +4,32 @@ import 'package:flutter/material.dart' show Color, Colors;
 DateTime? _date(Object? value) => value is Timestamp ? value.toDate() : null;
 
 class Business {
-  const Business({required this.id, required this.name, required this.ownerUid, required this.color, this.logoVersion});
+  const Business({
+    required this.id,
+    required this.name,
+    required this.ownerUid,
+    required this.color,
+    this.colors = const [],
+    this.logoVersion,
+    this.createdAt,
+  });
+
+  static const maxBrandColors = 3;
 
   final String id;
   final String name;
   final String ownerUid;
 
-  /// Brand colour; the default for new cards and for cards without a design.
+  /// Main brand colour (the first of [colors]); used for cards without a design.
   final int color;
+
+  /// 1 to 3 brand colours chosen during sign-up. Empty until the owner picks them.
+  final List<int> colors;
+
+  final DateTime? createdAt;
+
+  /// Colours to start new cards from.
+  List<int> get brandColors => colors.isEmpty ? [color] : colors;
 
   /// Bumped on every logo upload; null when the business has no logo.
   final int? logoVersion;
@@ -25,7 +43,9 @@ class Business {
       name: d['name'] as String? ?? '',
       ownerUid: d['ownerUid'] as String? ?? '',
       color: d['color'] as int? ?? 0xFFFF5A3C,
+      colors: [for (final c in d['colors'] as List? ?? const []) if (c is int) c],
       logoVersion: d['logoVersion'] as int?,
+      createdAt: _date(d['createdAt']),
     );
   }
 }
@@ -92,6 +112,15 @@ class CardDesign {
     stampIcon: stampIcon ?? this.stampIcon,
   );
 
+  /// A card in the business's brand colours: the first as background, the second as
+  /// gradient end, the third for the stamps.
+  factory CardDesign.fromBrand(List<int> colors) => CardDesign(
+    background: colors.first,
+    background2: colors.length > 1 ? colors[1] : null,
+    style: colors.length > 1 ? CardStyle.gradient : CardStyle.solid,
+    stampColor: colors.length > 2 ? colors[2] : 0xFFFFFFFF,
+  );
+
   factory CardDesign.fromMap(Map<String, dynamic> m) => CardDesign(
     background: m['background'] as int,
     background2: m['background2'] as int?,
@@ -155,7 +184,7 @@ class Program {
   final CardDesign? design;
   final DateTime? createdAt;
 
-  CardDesign designFor(Business business) => design ?? CardDesign(background: business.color);
+  CardDesign designFor(Business business) => design ?? CardDesign.fromBrand(business.brandColors);
 
   List<Reward> get activeRewards => rewards.where((r) => r.active).toList();
 
@@ -292,4 +321,29 @@ class ActivityItem {
       rewardTitle: d['rewardTitle'] as String?,
     );
   }
+}
+
+/// A business owner's Loyi subscription (`subscriptions/{ownerUid}`), written
+/// by the billing webhook. Tags only work while it hasn't expired.
+class Subscription {
+  const Subscription({required this.expiresAt, this.willRenew = true, this.billingIssue = false, this.store});
+
+  factory Subscription.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final d = doc.data() ?? const {};
+    return Subscription(
+      expiresAt: _date(d['expiresAt']) ?? DateTime.fromMillisecondsSinceEpoch(0),
+      willRenew: d['willRenew'] as bool? ?? true,
+      billingIssue: d['billingIssue'] as bool? ?? false,
+      store: d['store'] as String?,
+    );
+  }
+
+  final DateTime expiresAt;
+  final bool willRenew;
+  final bool billingIssue;
+
+  /// `app_store`, `play_store`, `stripe` (web), or null for a manual grant.
+  final String? store;
+
+  bool get isActive => expiresAt.isAfter(DateTime.now());
 }

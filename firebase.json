@@ -18,6 +18,39 @@
     ],
     "headers": [
       {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://www.gstatic.com https://apis.google.com https://www.google.com https://*.stripe.com; style-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.googleapis.com https://www.gstatic.com https://fonts.gstatic.com https://www.google.com https://*.revenuecat.com https://*.stripe.com https://*.stripe.network http://localhost:* http://127.0.0.1:*; frame-src 'self' https://loyi-b530b.firebaseapp.com https://demo-loyi.firebaseapp.com https://www.google.com https://*.stripe.com https://*.stripe.network https://*.revenuecat.com http://localhost:* http://127.0.0.1:*; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "X-Frame-Options",
+            "value": "DENY"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "camera=(), microphone=(), geolocation=(), payment=(self \"https://js.stripe.com\")"
+          },
+          {
+            "key": "Strict-Transport-Security",
+            "value": "max-age=31536000; includeSubDomains"
+          },
+          {
+            "key": "Cross-Origin-Opener-Policy",
+            "value": "same-origin-allow-popups"
+          }
+        ]
+      },
+      {
         "source": "**/!(*.*)",
         "headers": [
           {
@@ -27,7 +60,7 @@
         ]
       },
       {
-        "source": "**/*.@(html|js|json|wasm|mjs)",
+        "source": "**/*.@(html|js|json|wasm|mjs|css)",
         "headers": [
           {
             "key": "Cache-Control",
@@ -44,7 +77,8 @@
           }
         ]
       }
-    ]
+    ],
+    "cleanUrls": true
   },
   "emulators": {
     "auth": {

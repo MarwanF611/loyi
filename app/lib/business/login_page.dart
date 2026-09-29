@@ -1,11 +1,14 @@
 import 'dart:math' as math;
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models.dart';
 import '../services/auth_service.dart';
 import '../theme.dart';
+import '../widgets/account_widgets.dart';
 import '../widgets/loyalty_card_view.dart';
 import '../widgets/ui.dart';
 
@@ -17,6 +20,7 @@ class BusinessLoginPage extends StatefulWidget {
 }
 
 class _BusinessLoginPageState extends State<BusinessLoginPage> {
+  final _businessName = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
   bool _signUp = false;
@@ -27,33 +31,58 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
 
   @override
   void dispose() {
+    _businessName.dispose();
     _email.dispose();
     _password.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
+    final email = _email.text.trim();
+    if (_signUp) {
+      final name = _businessName.text.trim();
+      final problem = name.isEmpty
+          ? 'Enter your business name.'
+          : _password.text.length < 8
+          ? 'Use at least 8 characters for your password.'
+          : null;
+      if (problem != null) {
+        setState(() => _error = problem);
+        return;
+      }
+      return _run(() => auth.businessSignUp(email, _password.text, name));
+    }
+    return _run(() => auth.businessSignIn(email, _password.text));
+  }
+
+  Future<void> _run(Future<void> Function() signIn) async {
     setState(() {
       _busy = true;
       _error = null;
+      _info = null;
     });
     try {
-      final email = _email.text.trim();
-      if (_signUp) {
-        await auth.businessSignUp(email, _password.text);
-      } else {
-        await auth.businessSignIn(email, _password.text);
-      }
+      await signIn();
       // The router redirects to /business once the auth state changes.
     } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      final apple = appleSignInMessage(e);
       setState(
-        () => _error = switch (e.code) {
-          'invalid-credential' || 'wrong-password' || 'user-not-found' => 'Wrong email or password.',
-          'email-already-in-use' => 'An account with this email already exists. Sign in instead.',
-          'weak-password' => 'Use at least 6 characters for your password.',
-          'invalid-email' => 'Enter a valid email address.',
-          _ => e.message ?? 'Could not sign in.',
-        },
+        () => _error = apple != null
+            ? (apple.isEmpty ? null : apple)
+            : switch (e.code) {
+                'invalid-credential' || 'wrong-password' || 'user-not-found' => 'Wrong email or password.',
+                'email-already-in-use' => 'An account with this email already exists. Sign in instead.',
+                'account-exists-with-different-credential' =>
+                  'This email already has a Loyi account. Sign in with your email and password.',
+                'weak-password' => 'Use at least 8 characters for your password.',
+                'invalid-email' => 'Enter a valid email address.',
+                'operation-not-allowed' => 'This sign-in method is not enabled yet.',
+                'too-many-requests' => 'Too many attempts. Try again in a few minutes.',
+                // Closing the Apple sheet or popup isn't an error.
+                'canceled' || 'web-context-canceled' || 'popup-closed-by-user' || 'cancelled-popup-request' => null,
+                _ => e.message ?? 'Could not sign in.',
+              },
       );
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -93,11 +122,15 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
           const SizedBox(height: 6),
           Text(
             _signUp
-                ? 'Create your shop account. Your first card is ready in 2 minutes.'
+                ? 'Three steps: your account, your colours, your subscription. Then your dashboard is ready.'
                 : 'Sign in to manage your loyalty cards.',
             style: context.text.bodyMedium,
           ),
           const SizedBox(height: 28),
+          AppleSignInButton(onPressed: _busy ? null : () => _run(auth.businessSignInWithApple)),
+          const SizedBox(height: 20),
+          const LabeledDivider('or with email'),
+          const SizedBox(height: 20),
           SegmentedButton<bool>(
             showSelectedIcon: false,
             segments: const [
@@ -112,6 +145,22 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
             }),
           ),
           const SizedBox(height: 20),
+          if (_signUp) ...[
+            TextField(
+              controller: _businessName,
+              autocorrect: false,
+              maxLength: 80,
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                labelText: 'Business name',
+                hintText: 'e.g. Bakkerij Peeters',
+                prefixIcon: Icon(Icons.storefront_outlined),
+                counterText: '',
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
           TextField(
             controller: _email,
             keyboardType: TextInputType.emailAddress,
@@ -179,6 +228,21 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
                 ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
                 : Text(_signUp ? 'Create account' : 'Sign in'),
           ),
+          const SizedBox(height: 16),
+          if (_signUp)
+            Text(
+              'By creating an account you agree to the terms of use and privacy policy.',
+              style: context.text.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+          const LegalLinks(),
+          // Clients land here by mistake on the website; send them back to their cards.
+          if (kIsWeb)
+            TextButton.icon(
+              onPressed: () => context.go('/cards'),
+              icon: const Icon(Icons.style_outlined, size: 20),
+              label: const Text('Collecting stamps? Go to your cards'),
+            ),
         ],
       ),
     );

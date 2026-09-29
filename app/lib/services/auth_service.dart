@@ -5,11 +5,16 @@ import 'package:flutter/foundation.dart';
 
 import '../config.dart';
 import '../models.dart';
+import 'billing.dart';
+import 'repo.dart';
 import 'stamping.dart';
 
+/// How a signed-in user proves it's them before deleting their account.
+enum ReauthMethod { none, password, apple, google }
+
 /// Clients start as anonymous users (no sign-up at the counter) and can later
-/// save their cards with Google or email + password. Businesses sign in with
-/// email + password.
+/// save their cards with Google, Apple or email + password. Businesses sign in
+/// with email + password or Apple, then pick their brand colours and subscribe.
 ///
 /// No email links: on the free Spark plan Firebase sends only 5 per day.
 class AuthService {
@@ -27,10 +32,24 @@ class AuthService {
   Future<void> businessSignIn(String email, String password) =>
       _auth.signInWithEmailAndPassword(email: email, password: password);
 
-  Future<void> businessSignUp(String email, String password) =>
-      _auth.createUserWithEmailAndPassword(email: email, password: password);
+  /// Step 1 of business sign-up: the account plus the shop's name. If creating
+  /// the shop fails, the dashboard asks for the name again.
+  Future<void> businessSignUp(String email, String password, String businessName) async {
+    final credential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    try {
+      await repo.createBusiness(ownerUid: credential.user!.uid, name: businessName);
+    } catch (e) {
+      debugPrint('Creating the business failed, the dashboard will ask again: $e');
+    }
+  }
 
-  Future<void> signOut() => _auth.signOut();
+  /// Sign in with Apple; creates the account on first use.
+  Future<void> businessSignInWithApple() => _signInWith(_apple());
+
+  Future<void> signOut() async {
+    await billing.signOut();
+    await _auth.signOut();
+  }
 
   /// Email with a link to choose a new password (Spark: 150 emails/day).
   Future<void> sendPasswordReset(String email) => _auth.sendPasswordResetEmail(email: email);
@@ -40,11 +59,22 @@ class AuthService {
   /// Links this device's anonymous account to Google (same user id, nothing to
   /// move). If that Google account already has Loyi cards, signs into it and
   /// merges this device's cards.
-  Future<void> saveWithGoogle() async {
-    final provider = GoogleAuthProvider();
+  Future<void> saveWithGoogle() => _saveWith(GoogleAuthProvider());
+
+  /// Same as [saveWithGoogle], with Apple.
+  Future<void> saveWithApple() => _saveWith(_apple());
+
+  AppleAuthProvider _apple() => AppleAuthProvider()
+    ..addScope('email')
+    ..addScope('name');
+
+  Future<UserCredential> _signInWith(AuthProvider provider) =>
+      kIsWeb ? _auth.signInWithPopup(provider) : _auth.signInWithProvider(provider);
+
+  Future<void> _saveWith(AuthProvider provider) async {
     final current = user;
     if (current == null || !current.isAnonymous) {
-      await (kIsWeb ? _auth.signInWithPopup(provider) : _auth.signInWithProvider(provider));
+      await _signInWith(provider);
       return;
     }
     try {
@@ -150,6 +180,83 @@ class AuthService {
         }
         tx.delete(source.reference);
       });
+    }
+  }
+
+  // ── Account settings ──────────────────────────────────────────────────────
+
+  /// True for accounts with a Loyi password (not only Apple/Google).
+  bool get hasPassword => user?.providerData.any((p) => p.providerId == 'password') ?? false;
+
+  Future<void> _reauthenticate(String password) {
+    final u = user!;
+    return u.reauthenticateWithCredential(EmailAuthProvider.credential(email: u.email!, password: password));
+  }
+
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    await _reauthenticate(currentPassword);
+    await user!.updatePassword(newPassword);
+  }
+
+  /// Sends a confirmation link to [newEmail]; the address changes once it's opened.
+  Future<void> changeEmail(String password, String newEmail) async {
+    await _reauthenticate(password);
+    await user!.verifyBeforeUpdateEmail(newEmail);
+  }
+
+  // ── Account deletion (App Store / Google Play requirement, GDPR) ─────────
+
+  ReauthMethod get reauthMethod {
+    final u = user;
+    if (u == null || u.isAnonymous) return ReauthMethod.none;
+    final providers = {for (final p in u.providerData) p.providerId};
+    if (providers.contains('password')) return ReauthMethod.password;
+    if (providers.contains('apple.com')) return ReauthMethod.apple;
+    if (providers.contains('google.com')) return ReauthMethod.google;
+    return ReauthMethod.none;
+  }
+
+  /// Deletes the signed-in account and everything it created. Signing in again
+  /// comes first ([password] for email accounts), so a wrong password or a
+  /// cancelled Apple/Google sheet throws before anything is deleted.
+  Future<void> deleteAccount({String? password}) async {
+    final u = user;
+    if (u == null) return;
+
+    String? appleCode;
+    switch (reauthMethod) {
+      case ReauthMethod.password:
+        await _reauthenticate(password ?? '');
+      case ReauthMethod.apple:
+        final credential = kIsWeb
+            ? await u.reauthenticateWithPopup(_apple())
+            : await u.reauthenticateWithProvider(_apple());
+        appleCode = credential.additionalUserInfo?.authorizationCode;
+      case ReauthMethod.google:
+        await (kIsWeb
+            ? u.reauthenticateWithPopup(GoogleAuthProvider())
+            : u.reauthenticateWithProvider(GoogleAuthProvider()));
+      case ReauthMethod.none:
+        break;
+    }
+
+    if (!u.isAnonymous) await repo.deleteBusinessData(u.uid);
+    await repo.deleteClientData(u.uid);
+    // Apple requires apps to revoke Sign in with Apple tokens when the account is deleted.
+    if (appleCode != null) {
+      try {
+        await _auth.revokeTokenWithAuthorizationCode(appleCode);
+      } catch (e) {
+        debugPrint('Apple token revoke failed: $e');
+      }
+    }
+    await billing.signOut();
+    try {
+      await u.delete();
+    } on FirebaseAuthException catch (e) {
+      // An old anonymous session can't sign in again; its data is gone, so just leave it.
+      if (e.code != 'requires-recent-login' || !u.isAnonymous) rethrow;
+      await _auth.signOut();
     }
   }
 }

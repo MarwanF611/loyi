@@ -2,13 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../account/account_privacy.dart';
 import '../services/api.dart';
 import '../services/auth_service.dart';
 import '../theme.dart';
+import '../widgets/account_widgets.dart';
 import '../widgets/ui.dart';
 
 /// Lets a client save their cards (so they survive a new phone or browser)
-/// with Google or email + password.
+/// with Google, Apple or email + password, and delete their data.
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
@@ -42,17 +44,22 @@ class _AccountPageState extends State<AccountPage> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Your cards are saved.')));
       context.go('/cards');
     } on FirebaseAuthException catch (e) {
+      final apple = appleSignInMessage(e);
       setState(
-        () => _error = switch (e.code) {
-          'popup-closed-by-user' || 'cancelled-popup-request' => null,
-          'email-already-in-use' ||
-          'credential-already-in-use' => 'This email already has an account. Choose "I have an account".',
-          'invalid-credential' || 'wrong-password' || 'user-not-found' => 'Wrong email or password.',
-          'weak-password' => 'Use at least 6 characters for your password.',
-          'invalid-email' => 'Enter a valid email address.',
-          'operation-not-allowed' => 'This sign-in method is not enabled yet.',
-          _ => e.message ?? 'Could not sign in.',
-        },
+        () => _error = apple != null
+            ? (apple.isEmpty ? null : apple)
+            : switch (e.code) {
+                'popup-closed-by-user' || 'cancelled-popup-request' || 'canceled' || 'web-context-canceled' => null,
+                'account-exists-with-different-credential' =>
+                  'This email already has an account with another sign-in method. Use that one.',
+                'email-already-in-use' ||
+                'credential-already-in-use' => 'This email already has an account. Choose "I have an account".',
+                'invalid-credential' || 'wrong-password' || 'user-not-found' => 'Wrong email or password.',
+                'weak-password' => 'Use at least 6 characters for your password.',
+                'invalid-email' => 'Enter a valid email address.',
+                'operation-not-allowed' => 'This sign-in method is not enabled yet.',
+                _ => e.message ?? 'Could not sign in.',
+              },
       );
     } catch (e) {
       setState(() => _error = friendlyError(e));
@@ -78,6 +85,11 @@ class _AccountPageState extends State<AccountPage> {
         _info = 'If $email has an account, a link to reset the password is on its way.';
       });
     }
+  }
+
+  void _onDeleted() {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Your account and cards are deleted.')));
+    context.go('/cards');
   }
 
   void _submitPassword() {
@@ -121,23 +133,7 @@ class _AccountPageState extends State<AccountPage> {
                     'Your cards are saved',
                     'Sign in with this account on any device to see your cards.',
                   ),
-                  Panel(
-                    child: Row(
-                      children: [
-                        Icon(Icons.person_outline_rounded, color: p.inkMuted),
-                        const SizedBox(width: 12),
-                        Expanded(child: Text(user.email ?? user.displayName ?? '', style: context.text.titleMedium)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  OutlinedButton(
-                    onPressed: () async {
-                      await auth.signOut();
-                      if (context.mounted) context.go('/cards');
-                    },
-                    child: const Text('Sign out'),
-                  ),
+                  AccountPrivacySections(business: false, onDeleted: _onDeleted),
                 ] else ...[
                   header(
                     Icons.cloud_done_rounded,
@@ -153,19 +149,9 @@ class _AccountPageState extends State<AccountPage> {
                     icon: const _GoogleMark(),
                     label: const Text('Continue with Google'),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Row(
-                      children: [
-                        const Expanded(child: Divider()),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('or with email', style: context.text.bodySmall),
-                        ),
-                        const Expanded(child: Divider()),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 12),
+                  AppleSignInButton(onPressed: _busy ? null : () => _run(auth.saveWithApple)),
+                  const Padding(padding: EdgeInsets.symmetric(vertical: 20), child: LabeledDivider('or with email')),
                   Panel(
                     padding: const EdgeInsets.all(20),
                     child: AutofillGroup(
@@ -238,6 +224,8 @@ class _AccountPageState extends State<AccountPage> {
                       style: context.text.labelMedium?.copyWith(color: Theme.of(context).colorScheme.error),
                     ),
                   ],
+                  const SizedBox(height: 32),
+                  AccountPrivacySections(business: false, onDeleted: _onDeleted),
                 ],
               ],
             ),

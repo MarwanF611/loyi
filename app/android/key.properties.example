@@ -1,0 +1,6 @@
+# Copy to key.properties (never commit it) after creating the upload key:
+#   keytool -genkey -v -keystore ~/loyi-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+storePassword=
+keyPassword=
+keyAlias=upload
+storeFile=/Users/you/loyi-upload.jks

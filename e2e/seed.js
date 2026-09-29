@@ -130,8 +130,15 @@ async function seedShop(shop) {
     ownerUid: owner.uid,
     name: shop.name,
     color: shop.color,
+    colors: [shop.color],
     logoVersion: await saveLogo(shop.id, shop.logo),
     createdAt: Timestamp.fromDate(new Date(Date.now() - 60 * 86400_000)),
+  });
+  // Demo shops are subscribed for a year (in production the billing webhook writes this).
+  await db.doc(`subscriptions/${owner.uid}`).set({
+    expiresAt: Timestamp.fromDate(new Date(Date.now() + 365 * 86400_000)),
+    environment: "DEMO",
+    updatedAt: Timestamp.now(),
   });
   await db.doc(`programs/${program.id}`).set({
     businessId: shop.id,

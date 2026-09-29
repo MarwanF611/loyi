@@ -12,57 +12,29 @@ import '../theme.dart';
 import '../widgets/loyalty_card_view.dart';
 import '../widgets/stamp_icons.dart';
 import '../widgets/ui.dart';
-import 'business_form.dart';
 import 'business_scope.dart';
+import 'onboarding.dart';
+import 'subscribe_page.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
+  /// Sign-up steps first (name, colours, payment); the dashboard once the shop is paid.
   @override
   Widget build(BuildContext context) => BusinessScope(
-    builder: (context, business) => business == null ? const _Onboarding() : _Dashboard(business: business),
+    builder: (context, business) {
+      if (business == null) return const NameStep();
+      if (business.colors.isEmpty) return ColorsStep(business: business);
+      return PlanBuilder(
+        builder: (context, status) => switch (status.state) {
+          PlanState.loading => const Scaffold(body: Center(child: CircularProgressIndicator())),
+          PlanState.active => _Dashboard(business: business),
+          PlanState.activating => const ActivatingStep(),
+          PlanState.none || PlanState.expired => PayStep(status: status),
+        },
+      );
+    },
   );
-}
-
-class _Onboarding extends StatelessWidget {
-  const _Onboarding();
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const LoyiWordmark(size: 26), actions: const [_SignOutButton(), SizedBox(width: 8)]),
-    body: ListView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-      children: [
-        PageBody(
-          maxWidth: 520,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Welcome to Loyi 👋', style: context.text.headlineLarge),
-              const SizedBox(height: 8),
-              Text("Let's set up your shop. You can change all of this later.", style: context.text.bodyMedium),
-              const SizedBox(height: 24),
-              Panel(
-                padding: const EdgeInsets.all(24),
-                child: BusinessForm(
-                  submitLabel: 'Create my shop',
-                  onSubmit: (name, color) => repo.createBusiness(ownerUid: auth.user!.uid, name: name, color: color),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _SignOutButton extends StatelessWidget {
-  const _SignOutButton();
-
-  @override
-  Widget build(BuildContext context) =>
-      RoundIconButton(icon: Icons.logout_rounded, tooltip: 'Sign out', onPressed: auth.signOut);
 }
 
 String _greeting() {
@@ -94,8 +66,9 @@ class _DashboardState extends State<_Dashboard> {
   @override
   void initState() {
     super.initState();
-    // Refresh the counts whenever a client stamps or redeems (skip the initial snapshot).
-    for (final stream in [
+    // Refresh the counts whenever a client joins, stamps or redeems (skip the initial snapshot).
+    for (final stream in <Stream<Object?>>[
+      repo.newestCard(_uid, widget.business.id),
       repo.recentStamps(_uid, widget.business.id),
       repo.recentRedemptions(_uid, widget.business.id),
     ]) {
@@ -150,6 +123,7 @@ class _DashboardState extends State<_Dashboard> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _Header(business: b),
+                        const SubscriptionBanner(),
                         const SizedBox(height: 24),
                         _Bento(stats: _stats, week: _week),
                         if (b.logo == null) ...[
@@ -238,7 +212,11 @@ class _Header extends StatelessWidget {
         onPressed: () => context.go('/business/settings'),
       ),
       const SizedBox(width: 8),
-      const _SignOutButton(),
+      RoundIconButton(
+        icon: Icons.person_outline_rounded,
+        tooltip: 'Account & privacy',
+        onPressed: () => context.go('/business/account'),
+      ),
     ],
   );
 }

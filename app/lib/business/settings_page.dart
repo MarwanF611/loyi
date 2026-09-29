@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../models.dart';
 import '../services/repo.dart';
 import '../theme.dart';
+import '../widgets/account_widgets.dart';
 import '../widgets/loyalty_card_view.dart';
 import '../widgets/ui.dart';
 import 'business_form.dart';
@@ -56,12 +57,12 @@ class BusinessSettingsPage extends StatelessWidget {
                         const SizedBox(height: 16),
                         BusinessForm(
                           // Re-create the form if the stored values change elsewhere.
-                          key: ValueKey('${business.name}-${business.color}'),
+                          key: ValueKey('${business.name}-${business.brandColors}'),
                           initialName: business.name,
-                          initialColor: business.color,
+                          initialColors: business.brandColors,
                           submitLabel: 'Save',
-                          onSubmit: (name, color) async {
-                            await repo.updateBusiness(business.id, name: name, color: color);
+                          onSubmit: (name, colors) async {
+                            await repo.updateBusiness(business.id, name: name, colors: colors);
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saved')));
                             }
@@ -70,6 +71,51 @@ class BusinessSettingsPage extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  Panel(
+                    onTap: () => context.go('/business/subscribe'),
+                    child: Row(
+                      children: [
+                        IconBadge(
+                          icon: Icons.workspace_premium_rounded,
+                          background: context.loyi.sunSoft,
+                          foreground: context.loyi.ink,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(child: Text('Subscription', style: context.text.titleMedium)),
+                        const Icon(Icons.chevron_right_rounded),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Panel(
+                    onTap: () => context.go('/business/account'),
+                    child: Row(
+                      children: [
+                        IconBadge(
+                          icon: Icons.shield_outlined,
+                          background: context.loyi.mintSoft,
+                          foreground: context.loyi.mint,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Account & privacy', style: context.text.titleMedium),
+                              Text(
+                                'Email, password, your data, delete account',
+                                style: context.text.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right_rounded),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const LegalLinks(),
                 ],
               ),
             ),
@@ -113,6 +159,8 @@ class _LogoEditorState extends State<_LogoEditor> {
     // Downscaled on the device: logos are stored in Firestore (max 200 KB).
     final file = await ImagePicker().pickImage(
       source: ImageSource.gallery,
+      // No photo library permission needed: iOS's picker only hands over the chosen image.
+      requestFullMetadata: false,
       maxWidth: 256,
       maxHeight: 256,
       imageQuality: 85,

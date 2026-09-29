@@ -30,9 +30,11 @@ class _MyCardsPageState extends State<MyCardsPage> {
     appBar: FrostedAppBar(
       title: const LoyiWordmark(size: 26),
       actions: [
+        const _BusinessButton(),
+        const SizedBox(width: 8),
         RoundIconButton(
           icon: Icons.person_outline_rounded,
-          tooltip: 'Account',
+          tooltip: 'Account & privacy',
           onPressed: () => context.push('/account'),
         ),
         const SizedBox(width: 12),
@@ -163,7 +165,7 @@ class _CardListState extends State<_CardList> {
                     child: TextButton.icon(
                       onPressed: () => context.go('/business'),
                       icon: const Icon(Icons.storefront_outlined, size: 20),
-                      label: const Text('Own a shop? Loyi for business'),
+                      label: const Text('I have a business'),
                     ),
                   ),
                 ],
@@ -228,6 +230,29 @@ class _EmptyState extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Entry point for shop owners who land on the client site: sign in or sign up.
+class _BusinessButton extends StatelessWidget {
+  const _BusinessButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.loyi;
+    return TextButton.icon(
+      style: TextButton.styleFrom(
+        backgroundColor: p.surface,
+        foregroundColor: p.ink,
+        minimumSize: const Size(0, 44),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        shape: StadiumBorder(side: BorderSide(color: p.line)),
+        textStyle: context.text.labelLarge,
+      ),
+      onPressed: () => context.go('/business/login'),
+      icon: const Icon(Icons.storefront_outlined, size: 20),
+      label: const Text('I have a business'),
     );
   }
 }

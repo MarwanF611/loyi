@@ -87,7 +87,7 @@ class _ProgramEditorState extends State<_ProgramEditor> {
   late int _stampsRequired = widget.initial?.stampsRequired ?? 10;
   late int _cooldown = widget.initial?.stampCooldownMinutes ?? 30;
   late bool _active = widget.initial?.active ?? true;
-  late CardDesign _design = widget.initial?.designFor(widget.business) ?? CardDesign(background: widget.business.color);
+  late CardDesign _design = widget.initial?.designFor(widget.business) ?? CardDesign.fromBrand(widget.business.brandColors);
   late final List<_RewardRow> _rewards = [
     for (final r in widget.initial?.rewards ?? const <Reward>[]) _RewardRow(r.id, r.title, r.active),
     if (widget.initial == null) _RewardRow(repo.newId(), '', true),
@@ -119,7 +119,11 @@ class _ProgramEditorState extends State<_ProgramEditor> {
       _ => null,
     };
     setState(() => _error = error);
-    if (error != null) return;
+    if (error != null) {
+      // The inline message sits at the bottom of a long form; the app bar's Create button needs this too.
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      return;
+    }
 
     setState(() => _saving = true);
     try {
@@ -142,7 +146,9 @@ class _ProgramEditorState extends State<_ProgramEditor> {
       ).showSnackBar(SnackBar(content: Text(_isNew ? 'Card created. Now add your NFC tags below.' : 'Saved')));
       if (_isNew) context.go('/business/programs/$id');
     } catch (e) {
+      if (!mounted) return;
       setState(() => _error = 'Could not save. ${friendlyError(e)}');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_error!)));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

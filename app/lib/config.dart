@@ -15,3 +15,24 @@ String get publicBaseUrl =>
     _configuredBaseUrl.isNotEmpty ? _configuredBaseUrl : (kIsWeb ? Uri.base.origin : 'https://loyi-b530b.web.app');
 
 String tagUrl(String tagId) => '$publicBaseUrl/t/$tagId';
+
+// ── Production keys ─────────────────────────────────────────────────────────
+// Set in config/prod.json and passed with `--dart-define-from-file=config/prod.json`.
+// All of these are public client keys (they ship inside the app), not secrets.
+
+/// RevenueCat public SDK keys. Empty → subscriptions are unavailable in this build.
+const revenueCatAppleKey = String.fromEnvironment('REVENUECAT_APPLE_KEY');
+const revenueCatGoogleKey = String.fromEnvironment('REVENUECAT_GOOGLE_KEY');
+
+/// RevenueCat Web Billing key (needs Stripe connected in RevenueCat). Empty →
+/// businesses on the website are asked to subscribe in the app.
+const revenueCatWebKey = String.fromEnvironment('REVENUECAT_WEB_KEY');
+
+/// reCAPTCHA v3 site key for Firebase App Check on the web. Empty → App Check off on web.
+const appCheckWebKey = String.fromEnvironment('APP_CHECK_WEB_KEY');
+
+/// Legal pages, served as static files from Firebase Hosting (app/web/*.html).
+const legalBaseUrl = 'https://loyi-b530b.web.app';
+const privacyUrl = '$legalBaseUrl/privacy';
+const termsUrl = '$legalBaseUrl/terms';
+const supportEmail = String.fromEnvironment('SUPPORT_EMAIL', defaultValue: 'support@loyi.be');

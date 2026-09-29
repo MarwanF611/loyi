@@ -174,3 +174,110 @@ class _HexDialogState extends State<_HexDialog> {
     ],
   );
 }
+
+/// Pick up to [max] colours; the selection order is shown as 1, 2, 3.
+/// Tapping a selected colour removes it; when full, a new colour replaces the last one.
+class MultiColorPicker extends StatelessWidget {
+  const MultiColorPicker({
+    super.key,
+    required this.values,
+    required this.onChanged,
+    this.max = 3,
+    this.palette = cardPalette,
+  });
+
+  final List<int> values;
+  final ValueChanged<List<int>> onChanged;
+  final int max;
+  final List<Color> palette;
+
+  void _toggle(int argb) {
+    final next = [...values];
+    if (next.contains(argb)) {
+      next.remove(argb);
+    } else if (next.length < max) {
+      next.add(argb);
+    } else {
+      next[max - 1] = argb;
+    }
+    onChanged(next);
+  }
+
+  Future<void> _custom(BuildContext context) async {
+    final result = await showDialog<int>(
+      context: context,
+      builder: (_) => _HexDialog(initial: values.isEmpty ? palette.first.toARGB32() : values.last),
+    );
+    if (result != null && !values.contains(result)) _toggle(result);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final outline = Theme.of(context).colorScheme.outline;
+    final custom = [
+      for (final v in values)
+        if (!palette.any((c) => c.toARGB32() == v)) v,
+    ];
+    Widget swatch(int argb) {
+      final color = Color(argb);
+      final index = values.indexOf(argb);
+      return Semantics(
+        button: true,
+        selected: index >= 0,
+        label: '#${_hex(argb)}${index >= 0 ? ', colour ${index + 1}' : ''}',
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: () => _toggle(argb),
+          child: Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+              border: Border.all(
+                color: index >= 0
+                    ? readableOn(Theme.of(context).colorScheme.surface)
+                    : color.computeLuminance() > 0.8
+                    ? outline
+                    : color,
+                width: index >= 0 ? 3 : 1,
+              ),
+            ),
+            child: index >= 0
+                ? Text(
+                    '${index + 1}',
+                    style: TextStyle(color: readableOn(color), fontWeight: FontWeight.w800, fontSize: 16),
+                  )
+                : null,
+          ),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final c in palette) swatch(c.toARGB32()),
+        for (final c in custom) swatch(c),
+        Tooltip(
+          message: 'Custom colour',
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: () => _custom(context),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: outline),
+              ),
+              child: const Icon(Icons.colorize, size: 18),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
