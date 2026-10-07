@@ -12,11 +12,11 @@ import 'repo.dart';
 import 'stamping.dart';
 
 /// How a signed-in user proves it's them before deleting their account.
-enum ReauthMethod { none, password, apple, google }
+enum ReauthMethod { none, password, google }
 
 /// Clients start as anonymous users (no sign-up at the counter) and can later
-/// save their cards with Google, Apple or email + password. Businesses sign in
-/// with email + password, Google or Apple, then pick their brand colours and subscribe.
+/// save their cards with Google or email + password. Businesses sign in
+/// with email + password or Google, then pick their brand colours and subscribe.
 ///
 /// No email links: on the free Spark plan Firebase sends only 5 per day.
 class AuthService {
@@ -49,9 +49,6 @@ class AuthService {
   /// asks for the shop's name).
   Future<void> businessSignInWithGoogle() => _signInWith(_google());
 
-  /// Sign in with Apple; creates the account on first use.
-  Future<void> businessSignInWithApple() => _signInWith(_apple());
-
   Future<void> signOut() => _auth.signOut();
 
   /// Email with a link to choose a new password (Spark: 150 emails/day).
@@ -63,13 +60,6 @@ class AuthService {
   /// move). If that Google account already has Loyi cards, signs into it and
   /// merges this device's cards.
   Future<void> saveWithGoogle() => _saveWith(_google());
-
-  /// Same as [saveWithGoogle], with Apple.
-  Future<void> saveWithApple() => _saveWith(_apple());
-
-  AppleAuthProvider _apple() => AppleAuthProvider()
-    ..addScope('email')
-    ..addScope('name');
 
   /// Google asks which account to use every time, so a shop on a shared
   /// computer doesn't land in someone else's Google account by accident.
@@ -192,7 +182,7 @@ class AuthService {
 
   // ── Account settings ──────────────────────────────────────────────────────
 
-  /// True for accounts with a Loyi password (not only Apple/Google).
+  /// True for accounts with a Loyi password (not only Google).
   bool get hasPassword => user?.providerData.any((p) => p.providerId == 'password') ?? false;
 
   Future<void> _reauthenticate(String password) {
@@ -218,27 +208,20 @@ class AuthService {
     if (u == null || u.isAnonymous) return ReauthMethod.none;
     final providers = {for (final p in u.providerData) p.providerId};
     if (providers.contains('password')) return ReauthMethod.password;
-    if (providers.contains('apple.com')) return ReauthMethod.apple;
     if (providers.contains('google.com')) return ReauthMethod.google;
     return ReauthMethod.none;
   }
 
   /// Deletes the signed-in account and everything it created. Signing in again
   /// comes first ([password] for email accounts), so a wrong password or a
-  /// cancelled Apple/Google sheet throws before anything is deleted.
+  /// cancelled Google popup throws before anything is deleted.
   Future<void> deleteAccount({String? password}) async {
     final u = user;
     if (u == null) return;
 
-    String? appleCode;
     switch (reauthMethod) {
       case ReauthMethod.password:
         await _reauthenticate(password ?? '');
-      case ReauthMethod.apple:
-        final credential = kIsWeb
-            ? await u.reauthenticateWithPopup(_apple())
-            : await u.reauthenticateWithProvider(_apple());
-        appleCode = credential.additionalUserInfo?.authorizationCode;
       case ReauthMethod.google:
         await (kIsWeb
             ? u.reauthenticateWithPopup(GoogleAuthProvider())
@@ -257,14 +240,6 @@ class AuthService {
       await repo.deleteBusinessData(u.uid);
     }
     await repo.deleteClientData(u.uid);
-    // Apple requires apps to revoke Sign in with Apple tokens when the account is deleted.
-    if (appleCode != null) {
-      try {
-        await _auth.revokeTokenWithAuthorizationCode(appleCode);
-      } catch (e) {
-        debugPrint('Apple token revoke failed: $e');
-      }
-    }
     try {
       await u.delete();
     } on FirebaseAuthException catch (e) {

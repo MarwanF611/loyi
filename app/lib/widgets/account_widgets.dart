@@ -8,34 +8,6 @@ import '../services/auth_service.dart';
 import '../services/language.dart';
 import '../theme.dart';
 
-/// "Sign in with Apple" in Apple's style: black in light mode, white in dark mode.
-class AppleSignInButton extends StatelessWidget {
-  const AppleSignInButton({super.key, required this.onPressed, this.label});
-
-  final VoidCallback? onPressed;
-
-  /// Defaults to "Continue with Apple".
-  final String? label;
-
-  @override
-  Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final bg = dark ? Colors.white : Colors.black;
-    final fg = dark ? Colors.black : Colors.white;
-    return FilledButton.icon(
-      style: FilledButton.styleFrom(
-        backgroundColor: bg,
-        foregroundColor: fg,
-        disabledBackgroundColor: bg.withValues(alpha: 0.4),
-        disabledForegroundColor: fg.withValues(alpha: 0.7),
-      ),
-      onPressed: onPressed,
-      icon: const Icon(Icons.apple, size: 24),
-      label: Text(label ?? context.l10n.continueWithApple),
-    );
-  }
-}
-
 /// "Continue with Google": white button with Google's multicolour "G".
 class GoogleSignInButton extends StatelessWidget {
   const GoogleSignInButton({super.key, required this.onPressed});
@@ -82,16 +54,6 @@ class _GPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// Sign in with Apple errors arrive as raw AuthenticationServices errors:
-/// 1001 is the user cancelling, 1000 usually means no Apple Account on the device.
-/// Returns null when [e] isn't one of those, '' for a cancel (show nothing).
-String? appleSignInMessage(FirebaseAuthException e) {
-  final message = e.message ?? '';
-  if (!message.contains('AuthorizationError')) return null;
-  if (message.contains('1001')) return '';
-  return l10n.appleSignInFailed;
 }
 
 /// Divider with a short label in the middle ("or with email").
@@ -179,17 +141,14 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
       if (mounted) Navigator.pop(context, true);
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
-      final apple = appleSignInMessage(e);
       setState(
-        () => _error = apple != null
-            ? (apple.isEmpty ? null : apple)
-            : switch (e.code) {
-                'wrong-password' || 'invalid-credential' => l10n.wrongPassword,
-                'popup-closed-by-user' || 'cancelled-popup-request' || 'web-context-canceled' || 'canceled' => null,
-                'user-mismatch' => l10n.confirmSameAccount,
-                'too-many-requests' => l10n.tooManyAttempts,
-                _ => e.message ?? l10n.couldNotDeleteAccount,
-              },
+        () => _error = switch (e.code) {
+          'wrong-password' || 'invalid-credential' => l10n.wrongPassword,
+          'popup-closed-by-user' || 'cancelled-popup-request' || 'web-context-canceled' || 'canceled' => null,
+          'user-mismatch' => l10n.confirmSameAccount,
+          'too-many-requests' => l10n.tooManyAttempts,
+          _ => e.message ?? l10n.couldNotDeleteAccount,
+        },
       );
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
@@ -227,7 +186,6 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
                 decoration: InputDecoration(labelText: l.yourPassword),
                 onSubmitted: (_) => _busy ? null : _delete(),
               ),
-              ReauthMethod.apple => Text(l.confirmWithApple, style: context.text.bodySmall),
               ReauthMethod.google => Text(l.confirmWithGoogle, style: context.text.bodySmall),
               ReauthMethod.none => const SizedBox.shrink(),
             },

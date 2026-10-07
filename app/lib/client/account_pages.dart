@@ -12,7 +12,7 @@ import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 
 /// Lets a client save their cards (so they survive a new phone or browser)
-/// with Google, Apple or email + password, and delete their data.
+/// with Google or email + password, and delete their data.
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
@@ -46,20 +46,17 @@ class _AccountPageState extends State<AccountPage> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.cardsSaved)));
       context.go('/cards');
     } on FirebaseAuthException catch (e) {
-      final apple = appleSignInMessage(e);
       setState(
-        () => _error = apple != null
-            ? (apple.isEmpty ? null : apple)
-            : switch (e.code) {
-                'popup-closed-by-user' || 'cancelled-popup-request' || 'canceled' || 'web-context-canceled' => null,
-                'account-exists-with-different-credential' => l10n.emailOtherMethod,
-                'email-already-in-use' || 'credential-already-in-use' => l10n.emailHasAccountChoose,
-                'invalid-credential' || 'wrong-password' || 'user-not-found' => l10n.wrongEmailOrPassword,
-                'weak-password' => l10n.passwordTooShort6,
-                'invalid-email' => l10n.invalidEmail,
-                'operation-not-allowed' => l10n.signInMethodDisabled,
-                _ => e.message ?? l10n.couldNotSignIn,
-              },
+        () => _error = switch (e.code) {
+          'popup-closed-by-user' || 'cancelled-popup-request' || 'canceled' || 'web-context-canceled' => null,
+          'account-exists-with-different-credential' => l10n.emailOtherMethod,
+          'email-already-in-use' || 'credential-already-in-use' => l10n.emailHasAccountChoose,
+          'invalid-credential' || 'wrong-password' || 'user-not-found' => l10n.wrongEmailOrPassword,
+          'weak-password' => l10n.passwordTooShort6,
+          'invalid-email' => l10n.invalidEmail,
+          'operation-not-allowed' => l10n.signInMethodDisabled,
+          _ => e.message ?? l10n.couldNotSignIn,
+        },
       );
     } catch (e) {
       setState(() => _error = friendlyError(e));
@@ -143,8 +140,6 @@ class _AccountPageState extends State<AccountPage> {
                     context.l10n.keepCardsSafeSub,
                   ),
                   GoogleSignInButton(onPressed: _busy ? null : () => _run(auth.saveWithGoogle)),
-                  const SizedBox(height: 12),
-                  AppleSignInButton(onPressed: _busy ? null : () => _run(auth.saveWithApple)),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     child: LabeledDivider(context.l10n.orWithEmail),

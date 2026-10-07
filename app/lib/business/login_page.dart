@@ -71,22 +71,19 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
       // The router redirects to /business once the auth state changes.
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
-      final apple = appleSignInMessage(e);
       setState(
-        () => _error = apple != null
-            ? (apple.isEmpty ? null : apple)
-            : switch (e.code) {
-                'invalid-credential' || 'wrong-password' || 'user-not-found' => l10n.wrongEmailOrPassword,
-                'email-already-in-use' => l10n.emailInUse,
-                'account-exists-with-different-credential' => l10n.emailHasAccount,
-                'weak-password' => l10n.passwordTooShort,
-                'invalid-email' => l10n.invalidEmail,
-                'operation-not-allowed' => l10n.signInMethodDisabled,
-                'too-many-requests' => l10n.tooManyAttempts,
-                // Closing the Apple/Google sheet or popup isn't an error.
-                'canceled' || 'web-context-canceled' || 'popup-closed-by-user' || 'cancelled-popup-request' => null,
-                _ => e.message ?? l10n.couldNotSignIn,
-              },
+        () => _error = switch (e.code) {
+          'invalid-credential' || 'wrong-password' || 'user-not-found' => l10n.wrongEmailOrPassword,
+          'email-already-in-use' => l10n.emailInUse,
+          'account-exists-with-different-credential' => l10n.emailHasAccount,
+          'weak-password' => l10n.passwordTooShort,
+          'invalid-email' => l10n.invalidEmail,
+          'operation-not-allowed' => l10n.signInMethodDisabled,
+          'too-many-requests' => l10n.tooManyAttempts,
+          // Closing the Google popup isn't an error.
+          'canceled' || 'web-context-canceled' || 'popup-closed-by-user' || 'cancelled-popup-request' => null,
+          _ => e.message ?? l10n.couldNotSignIn,
+        },
       );
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -129,8 +126,6 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
           Text(_signUp ? l.signUpSteps : l.signInSub, style: context.text.bodyMedium),
           const SizedBox(height: 28),
           GoogleSignInButton(onPressed: _busy ? null : () => _run(auth.businessSignInWithGoogle)),
-          const SizedBox(height: 12),
-          AppleSignInButton(onPressed: _busy ? null : () => _run(auth.businessSignInWithApple)),
           const SizedBox(height: 20),
           LabeledDivider(l.orWithEmail),
           const SizedBox(height: 20),

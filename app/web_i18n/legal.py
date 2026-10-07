@@ -39,15 +39,15 @@ PRIVACY = {
         your card. Neither the shop nor Loyi learns who saw it. Messages are shown only inside Loyi (no email, no push).
         You can hide one message, or turn off all messages from shops under Account &amp; privacy → Messages from
         shops.</li>
-      <li><strong>If you save your cards to an account:</strong> your email address, or the email and name Apple or
-        Google share with us when you use "Continue with Apple / Google". Apple can hide your real email.</li>
+      <li><strong>If you save your cards to an account:</strong> your email address, or the email and name Google
+        shares with us when you use "Continue with Google".</li>
     </ul>
   </div>
 
   <h2>Shops (Loyi for business)</h2>
   <div class="card">
     <ul>
-      <li>Account: email address (or your Apple ID's email when you use Sign in with Apple).</li>
+      <li>Account: email address (or your Google account's email when you use "Continue with Google").</li>
       <li>Shop details you enter: name, brand colours, logo, loyalty cards, rewards and NFC tags.</li>
       <li>Activity: stamps given and rewards used by your clients (with anonymous client IDs). Your dashboard,
         client list and insights are counted from this; each client appears as a code that only works in your shop.</li>
@@ -79,7 +79,7 @@ PRIVACY = {
       europe-west1) and hosting. Firebase Authentication can process data in the United States.</li>
     <li><strong>Stripe</strong> (Ireland / United States): takes payments for subscriptions bought on the
       website.</li>
-    <li><strong>Apple</strong> and <strong>Google</strong>: Sign in with Apple and Google sign-in.</li>
+    <li><strong>Google</strong>: Google sign-in.</li>
     <li><strong>Cloudflare</strong>: runs the small service that switches a shop's tags on after payment.</li>
   </ul>
   <p>Transfers outside the EU are covered by the EU–US Data Privacy Framework or the European Commission's
@@ -92,7 +92,7 @@ PRIVACY = {
   <p>Everything the website and app need, including code and fonts, comes from Loyi's own hosting: we don't load
     Google Fonts or other outside content. Our hosting provider (Google Firebase) handles your IP address and browser
     details to deliver the pages and protect them from abuse, in short-lived technical logs. If you choose "Continue
-    with Google" or "Continue with Apple", that provider's sign-in page opens.</p>
+    with Google", Google's sign-in page opens.</p>
 
   <h2>How long we keep data</h2>
   <ul>
@@ -152,15 +152,14 @@ PRIVACY = {
         alleen in Loyi (geen e-mail, geen pushmelding). Je kunt één bericht verbergen, of alle berichten van zaken
         uitzetten onder Account &amp; privacy → Berichten van zaken.</li>
       <li><strong>Als je je kaarten in een account bewaart:</strong> je e-mailadres, of het e-mailadres en de naam die
-        Apple of Google met ons delen als je "Doorgaan met Apple / Google" gebruikt. Apple kan je echte e-mailadres
-        verbergen.</li>
+        Google met ons deelt als je "Doorgaan met Google" gebruikt.</li>
     </ul>
   </div>
 
   <h2>Zaken (Loyi voor zaken)</h2>
   <div class="card">
     <ul>
-      <li>Account: e-mailadres (of het e-mailadres van je Apple ID als je Inloggen met Apple gebruikt).</li>
+      <li>Account: e-mailadres (of het e-mailadres van je Google-account als je "Doorgaan met Google" gebruikt).</li>
       <li>Gegevens van je zaak die je invult: naam, huiskleuren, logo, klantenkaarten, beloningen en NFC-tags.</li>
       <li>Activiteit: gegeven stempels en gebruikte beloningen van je klanten (met anonieme klant-ID's). Je dashboard,
         klantenlijst en inzichten worden hiermee berekend; elke klant verschijnt als een code die alleen in jouw zaak
@@ -196,7 +195,7 @@ PRIVACY = {
       europe-west1) en hosting. Firebase Authentication kan gegevens in de Verenigde Staten verwerken.</li>
     <li><strong>Stripe</strong> (Ierland / Verenigde Staten): neemt de betalingen af voor abonnementen die op de
       website worden genomen.</li>
-    <li><strong>Apple</strong> en <strong>Google</strong>: Inloggen met Apple en inloggen met Google.</li>
+    <li><strong>Google</strong>: inloggen met Google.</li>
     <li><strong>Cloudflare</strong>: draait de kleine dienst die de tags van een zaak na betaling aanzet.</li>
   </ul>
   <p>Doorgiften buiten de EU vallen onder het EU-VS-kader voor gegevensbescherming (Data Privacy Framework) of de
@@ -209,7 +208,7 @@ PRIVACY = {
   <p>Alles wat de website en de app nodig hebben, ook code en lettertypes, komt van Loyi's eigen hosting: we laden
     geen Google Fonts of andere externe inhoud. Onze hostingprovider (Google Firebase) verwerkt je IP-adres en
     browsergegevens in kortlopende technische logs, om de pagina's te leveren en tegen misbruik te beschermen. Kies je
-    "Doorgaan met Google" of "Doorgaan met Apple", dan opent de inlogpagina van die aanbieder.</p>
+    "Doorgaan met Google", dan opent de inlogpagina van Google.</p>
 
   <h2>Hoe lang we gegevens bewaren</h2>
   <ul>
@@ -275,15 +274,14 @@ PRIVACY = {
         n'apparaissent que dans Loyi (ni e-mail, ni notification). Vous pouvez masquer un message, ou désactiver tous
         les messages des commerces dans Compte et confidentialité → Messages des commerces.</li>
       <li><strong>Si vous enregistrez vos cartes dans un compte :</strong> votre adresse e-mail, ou l'e-mail et le nom
-        qu'Apple ou Google nous transmettent quand vous utilisez « Continuer avec Apple / Google ». Apple peut masquer
-        votre véritable e-mail.</li>
+        que Google nous transmet quand vous utilisez « Continuer avec Google ».</li>
     </ul>
   </div>
 
   <h2>Commerces (Loyi pour les commerces)</h2>
   <div class="card">
     <ul>
-      <li>Compte : adresse e-mail (ou l'e-mail de votre identifiant Apple si vous utilisez Connexion avec Apple).</li>
+      <li>Compte : adresse e-mail (ou l'e-mail de votre compte Google si vous utilisez « Continuer avec Google »).</li>
       <li>Informations que vous saisissez : nom, couleurs de marque, logo, cartes de fidélité, récompenses et tags
         NFC.</li>
       <li>Activité : tampons donnés et récompenses utilisées par vos clients (avec des identifiants clients anonymes).
@@ -322,7 +320,7 @@ PRIVACY = {
       Belgique, europe-west1) et hébergement. Firebase Authentication peut traiter des données aux États-Unis.</li>
     <li><strong>Stripe</strong> (Irlande / États-Unis) : encaisse les paiements des abonnements souscrits sur le
       site.</li>
-    <li><strong>Apple</strong> et <strong>Google</strong> : Connexion avec Apple et connexion avec Google.</li>
+    <li><strong>Google</strong> : connexion avec Google.</li>
     <li><strong>Cloudflare</strong> : fait tourner le petit service qui active les tags d'un commerce après
       paiement.</li>
   </ul>
@@ -336,8 +334,8 @@ PRIVACY = {
   <p>Tout ce dont le site et l'app ont besoin, y compris le code et les polices, vient de l'hébergement de Loyi : nous
     ne chargeons ni Google Fonts ni d'autres contenus externes. Notre hébergeur (Google Firebase) traite votre adresse
     IP et les données de votre navigateur dans des journaux techniques de courte durée, pour fournir les pages et les
-    protéger contre les abus. Si vous choisissez « Continuer avec Google » ou « Continuer avec Apple », la page de
-    connexion de ce fournisseur s'ouvre.</p>
+    protéger contre les abus. Si vous choisissez « Continuer avec Google », la page de
+    connexion de Google s'ouvre.</p>
 
   <h2>Durée de conservation</h2>
   <ul>
@@ -638,7 +636,7 @@ DELETE = {
       <li>Open the Loyi for business app, or <a href="/business/account">sign in on the website</a>.</li>
       <li>Open <strong>Account &amp; privacy</strong>: in the menu on the left on a computer, or with the person icon at
         the top right on a phone (also during sign-up).</li>
-      <li>Tap <strong>Delete account</strong> and confirm with your password (or Apple).</li>
+      <li>Tap <strong>Delete account</strong> and confirm with your password (or Google).</li>
     </ol>
     <p>This permanently deletes your account, shop, loyalty cards, tags, logo, follow-up messages, activity history
       and your clients' stamps for your shop. Your tags stop working.</p>
@@ -673,7 +671,7 @@ DELETE = {
       <li>Open de app Loyi voor zaken, of <a href="/business/account">log in op de website</a>.</li>
       <li>Open <strong>Account &amp; privacy</strong>: in het menu links op een computer, of met het persoonsicoon
         rechtsboven op een telefoon (ook tijdens het aanmelden).</li>
-      <li>Tik op <strong>Account verwijderen</strong> en bevestig met je wachtwoord (of met Apple).</li>
+      <li>Tik op <strong>Account verwijderen</strong> en bevestig met je wachtwoord (of met Google).</li>
     </ol>
     <p>Dit verwijdert definitief je account, je zaak, je klantenkaarten, tags, logo, opvolgberichten,
       activiteitengeschiedenis en de stempels van je klanten bij jouw zaak. Je tags werken niet meer.</p>
@@ -708,7 +706,7 @@ DELETE = {
       <li>Ouvrez l'app Loyi pour les commerces, ou <a href="/business/account">connectez-vous sur le site</a>.</li>
       <li>Ouvrez <strong>Compte et confidentialité</strong> : dans le menu à gauche sur ordinateur, ou avec l'icône de
         personne en haut à droite sur téléphone (aussi pendant l'inscription).</li>
-      <li>Touchez <strong>Supprimer le compte</strong> et confirmez avec votre mot de passe (ou avec Apple).</li>
+      <li>Touchez <strong>Supprimer le compte</strong> et confirmez avec votre mot de passe (ou avec Google).</li>
     </ol>
     <p>Cela supprime définitivement votre compte, votre commerce, vos cartes de fidélité, tags, logo, messages de suivi,
       historique d'activité et les tampons de vos clients chez vous. Vos tags ne fonctionneront plus.</p>

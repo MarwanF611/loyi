@@ -29,8 +29,8 @@ legal advice: have them checked once.
 
 ## 2. App Store Connect
 
-1. **Certificates, Identifiers & Profiles → Identifiers**: App ID `be.loyi.loyi` with
-   **Sign in with Apple** enabled.
+1. **Certificates, Identifiers & Profiles → Identifiers**: App ID `be.loyi.loyi` (no extra
+   capabilities needed).
 2. **App Store Connect → Apps → +**: bundle ID `be.loyi.loyi`, name e.g. "Loyi for Business"
    (the plain name "Loyi" may be taken), category Business.
 3. **Pricing**: Free. No in-app purchases.
@@ -72,10 +72,8 @@ server, and a full test. It also covers switching to real money.
 
 ## 5. Firebase console
 
-1. **Authentication → Sign-in method → Apple**: enable. For the iOS app nothing else is
-   needed. For the website and Android also create a **Services ID** and a **Sign in with
-   Apple key** in the Apple Developer portal, enter them here, and add the return URL
-   `https://loyi-b530b.firebaseapp.com/__/auth/handler` to the Services ID.
+1. **Authentication → Sign-in method**: Email/Password, Anonymous and Google are enabled
+   (Loyi doesn't offer Sign in with Apple).
 2. **Deploy the rules** once the billing server works (STRIPE.md step 4), because from then
    on tags only work for subscribed businesses:
    ```bash
@@ -117,8 +115,7 @@ Bump `version:` in `app/pubspec.yaml` (e.g. `1.0.1+2`) for every upload.
 | Account deletion in the app (Apple 5.1.1(v), Google Play), also before paying | Account & privacy (avatar on the dashboard and on every sign-up step); client account page |
 | Data access, export and correction (GDPR) | Account & privacy: download my data, change email/password |
 | Web page to request deletion (Google Play) | `/delete-account` |
-| Sign in with Apple when other sign-in providers are offered (Apple 4.8) | Business login and client save page |
-| Revoke Apple tokens on account deletion | `AuthService.deleteAccount` |
+| Login services (Apple 4.8): Loyi offers its own email + password accounts next to Google, without Sign in with Apple. If review asks for an equivalent login under 4.8, explain that every feature works with a Loyi email account, or add Sign in with Apple back | Business login |
 | No purchases or purchase links in the app (Apple 3.1.1 / 3.1.3(f), Google Play payments) | `subscribe_page.dart`: Subscribe and Manage only on the website (`kIsWeb`) |
 | Cancelling: deleting the account also cancels the Stripe subscription | `AuthService.deleteAccount` → billing server `/delete-account` |
 | Privacy manifest, photo library purpose string, export compliance | `ios/Runner/PrivacyInfo.xcprivacy`, `Info.plist` |

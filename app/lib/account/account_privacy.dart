@@ -36,8 +36,6 @@ class AccountPrivacySections extends StatelessWidget {
     final google = providers.contains('google.com');
     final method = providers.contains('password')
         ? l.methodEmailPassword
-        : providers.contains('apple.com')
-        ? l.methodApple
         : google
         ? 'Google'
         : l.methodNotSaved;
@@ -71,7 +69,7 @@ class AccountPrivacySections extends StatelessWidget {
                       onTap: () => showDialog<void>(context: context, builder: (_) => const _ChangePasswordDialog()),
                     ),
                   ]
-                : [Text(l.noLoyiPassword(google ? 'Google' : 'Apple'), style: context.text.bodyMedium)],
+                : [Text(l.noLoyiPassword('Google'), style: context.text.bodyMedium)],
           ),
         ],
         const SizedBox(height: 16),

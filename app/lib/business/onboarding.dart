@@ -18,7 +18,7 @@ import '../widgets/ui.dart';
 import 'subscribe_page.dart';
 
 // Business sign-up after the account exists:
-//   1. account + business name (login page; [NameStep] if the shop is missing, e.g. Sign in with Apple)
+//   1. account + business name (login page; [NameStep] if the shop is missing, e.g. Google sign-in)
 //   2. brand colours ([ColorsStep])
 //   3. payment ([PayStep])
 // then the dashboard. Each step is derived from stored data, so leaving and
@@ -153,7 +153,7 @@ class _NameStepState extends State<NameStep> {
           ),
           const SizedBox(height: 16),
           FilledButton(onPressed: _busy ? null : _save, child: Text(context.l10n.continueAction)),
-          // Google and Apple accounts start here without seeing the sign-up form.
+          // Google accounts start here without seeing the sign-up form.
           const SizedBox(height: 16),
           Text(context.l10n.continueAgreesToTerms, style: context.text.bodySmall, textAlign: TextAlign.center),
           const LegalLinks(),

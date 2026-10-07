@@ -31,7 +31,7 @@ referee. A write is only accepted if it's exactly what the app would do:
 | --- | --- |
 | Flutter app: business app (iOS/Android/web) and client pages (web) | `app/` |
 | Tap / redeem transactions | `app/lib/services/api.dart` |
-| Save cards (Google, Apple, email + password) and merge devices; business sign-in | `app/lib/services/auth_service.dart` |
+| Save cards (Google, email + password) and merge devices; business sign-in | `app/lib/services/auth_service.dart` |
 | Stamp maths (pure, unit tested; mirrored in the rules) | `app/lib/services/stamping.dart` |
 | Security rules | `firestore.rules` |
 | End-to-end rules tests, plus demo seed data | `e2e/` |
@@ -100,7 +100,7 @@ account and data (art. 17). `/delete-account` explains the same for Google Play.
 - `billing/{ownerUid}`: Stripe customer and subscription ids; only the billing server reads or writes it
 
 **Clients** start as anonymous Firebase users (nothing to sign up for at the
-counter). They can save their cards with **Google**, **Apple** or **email + password**. This
+counter). They can save their cards with **Google** or **email + password**. This
 links the anonymous account, so the user id and cards stay the same. Signing
 into an account that already exists (for example on a second phone) merges that
 device's cards into it. Email sign-in links aren't used, because Spark allows
@@ -108,7 +108,7 @@ only 5 of those emails per day.
 
 **Several shops, one client:** a client's cards from every shop live under the same client ID, so *My cards* shows them all. Cards with a reward ready come first. Each shop only ever sees its own clients' cards.
 
-**Businesses** sign in with email and password, Google or Sign in with Apple; a new Google or Apple account is asked for the shop's name (with the terms) first. The native app opens on `/business`. Under *Business settings* they upload a logo and change their name and brand colours. In each card's editor they choose the card's colours, style and stamp icon, with a live preview.
+**Businesses** sign in with email and password or Google; a new Google account is asked for the shop's name (with the terms) first. The native app opens on `/business`. Under *Business settings* they upload a logo and change their name and brand colours. In each card's editor they choose the card's colours, style and stamp icon, with a live preview.
 
 ## Design system ("Coral & Ink")
 
@@ -188,8 +188,6 @@ Status (free Spark plan, no billing):
   key's fingerprints too** (`firebase apps:android:sha:create <appId> <sha>`, the Play key is under Play
   Console → Setup → App signing), then download `google-services.json` again
   (`firebase apps:sdkconfig ANDROID <appId>`)
-- [ ] Authentication: Sign in with Apple is **not enabled yet** (the buttons answer "not enabled"). Needs an
-  Apple Developer Services ID, key and team ID in Firebase → Authentication → Sign-in method → Apple
 - [x] Hosting: live at **https://loyi-b530b.web.app**. Deploy updates with `./scripts/deploy-web.sh` (builds production, deploys, then restores the local emulator build)
 - [ ] Custom domain (loyi.be) in Hosting and Auth's authorised domains; build with `--dart-define=PUBLIC_BASE_URL=https://loyi.be`
 

@@ -30,7 +30,7 @@ monitoring or special categories), but name one contact person: [you].
 
 | Processing | Purpose | People | Data | Legal basis | Retention | Recipients |
 | --- | --- | --- | --- | --- | --- | --- |
-| Client cards (Loyi as controller) | Keep a client's cards across shops and devices, prevent fraud | Clients | Pseudonymous ID; optional email (or Apple/Google ID); cards, stamps, rewards, tap times | Contract (6(1)(b)); fraud prevention: legitimate interest (6(1)(f)) | Until the client deletes the account; cards unused 2 years are deleted | Google (Firebase) |
+| Client cards (Loyi as controller) | Keep a client's cards across shops and devices, prevent fraud | Clients | Pseudonymous ID; optional email (or Google ID); cards, stamps, rewards, tap times | Contract (6(1)(b)); fraud prevention: legitimate interest (6(1)(f)) | Until the client deletes the account; cards unused 2 years are deleted | Google (Firebase) |
 | Shop loyalty programmes (Loyi as **processor** for each shop) | Run the shop's programme, dashboard, client list, insights | Clients of that shop | Pseudonymous ID per shop, cards, stamps, rewards, tap times | The shop's; see the data processing agreement | Logs 2 years, unused cards 2 years, everything when the shop leaves | Google (Firebase) |
 | Follow-up messages (shop as controller, Loyi as processor) | Show a shop's message to a group of its clients | Clients of that shop | Card data, matched on the client's own device | Shop's legitimate interest (6(1)(f)), direct marketing with opt-out (21(2)) | Message until its end date (max. 2 months) | None (matching happens on the device) |
 | Shop accounts | Provide the business app | Shop owners | Email, shop name, colours, logo, cards, tags, messages | Contract (6(1)(b)) | Until the shop deletes its account | Google (Firebase) |
@@ -52,7 +52,7 @@ Privacy Framework and standard contractual clauses. The database itself is in Be
   (`Repo.applyRetention`, run when a shop opens the app).
 - No third-party content on the site or in the web app: the Firebase SDK, Flutter's engine and its fallback fonts are
   served from our own hosting (`scripts/vendor-firebase-sdk.sh`, `scripts/vendor-fallback-fonts.sh`), and the
-  Content-Security-Policy in `firebase.json` blocks Google's CDNs. Google/Apple sign-in pages open only when chosen.
+  Content-Security-Policy in `firebase.json` blocks Google's CDNs. Google's sign-in page opens only when chosen.
   If you ever turn on App Check for the web (reCAPTCHA), that adds a Google request: update the privacy policy first.
 - Self-service rights: download (JSON), change email/password, delete account (also cancels Stripe).
 - HTTPS everywhere; secrets (Stripe, service account) only in the billing server's environment, never in the app or git.
