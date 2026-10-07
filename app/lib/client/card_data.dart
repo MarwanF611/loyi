@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../models.dart';
+import '../services/language.dart';
 import '../services/repo.dart';
 import '../theme.dart';
+import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 
 /// Streams the program and business behind a card and hands them to [builder]
@@ -68,9 +70,9 @@ class _ShopGone extends StatelessWidget {
   Widget build(BuildContext context) => Panel(
     child: Row(
       children: [
-        Icon(Icons.storefront_outlined, color: context.loyi.inkMuted),
+        Icon(LoyiIcons.store, color: context.loyi.inkMuted),
         const SizedBox(width: 12),
-        Expanded(child: Text('This shop no longer uses Loyi.', style: context.text.bodyMedium)),
+        Expanded(child: Text(context.l10n.shopNoLongerUsesLoyi, style: context.text.bodyMedium)),
       ],
     ),
   );

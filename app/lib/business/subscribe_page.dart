@@ -2,18 +2,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 
+import '../config.dart';
 import '../models.dart';
+import '../services/api.dart';
 import '../services/auth_service.dart';
 import '../services/billing.dart';
+import '../services/language.dart';
 import '../services/repo.dart';
 import '../theme.dart';
 import '../widgets/account_widgets.dart';
+import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 
-/// Where the business's subscription stands, combining Firestore (what the
-/// tags actually follow) with RevenueCat (knows about a purchase immediately).
+/// Where the business's subscription stands (`subscriptions/{uid}`, written by
+/// the billing server). `activating`: back from Stripe, waiting for its webhook.
 enum PlanState { loading, none, activating, active, expired }
 
 /// See [PlanState].
@@ -33,19 +36,12 @@ class PlanBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) => StreamBuilder<Subscription?>(
     stream: repo.subscription(auth.user!.uid),
-    builder: (context, subSnap) => StreamBuilder<CustomerInfo?>(
-      stream: billing.customerInfo,
-      builder: (context, infoSnap) {
-        if (subSnap.connectionState == ConnectionState.waiting) {
-          return builder(context, const PlanStatus(PlanState.loading));
-        }
-        final sub = subSnap.data;
-        if (sub != null && sub.isActive) return builder(context, PlanStatus(PlanState.active, sub));
-        // Bought, but the webhook hasn't written Firestore yet (a few seconds).
-        if (Billing.isActive(infoSnap.data)) return builder(context, PlanStatus(PlanState.activating, sub));
-        return builder(context, PlanStatus(sub == null ? PlanState.none : PlanState.expired, sub));
-      },
-    ),
+    builder: (context, snap) {
+      if (snap.connectionState == ConnectionState.waiting) return builder(context, const PlanStatus(PlanState.loading));
+      final sub = snap.data;
+      if (sub != null && sub.isActive) return builder(context, PlanStatus(PlanState.active, sub));
+      return builder(context, PlanStatus(sub == null ? PlanState.none : PlanState.expired, sub));
+    },
   );
 }
 
@@ -68,19 +64,19 @@ class SubscriptionBanner extends StatelessWidget {
           onTap: () => context.go('/business/subscribe'),
           child: Row(
             children: [
-              IconBadge(icon: Icons.credit_card_off_rounded, background: p.surface, foreground: p.ink),
+              IconBadge(icon: LoyiIcons.creditCard, background: p.surface, foreground: p.ink),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Payment problem', style: context.text.titleMedium),
+                    Text(context.l10n.paymentProblem, style: context.text.titleMedium),
                     const SizedBox(height: 2),
-                    Text('Update your payment method to keep your tags working.', style: context.text.bodySmall),
+                    Text(context.l10n.paymentProblemSub, style: context.text.bodySmall),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded),
+              const Icon(LoyiIcons.chevronRight),
             ],
           ),
         ),
@@ -95,8 +91,8 @@ class SubscribePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Subscription'),
-      leading: BackButton(onPressed: () => context.go('/business')),
+      title: Text(context.l10n.subscription),
+      leading: BackButton(onPressed: () => context.go('/business/settings')),
     ),
     body: ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
@@ -129,7 +125,7 @@ class PlanHero extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle_rounded, color: white, size: 20),
+          const Icon(LoyiIcons.circleCheck, color: white, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(text, style: context.text.bodyMedium?.copyWith(color: white)),
@@ -150,18 +146,18 @@ class PlanHero extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Loyi for business', style: context.text.headlineMedium?.copyWith(color: white)),
+          Text(context.l10n.loyiForBusiness, style: context.text.headlineMedium?.copyWith(color: white)),
           const SizedBox(height: 6),
           Text(
-            'Digital stamp cards your clients actually keep.',
+            context.l10n.planTagline,
             style: context.text.bodyMedium?.copyWith(color: white.withValues(alpha: 0.85)),
           ),
           const SizedBox(height: 8),
-          perk('Your NFC join and stamp tags, switched on'),
-          perk('Unlimited loyalty cards and rewards'),
-          perk('Your logo, colours and card design'),
-          perk('Live dashboard: clients, stamps and rewards'),
-          perk('Nothing for your clients to install'),
+          perk(context.l10n.perkTags),
+          perk(context.l10n.perkUnlimited),
+          perk(context.l10n.perkBrand),
+          perk(context.l10n.perkDashboard),
+          perk(context.l10n.perkNoInstall),
         ],
       ),
     );
@@ -178,18 +174,15 @@ class PlanSection extends StatefulWidget {
 }
 
 class PlanSectionState extends State<PlanSection> {
-  late final Future<Package?>? _package = billing.available ? billing.monthlyPackage() : null;
   bool _busy = false;
 
-  Future<void> _run(Future<bool> Function() action, {required String success, String? nothing}) async {
+  /// Runs [action] (which leaves for Stripe on success); shows the error otherwise.
+  Future<void> _run(Future<void> Function() action) async {
     setState(() => _busy = true);
     try {
-      final ok = await action();
-      if (!mounted) return;
-      final message = ok ? success : nothing;
-      if (message != null) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      await action();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(billingError(e))));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(e))));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -199,12 +192,12 @@ class PlanSectionState extends State<PlanSection> {
   Widget build(BuildContext context) {
     final status = widget.status;
     final p = context.loyi;
+    final l = context.l10n;
     switch (status.state) {
       case PlanState.loading:
         return const Skeleton(height: 160, radius: Radii.lg);
       case PlanState.active:
         final sub = status.subscription!;
-        final manage = billing.managementUrl;
         return Panel(
           padding: const EdgeInsets.all(22),
           child: Column(
@@ -212,25 +205,32 @@ class PlanSectionState extends State<PlanSection> {
             children: [
               Row(
                 children: [
-                  IconBadge(icon: Icons.verified_rounded, background: p.mintSoft, foreground: p.mint),
+                  IconBadge(icon: LoyiIcons.badgeCheck, background: p.mintSoft, foreground: p.mint),
                   const SizedBox(width: 14),
-                  Expanded(child: Text('You\'re subscribed', style: context.text.titleLarge)),
+                  Expanded(child: Text(l.youreSubscribed, style: context.text.titleLarge)),
                 ],
               ),
               const SizedBox(height: 12),
               Text(
                 sub.expiresAt.year >= 9999
-                    ? 'Your tags are live.'
+                    ? l.tagsLive
                     : sub.store == null
-                    ? 'Your tags are live until ${_date(sub.expiresAt)}.'
+                    ? l.tagsLiveUntil(_date(sub.expiresAt))
+                    : sub.billingIssue
+                    ? l.lastPaymentFailed(_date(sub.expiresAt))
                     : sub.willRenew
-                    ? 'Your tags are live. Renews on ${_date(sub.expiresAt)}.'
-                    : 'Your tags are live until ${_date(sub.expiresAt)}. The subscription won\'t renew.',
+                    ? l.renewsOn(_date(sub.expiresAt))
+                    : l.wontRenew(_date(sub.expiresAt)),
                 style: context.text.bodyMedium,
               ),
-              if (manage != null) ...[
+              if (sub.store == 'stripe' && billing.canManageHere) ...[
                 const SizedBox(height: 18),
-                OutlinedButton(onPressed: () => openUrl(manage), child: const Text('Manage subscription')),
+                OutlinedButton(
+                  onPressed: _busy ? null : () => _run(billing.openPortal),
+                  child: Text(l.manageSubscription),
+                ),
+                const SizedBox(height: 6),
+                Text(l.manageSubscriptionSub, style: context.text.bodySmall, textAlign: TextAlign.center),
               ],
             ],
           ),
@@ -242,103 +242,61 @@ class PlanSectionState extends State<PlanSection> {
             children: [
               const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5)),
               const SizedBox(width: 16),
-              Expanded(child: Text('Subscription confirmed. Switching on your tags…', style: context.text.titleMedium)),
+              Expanded(child: Text(l.switchingOnTags, style: context.text.titleMedium)),
             ],
           ),
         );
       case PlanState.none || PlanState.expired:
-        if (!billing.available) return _Unavailable(expired: status.state == PlanState.expired);
-        return FutureBuilder<Package?>(
-          future: _package,
-          builder: (context, snap) {
-            if (snap.connectionState != ConnectionState.done) return const Skeleton(height: 220, radius: Radii.lg);
-            final package = snap.data;
-            if (package == null) {
-              return Panel(
-                child: Text(
-                  'Subscriptions aren\'t available right now. Please try again later.',
-                  style: context.text.bodyMedium,
-                ),
-              );
-            }
-            return _Offer(
-              package: package,
-              busy: _busy,
-              onSubscribe: () =>
-                  _run(() => billing.purchase(package, email: auth.user?.email), success: 'Welcome to Loyi! Your tags are switching on.'),
-              onRestore: () => _run(
-                billing.restore,
-                success: 'Subscription restored.',
-                nothing: 'No active subscription found for this account.',
-              ),
-            );
-          },
-        );
+        if (!kIsWeb) return const _NotActive();
+        if (!billing.available) return const _Unavailable();
+        return _Offer(busy: _busy, onSubscribe: () => _run(billing.startCheckout));
     }
   }
 }
 
 class _Offer extends StatelessWidget {
-  const _Offer({required this.package, required this.busy, required this.onSubscribe, required this.onRestore});
+  const _Offer({required this.busy, required this.onSubscribe});
 
-  final Package package;
   final bool busy;
   final VoidCallback onSubscribe;
-  final VoidCallback onRestore;
 
   @override
-  Widget build(BuildContext context) {
-    final price = package.storeProduct.priceString;
-    // Renewal terms the stores require next to a subscription's buy button.
-    final terms = kIsWeb
-        ? '$price per month. Renews automatically every month until you cancel. Cancel anytime '
-              'under Subscription → Manage subscription.'
-        : defaultTargetPlatform == TargetPlatform.iOS
-        ? '$price per month, charged to your Apple Account. The subscription renews automatically '
-              'unless you cancel it at least 24 hours before the end of the current period. Manage or '
-              'cancel it in your App Store account settings.'
-        : '$price per month, charged to your Google Play account. The subscription renews '
-              'automatically until you cancel it. Manage or cancel it in Google Play → Subscriptions.';
-    return Panel(
-      padding: const EdgeInsets.all(22),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('Monthly', style: context.text.titleMedium),
-          const SizedBox(height: 4),
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(text: price, style: context.text.displaySmall),
-                TextSpan(text: ' / month', style: context.text.bodyLarge),
-              ],
-            ),
+  Widget build(BuildContext context) => Panel(
+    padding: const EdgeInsets.all(22),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(context.l10n.monthly, style: context.text.titleMedium),
+        const SizedBox(height: 4),
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: subscriptionPrice, style: context.text.displaySmall),
+              TextSpan(text: context.l10n.perMonthExclVat, style: context.text.bodyLarge),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text('Cancel anytime.', style: context.text.bodySmall),
-          const SizedBox(height: 20),
-          FilledButton(
-            onPressed: busy ? null : onSubscribe,
-            child: busy
-                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
-                : const Text('Subscribe'),
-          ),
-          const SizedBox(height: 8),
-          TextButton(onPressed: busy ? null : onRestore, child: const Text('Restore purchases')),
-          const SizedBox(height: 8),
-          Text(terms, style: context.text.bodySmall, textAlign: TextAlign.center),
-          const SizedBox(height: 4),
-          const LegalLinks(),
-        ],
-      ),
-    );
-  }
+        ),
+        const SizedBox(height: 4),
+        Text(context.l10n.cardOrBancontact, style: context.text.bodySmall),
+        const SizedBox(height: 20),
+        FilledButton(
+          onPressed: busy ? null : onSubscribe,
+          child: busy
+              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
+              : Text(context.l10n.subscribe),
+        ),
+        const SizedBox(height: 12),
+        Text(context.l10n.stripeNote, style: context.text.bodySmall, textAlign: TextAlign.center),
+        const SizedBox(height: 4),
+        const LegalLinks(),
+      ],
+    ),
+  );
 }
 
-class _Unavailable extends StatelessWidget {
-  const _Unavailable({required this.expired});
-
-  final bool expired;
+/// In the native apps: status only, no way to buy (the subscription is sold on the website).
+class _NotActive extends StatelessWidget {
+  const _NotActive();
 
   @override
   Widget build(BuildContext context) => Panel(
@@ -346,23 +304,20 @@ class _Unavailable extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          !kIsWeb
-              ? 'Subscriptions unavailable'
-              : expired
-              ? 'Renew in the Loyi app'
-              : 'Subscribe in the Loyi app',
-          style: context.text.titleLarge,
-        ),
+        Text(context.l10n.noActiveSubscription, style: context.text.titleLarge),
         const SizedBox(height: 8),
-        Text(
-          kIsWeb
-              ? 'Download Loyi for business on your iPhone or Android phone, sign in with this account and '
-                    'subscribe there. Your tags switch on everywhere, including here.'
-              : 'Subscriptions aren\'t set up in this build of the app.',
-          style: context.text.bodyMedium,
-        ),
+        Text(context.l10n.noActiveSubscriptionSub, style: context.text.bodyMedium),
       ],
     ),
+  );
+}
+
+class _Unavailable extends StatelessWidget {
+  const _Unavailable();
+
+  @override
+  Widget build(BuildContext context) => Panel(
+    padding: const EdgeInsets.all(22),
+    child: Text(context.l10n.subscriptionsNotSetUp, style: context.text.bodyMedium),
   );
 }

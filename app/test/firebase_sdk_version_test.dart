@@ -11,8 +11,9 @@ String flutterFireJsSdkVersion() {
     (p) => p['name'] == 'firebase_core_web',
   );
   final root = Uri.parse('${package['rootUri']}/').resolve('lib/src/firebase_sdk_version.dart');
-  final source = File.fromUri(root.isAbsolute ? root : Directory('.dart_tool').absolute.uri.resolveUri(root))
-      .readAsStringSync();
+  final source = File.fromUri(
+    root.isAbsolute ? root : Directory('.dart_tool').absolute.uri.resolveUri(root),
+  ).readAsStringSync();
   return RegExp(r"supportedFirebaseJsSdkVersion = '([^']+)'").firstMatch(source)!.group(1)!;
 }
 

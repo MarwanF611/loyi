@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../models.dart';
+import '../services/language.dart';
 import '../services/repo.dart';
 import '../theme.dart';
+import 'loyi_icons.dart';
 import 'stamp_icons.dart';
 import 'ui.dart';
 
@@ -104,13 +106,13 @@ class LoyaltyCardView extends StatelessWidget {
                           style: text.titleLarge?.copyWith(color: fg, fontWeight: FontWeight.w800, height: 1),
                         ),
                         Text(
-                          ' / $stampsRequired stamps',
+                          context.l10n.ofStamps(stampsRequired),
                           style: text.labelMedium?.copyWith(color: fg.withValues(alpha: 0.72)),
                         ),
                         const Spacer(),
                         if (remaining > 0 && stamps > 0)
                           Text(
-                            '$remaining to go',
+                            context.l10n.toGo(remaining),
                             style: text.labelMedium?.copyWith(color: fg.withValues(alpha: 0.72)),
                           ),
                       ],
@@ -125,8 +127,8 @@ class LoyaltyCardView extends StatelessWidget {
     );
     return Semantics(
       label:
-          '$businessName, $programName: $stamps of $stampsRequired stamps'
-          '${rewardsAvailable > 0 ? ', $rewardsAvailable rewards ready' : ''}',
+          context.l10n.cardSemantic(businessName, programName, stamps, stampsRequired) +
+          (rewardsAvailable > 0 ? context.l10n.rewardsReadySuffix(rewardsAvailable) : ''),
       button: onTap != null,
       child: onTap == null ? card : Pressable(onTap: onTap, child: card),
     );
@@ -223,10 +225,10 @@ class _RewardBadge extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.redeem_rounded, size: 16, color: Color(0xFF17161C)),
+        const Icon(LoyiIcons.gift, size: 16, color: Color(0xFF17161C)),
         const SizedBox(width: 6),
         Text(
-          count == 1 ? '1 reward' : '$count rewards',
+          context.l10n.rewardsBadge(count),
           style: const TextStyle(color: Color(0xFF17161C), fontWeight: FontWeight.w800, fontSize: 13),
         ),
       ],

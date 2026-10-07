@@ -77,7 +77,8 @@ class _PressableState extends State<Pressable> {
   );
 }
 
-/// White rounded surface with a soft layered shadow: the basic building block.
+/// The basic building block, like the website: a white card with a soft drop
+/// shadow, or with [muted] a warm grey panel without one (to group cards).
 class Panel extends StatelessWidget {
   const Panel({
     super.key,
@@ -87,6 +88,7 @@ class Panel extends StatelessWidget {
     this.color,
     this.radius = Radii.lg,
     this.shadow = true,
+    this.muted = false,
   });
 
   final Widget child;
@@ -95,29 +97,105 @@ class Panel extends StatelessWidget {
   final Color? color;
   final double radius;
   final bool shadow;
+  final bool muted;
 
   @override
   Widget build(BuildContext context) {
     final p = context.loyi;
+    final plain = color == null && !muted;
     final content = Material(
-      color: color ?? p.surface,
+      color: color ?? (muted ? p.surfaceMuted : p.surface),
       borderRadius: BorderRadius.circular(radius),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
+        hoverColor: p.ink.withValues(alpha: 0.03),
         child: Padding(padding: padding, child: child),
       ),
     );
     final decorated = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        boxShadow: shadow && color == null ? p.panelShadow : null,
-        border: color == null ? Border.all(color: p.line.withValues(alpha: 0.7)) : null,
+        boxShadow: shadow && plain ? p.panelShadow : null,
+        // Dark cards need an edge; light ones get it from the shadow.
+        border: plain && p.isDark ? Border.all(color: p.line.withValues(alpha: 0.6)) : null,
       ),
       child: content,
     );
-    return onTap == null ? decorated : Pressable(onTap: onTap, borderRadius: radius, child: decorated);
+    if (onTap == null) return decorated;
+    return Semantics(
+      button: true,
+      child: Pressable(onTap: onTap, borderRadius: radius, child: decorated),
+    );
   }
+}
+
+/// Mono caps label, the website's `.eyebrow` ("FOR YOUR SHOP").
+class Eyebrow extends StatelessWidget {
+  const Eyebrow(this.text, {super.key, this.color});
+
+  final String text;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) => Text(text.toUpperCase(), style: context.eyebrow.copyWith(color: color));
+}
+
+/// The website's coral "stage": a warm gradient with light spots and a dotted
+/// texture. White text and translucent tiles sit on top.
+class CoralStage extends StatelessWidget {
+  const CoralStage({super.key, required this.child, this.padding = const EdgeInsets.all(24), this.radius = Radii.xl});
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: BorderRadius.circular(radius),
+    child: CustomPaint(
+      painter: const _StagePainter(),
+      child: Padding(padding: padding, child: child),
+    ),
+  );
+}
+
+class _StagePainter extends CustomPainter {
+  const _StagePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFF7A5C), Color(0xFFFF5A3C), Color(0xFFC9381F)],
+          stops: [0, 0.45, 1],
+        ).createShader(rect),
+    );
+    void spot(Offset c, double r, Color color) => canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [color, color.withValues(alpha: 0)],
+        ).createShader(Rect.fromCircle(center: c, radius: r)),
+    );
+    final d = size.longestSide;
+    spot(Offset(size.width * 0.18, size.height * 0.22), d * 0.42, const Color(0x38FFFFFF));
+    spot(Offset(size.width * 0.85, size.height * 0.8), d * 0.45, const Color(0x59FFC83D));
+    final dot = Paint()..color = const Color(0x29FFFFFF);
+    for (var y = 11.0; y < size.height; y += 22) {
+      for (var x = 11.0; x < size.width; x += 22) {
+        canvas.drawCircle(Offset(x, y), 1.2, dot);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_StagePainter oldDelegate) => false;
 }
 
 /// Rounded square with an icon on a soft tinted background.
@@ -133,18 +211,21 @@ class IconBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     width: size,
     height: size,
-    decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(size * 0.32)),
+    decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(size * 0.3)),
     child: Icon(icon, color: foreground, size: size * 0.5),
   );
 }
 
 /// Section title with an optional trailing action.
 class SectionHeader extends StatelessWidget {
-  const SectionHeader({super.key, required this.title, this.subtitle, this.action});
+  const SectionHeader({super.key, required this.title, this.subtitle, this.action, this.eyebrow});
 
   final String title;
   final String? subtitle;
   final Widget? action;
+
+  /// Optional mono caps label above the title.
+  final String? eyebrow;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -156,7 +237,8 @@ class SectionHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: context.text.titleLarge),
+              if (eyebrow != null) ...[Eyebrow(eyebrow!), const SizedBox(height: 6)],
+              Text(title, style: context.text.headlineSmall),
               if (subtitle != null) ...[const SizedBox(height: 2), Text(subtitle!, style: context.text.bodySmall)],
             ],
           ),
@@ -262,10 +344,7 @@ class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
     backgroundColor: context.loyi.canvas.withValues(alpha: 0.9),
     automaticallyImplyLeading: false,
     flexibleSpace: ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-        child: const SizedBox.expand(),
-      ),
+      child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18), child: const SizedBox.expand()),
     ),
   );
 }
@@ -332,4 +411,35 @@ class RoundIconButton extends StatelessWidget {
       icon: Icon(icon, size: 22),
     );
   }
+}
+
+/// [children] laid out [columns] per row, each row as tall as its tallest card,
+/// so tiles line up even when a translation needs an extra line.
+class GridRows extends StatelessWidget {
+  const GridRows({super.key, required this.columns, required this.gap, required this.children});
+
+  final int columns;
+  final double gap;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      for (var start = 0; start < children.length; start += columns) ...[
+        if (start > 0) SizedBox(height: gap),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < columns; i++) ...[
+                if (i > 0) SizedBox(width: gap),
+                Expanded(child: start + i < children.length ? children[start + i] : const SizedBox()),
+              ],
+            ],
+          ),
+        ),
+      ],
+    ],
+  );
 }

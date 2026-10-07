@@ -5,11 +5,14 @@ import 'package:intl/intl.dart';
 
 import '../config.dart';
 import '../services/api.dart';
+import '../services/appearance.dart';
 import '../services/auth_service.dart';
 import '../services/data_export.dart';
+import '../services/language.dart';
 import '../services/save_file/save_file.dart';
 import '../theme.dart';
 import '../widgets/account_widgets.dart';
+import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 
 /// Account & privacy for shops and clients: what we store, email and password,
@@ -27,63 +30,63 @@ class AccountPrivacySections extends StatelessWidget {
     final user = auth.user;
     if (user == null) return const SizedBox.shrink();
     final anonymous = user.isAnonymous;
+    final l = context.l10n;
     final providers = {for (final p in user.providerData) p.providerId};
+    final google = providers.contains('google.com');
     final method = providers.contains('password')
-        ? 'Email and password'
+        ? l.methodEmailPassword
         : providers.contains('apple.com')
-        ? 'Sign in with Apple'
-        : providers.contains('google.com')
+        ? l.methodApple
+        : google
         ? 'Google'
-        : 'Not saved (this browser only)';
+        : l.methodNotSaved;
     final since = user.metadata.creationTime;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _Section(
-          title: 'Your account',
+          title: l.yourAccount,
           children: [
-            if (!anonymous) _Row(label: 'Email', value: user.email ?? '—'),
-            _Row(label: 'Sign-in', value: method),
-            if (since != null) _Row(label: 'Member since', value: DateFormat('d MMMM y').format(since)),
+            if (!anonymous) _Row(label: l.email, value: user.email ?? '—'),
+            _Row(label: l.signInMethod, value: method),
+            if (since != null) _Row(label: l.memberSince, value: DateFormat('d MMMM y').format(since)),
           ],
         ),
         if (!anonymous) ...[
           const SizedBox(height: 16),
           _Section(
-            title: 'Sign-in & security',
+            title: l.signInSecurity,
             children: auth.hasPassword
                 ? [
                     _ActionTile(
-                      icon: Icons.alternate_email_rounded,
-                      title: 'Change email',
+                      icon: LoyiIcons.atSign,
+                      title: l.changeEmail,
                       onTap: () => showDialog<void>(context: context, builder: (_) => const _ChangeEmailDialog()),
                     ),
                     _ActionTile(
-                      icon: Icons.password_rounded,
-                      title: 'Change password',
+                      icon: LoyiIcons.keyRound,
+                      title: l.changePassword,
                       onTap: () => showDialog<void>(context: context, builder: (_) => const _ChangePasswordDialog()),
                     ),
                   ]
-                : [
-                    Text(
-                      'You sign in with ${method == 'Google' ? 'Google' : 'Apple'}, so there is no Loyi password. '
-                      'Manage your email and security in your ${method == 'Google' ? 'Google' : 'Apple'} account.',
-                      style: context.text.bodyMedium,
-                    ),
-                  ],
+                : [Text(l.noLoyiPassword(google ? 'Google' : 'Apple'), style: context.text.bodyMedium)],
           ),
         ],
         const SizedBox(height: 16),
+        _Section(title: l.appearance, children: const [AppearancePicker(), SizedBox(height: 8)]),
+        const SizedBox(height: 16),
+        _Section(title: l.language, children: const [LanguagePicker(), SizedBox(height: 8)]),
+        const SizedBox(height: 16),
         _Section(
-          title: 'Your data',
+          title: l.yourData,
           children: [
             Text(
               business
-                  ? 'Loyi stores your account, your shop (name, colours, logo), your loyalty cards and tags, your '
-                        'subscription status and your clients\' stamps and rewards under anonymous IDs.'
-                  : 'Loyi stores your cards, stamps and rewards per shop${anonymous ? '' : ', and your email'}. '
-                        'Shops only see an anonymous ID, never your email.',
+                  ? l.yourDataBusiness
+                  : anonymous
+                  ? l.yourDataClient
+                  : l.yourDataClientEmail,
               style: context.text.bodyMedium,
             ),
             const SizedBox(height: 12),
@@ -91,7 +94,7 @@ class AccountPrivacySections extends StatelessWidget {
             const SizedBox(height: 4),
             Align(
               alignment: Alignment.centerLeft,
-              child: TextButton(onPressed: () => openUrl(privacyUrl), child: const Text('Read the privacy policy')),
+              child: TextButton(onPressed: () => openUrl(privacyUrl), child: Text(l.readPrivacyPolicy)),
             ),
           ],
         ),
@@ -101,14 +104,10 @@ class AccountPrivacySections extends StatelessWidget {
             onTap: () => context.go('/business/subscribe'),
             child: Row(
               children: [
-                IconBadge(
-                  icon: Icons.workspace_premium_rounded,
-                  background: context.loyi.sunSoft,
-                  foreground: context.loyi.ink,
-                ),
+                IconBadge(icon: LoyiIcons.badgeCheck, background: context.loyi.sunSoft, foreground: context.loyi.ink),
                 const SizedBox(width: 14),
-                Expanded(child: Text('Subscription', style: context.text.titleMedium)),
-                const Icon(Icons.chevron_right_rounded),
+                Expanded(child: Text(l.subscription, style: context.text.titleMedium)),
+                const Icon(LoyiIcons.chevronRight),
               ],
             ),
           ),
@@ -120,7 +119,7 @@ class AccountPrivacySections extends StatelessWidget {
               await auth.signOut();
               if (context.mounted) context.go(business ? '/business/login' : '/cards');
             },
-            child: const Text('Sign out'),
+            child: Text(l.signOut),
           ),
         const SizedBox(height: 8),
         TextButton(
@@ -128,7 +127,7 @@ class AccountPrivacySections extends StatelessWidget {
           onPressed: () async {
             if (await showDeleteAccountDialog(context, business: business)) onDeleted();
           },
-          child: Text(anonymous ? 'Delete the cards on this device' : 'Delete account'),
+          child: Text(anonymous ? l.deleteCardsOnDevice : l.deleteAccount),
         ),
         const SizedBox(height: 8),
         const LegalLinks(),
@@ -188,7 +187,7 @@ class _ActionTile extends StatelessWidget {
     contentPadding: EdgeInsets.zero,
     leading: Icon(icon, color: context.loyi.ink),
     title: Text(title, style: context.text.titleMedium),
-    trailing: const Icon(Icons.chevron_right_rounded),
+    trailing: const Icon(LoyiIcons.chevronRight),
     onTap: onTap,
   );
 }
@@ -224,19 +223,19 @@ class _DownloadButtonState extends State<_DownloadButton> {
     onPressed: _busy ? null : _download,
     icon: _busy
         ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-        : const Icon(Icons.download_rounded),
-    label: const Text('Download my data'),
+        : const Icon(LoyiIcons.download),
+    label: Text(context.l10n.downloadMyData),
   );
 }
 
 String _authMessage(FirebaseAuthException e) => switch (e.code) {
-  'wrong-password' || 'invalid-credential' => 'Wrong password.',
-  'weak-password' => 'Use at least 8 characters for your new password.',
-  'email-already-in-use' => 'Another account already uses this email.',
-  'invalid-email' => 'Enter a valid email address.',
-  'too-many-requests' => 'Too many attempts. Try again in a few minutes.',
-  'requires-recent-login' => 'Please sign in again and retry.',
-  _ => e.message ?? 'That didn\'t work. Please try again.',
+  'wrong-password' || 'invalid-credential' => l10n.wrongPassword,
+  'weak-password' => l10n.newPasswordTooShort,
+  'email-already-in-use' => l10n.emailUsedByOther,
+  'invalid-email' => l10n.invalidEmail,
+  'too-many-requests' => l10n.tooManyAttempts,
+  'requires-recent-login' => l10n.signInAgainRetry,
+  _ => e.message ?? l10n.thatDidntWork,
 };
 
 class _ChangePasswordDialog extends StatefulWidget {
@@ -263,9 +262,9 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
 
   Future<void> _save() async {
     final error = _next.text.length < 8
-        ? 'Use at least 8 characters for your new password.'
+        ? context.l10n.newPasswordTooShort
         : _next.text != _repeat.text
-        ? 'The new passwords don\'t match.'
+        ? context.l10n.passwordsDontMatch
         : null;
     setState(() => _error = error);
     if (error != null) return;
@@ -274,7 +273,7 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
       await auth.changePassword(_current.text, _next.text);
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Your password is changed.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.passwordChanged)));
     } on FirebaseAuthException catch (e) {
       if (mounted) setState(() => _error = _authMessage(e));
     } catch (e) {
@@ -286,7 +285,7 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Change password'),
+    title: Text(context.l10n.changePassword),
     content: AutofillGroup(
       child: SingleChildScrollView(
         child: Column(
@@ -297,21 +296,25 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
               obscureText: true,
               autofocus: true,
               autofillHints: const [AutofillHints.password],
-              decoration: const InputDecoration(labelText: 'Current password'),
+              decoration: InputDecoration(labelText: context.l10n.currentPassword),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _next,
               obscureText: true,
               autofillHints: const [AutofillHints.newPassword],
-              decoration: const InputDecoration(labelText: 'New password'),
+              decoration: InputDecoration(labelText: context.l10n.newPassword),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _repeat,
               obscureText: true,
               autofillHints: const [AutofillHints.newPassword],
-              decoration: InputDecoration(labelText: 'Repeat new password', errorText: _error, errorMaxLines: 3),
+              decoration: InputDecoration(
+                labelText: context.l10n.repeatNewPassword,
+                errorText: _error,
+                errorMaxLines: 3,
+              ),
               onSubmitted: (_) => _busy ? null : _save(),
             ),
           ],
@@ -319,8 +322,8 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
       ),
     ),
     actions: [
-      TextButton(onPressed: _busy ? null : () => Navigator.pop(context), child: const Text('Cancel')),
-      FilledButton(onPressed: _busy ? null : _save, child: const Text('Save')),
+      TextButton(onPressed: _busy ? null : () => Navigator.pop(context), child: Text(context.l10n.cancel)),
+      FilledButton(onPressed: _busy ? null : _save, child: Text(context.l10n.save)),
     ],
   );
 }
@@ -349,7 +352,7 @@ class _ChangeEmailDialogState extends State<_ChangeEmailDialog> {
   Future<void> _save() async {
     final email = _email.text.trim();
     if (!email.contains('@')) {
-      setState(() => _error = 'Enter a valid email address.');
+      setState(() => _error = context.l10n.invalidEmail);
       return;
     }
     setState(() {
@@ -372,16 +375,13 @@ class _ChangeEmailDialogState extends State<_ChangeEmailDialog> {
   Widget build(BuildContext context) {
     if (_sentTo != null) {
       return AlertDialog(
-        title: const Text('Check your inbox'),
-        content: Text(
-          'We sent a link to $_sentTo. Your email changes as soon as you open it. Until then, keep signing in '
-          'with ${auth.user?.email}.',
-        ),
-        actions: [FilledButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
+        title: Text(context.l10n.checkInbox),
+        content: Text(context.l10n.emailChangeSent(_sentTo!, auth.user?.email ?? '')),
+        actions: [FilledButton(onPressed: () => Navigator.pop(context), child: Text(context.l10n.ok))],
       );
     }
     return AlertDialog(
-      title: const Text('Change email'),
+      title: Text(context.l10n.changeEmail),
       content: AutofillGroup(
         child: SingleChildScrollView(
           child: Column(
@@ -393,14 +393,14 @@ class _ChangeEmailDialogState extends State<_ChangeEmailDialog> {
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
                 autofillHints: const [AutofillHints.email],
-                decoration: const InputDecoration(labelText: 'New email'),
+                decoration: InputDecoration(labelText: context.l10n.newEmail),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _password,
                 obscureText: true,
                 autofillHints: const [AutofillHints.password],
-                decoration: InputDecoration(labelText: 'Your password', errorText: _error, errorMaxLines: 3),
+                decoration: InputDecoration(labelText: context.l10n.yourPassword, errorText: _error, errorMaxLines: 3),
                 onSubmitted: (_) => _busy ? null : _save(),
               ),
             ],
@@ -408,8 +408,8 @@ class _ChangeEmailDialogState extends State<_ChangeEmailDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: _busy ? null : () => Navigator.pop(context), child: const Text('Cancel')),
-        FilledButton(onPressed: _busy ? null : _save, child: const Text('Send link')),
+        TextButton(onPressed: _busy ? null : () => Navigator.pop(context), child: Text(context.l10n.cancel)),
+        FilledButton(onPressed: _busy ? null : _save, child: Text(context.l10n.sendLink)),
       ],
     );
   }

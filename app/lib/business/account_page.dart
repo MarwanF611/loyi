@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../account/account_privacy.dart';
+import '../services/language.dart';
 import '../theme.dart';
 
 /// Account & privacy for business owners. Reachable during sign-up too, so an
@@ -12,7 +13,7 @@ class BusinessAccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Account & privacy'),
+      title: Text(context.l10n.accountAndPrivacy),
       leading: BackButton(onPressed: () => context.go('/business')),
     ),
     body: ListView(
@@ -23,7 +24,7 @@ class BusinessAccountPage extends StatelessWidget {
           child: AccountPrivacySections(
             business: true,
             onDeleted: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Your account is deleted.')));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.accountDeleted)));
               context.go('/business/login');
             },
           ),

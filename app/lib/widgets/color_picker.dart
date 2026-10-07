@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../models.dart';
+import '../services/language.dart';
+import 'loyi_icons.dart';
 
 /// Preset swatches for card and brand colours.
 const cardPalette = <Color>[
@@ -52,7 +54,7 @@ class ColorPickerRow extends StatelessWidget {
         for (final c in palette)
           _Swatch(color: c, selected: c.toARGB32() == value, outline: outline, onTap: () => onChanged(c.toARGB32())),
         Tooltip(
-          message: 'Custom colour',
+          message: context.l10n.customColour,
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: () => _custom(context),
@@ -64,7 +66,7 @@ class ColorPickerRow extends StatelessWidget {
                 color: isCustom ? Color(value!) : null,
                 border: Border.all(color: outline),
               ),
-              child: Icon(Icons.colorize, size: 18, color: isCustom ? readableOn(Color(value!)) : null),
+              child: Icon(LoyiIcons.pipette, size: 18, color: isCustom ? readableOn(Color(value!)) : null),
             ),
           ),
         ),
@@ -98,7 +100,7 @@ class _Swatch extends StatelessWidget {
           // Light swatches (white, cream) need an outline to be visible.
           border: Border.all(color: color.computeLuminance() > 0.8 ? outline : color),
         ),
-        child: selected ? Icon(Icons.check, size: 20, color: readableOn(color)) : null,
+        child: selected ? Icon(LoyiIcons.check, size: 20, color: readableOn(color)) : null,
       ),
     ),
   );
@@ -139,7 +141,7 @@ class _HexDialogState extends State<_HexDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Custom colour'),
+    title: Text(context.l10n.customColour),
     content: Row(
       children: [
         Container(
@@ -160,17 +162,20 @@ class _HexDialogState extends State<_HexDialog> {
             onChanged: _parse,
             decoration: InputDecoration(
               prefixText: '#',
-              labelText: 'Hex code',
+              labelText: context.l10n.hexCode,
               hintText: 'E8553D',
-              errorText: _parsed == null ? 'Use 6 hex digits, e.g. E8553D' : null,
+              errorText: _parsed == null ? context.l10n.hexCodeHint : null,
             ),
           ),
         ),
       ],
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-      FilledButton(onPressed: _parsed == null ? null : () => Navigator.pop(context, _parsed), child: const Text('Use')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(context.l10n.cancel)),
+      FilledButton(
+        onPressed: _parsed == null ? null : () => Navigator.pop(context, _parsed),
+        child: Text(context.l10n.use),
+      ),
     ],
   );
 }
@@ -224,7 +229,7 @@ class MultiColorPicker extends StatelessWidget {
       return Semantics(
         button: true,
         selected: index >= 0,
-        label: '#${_hex(argb)}${index >= 0 ? ', colour ${index + 1}' : ''}',
+        label: '#${_hex(argb)}${index >= 0 ? ', ${context.l10n.colourNumber(index + 1)}' : ''}',
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: () => _toggle(argb),
@@ -262,7 +267,7 @@ class MultiColorPicker extends StatelessWidget {
         for (final c in palette) swatch(c.toARGB32()),
         for (final c in custom) swatch(c),
         Tooltip(
-          message: 'Custom colour',
+          message: context.l10n.customColour,
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: () => _custom(context),
@@ -273,7 +278,7 @@ class MultiColorPicker extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: outline),
               ),
-              child: const Icon(Icons.colorize, size: 18),
+              child: const Icon(LoyiIcons.pipette, size: 18),
             ),
           ),
         ),

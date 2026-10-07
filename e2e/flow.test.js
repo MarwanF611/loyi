@@ -355,6 +355,9 @@ test("Loyi rules: full flow and abuse attempts", async (t) => {
     await denied(setDoc(doc(zoe.db, "subscriptions", zoeUid), fake));
     await denied(setDoc(doc(eve.db, "subscriptions", zoeUid), fake));
     await denied(getDocs(collection(zoe.db, "subscriptions")));
+    // Stripe ids are for the billing server only.
+    await denied(getDoc(doc(zoe.db, "billing", zoeUid)));
+    await denied(setDoc(doc(zoe.db, "billing", zoeUid), { customerId: "cus_x" }));
 
     await subscribe(zoeUid);
     assert.equal((await tap(eve.db, eve.uid(), stamp.id)).rewardsAvailable, 1); // 1-stamp card: full
@@ -399,6 +402,61 @@ test("Loyi rules: full flow and abuse attempts", async (t) => {
     await denied(updateDoc(doc(biz.db, "tags", stampTag.id), { label: "" }));
   });
 
+  await t.test("follow-up messages: owner-only, no links, short, readable by clients", async () => {
+    const message = (over = {}) => ({
+      businessId: bizRef.id,
+      ownerUid: owner.uid,
+      programId: programRef.id,
+      title: "We miss you",
+      body: "Show this card this week for a free coffee.",
+      audience: "slipping",
+      active: true,
+      endsAt: ClientTimestamp.fromMillis(Date.now() + 14 * DAY),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      ...over,
+    });
+    const ref = await addDoc(collection(biz.db, "messages"), message());
+    await addDoc(collection(biz.db, "messages"), message({ programId: null, audience: "all" }));
+
+    // Clients (anonymous) can read the live messages of a shop, but never write them.
+    const live = await getDocs(
+      query(collection(alice.db, "messages"), where("businessId", "==", bizRef.id), where("active", "==", true)),
+    );
+    assert.equal(live.size, 2);
+    await denied(addDoc(collection(alice.db, "messages"), message({ ownerUid: alice.uid() })));
+    await denied(updateDoc(doc(alice.db, "messages", ref.id), { active: false, updatedAt: serverTimestamp() }));
+
+    // Another business can't post as this shop or change its messages.
+    await denied(addDoc(collection(other.db, "messages"), message()));
+    await denied(addDoc(collection(other.db, "messages"), message({ ownerUid: other.uid() })));
+    await denied(deleteDoc(doc(other.db, "messages", ref.id)));
+
+    // Content limits: no links, no long texts, known audiences, at most two months, no extra fields.
+    await denied(addDoc(collection(biz.db, "messages"), message({ body: "Win a prize at https://evil.example" })));
+    await denied(addDoc(collection(biz.db, "messages"), message({ title: "Go to WWW.evil.example" })));
+    await denied(addDoc(collection(biz.db, "messages"), message({ body: "x".repeat(241) })));
+    await denied(addDoc(collection(biz.db, "messages"), message({ audience: "people-named-jan" })));
+    await denied(addDoc(collection(biz.db, "messages"), message({ endsAt: ClientTimestamp.fromMillis(Date.now() + 90 * DAY) })));
+    await denied(addDoc(collection(biz.db, "messages"), message({ clientUid: alice.uid() })));
+    await denied(addDoc(collection(biz.db, "messages"), message({ programId: "someone-elses-program" })));
+
+    // The owner pauses, edits and deletes.
+    await updateDoc(ref, { active: false, updatedAt: serverTimestamp() });
+    await updateDoc(ref, { title: "Come back soon", active: true, updatedAt: serverTimestamp() });
+    await denied(updateDoc(ref, { createdAt: ClientTimestamp.fromMillis(0), updatedAt: serverTimestamp() }));
+    await deleteDoc(ref);
+  });
+
+  await t.test("insights: a business reads its own client cards and visits, not another shop's", async () => {
+    const cards = await getDocs(
+      query(collection(biz.db, "cards"), where("ownerUid", "==", owner.uid), where("businessId", "==", bizRef.id)),
+    );
+    assert.ok(cards.size >= 1);
+    await denied(getDocs(query(collection(other.db, "cards"), where("ownerUid", "==", owner.uid))));
+    await denied(getDocs(query(collection(other.db, "stampEvents"), where("ownerUid", "==", owner.uid))));
+  });
+
   await t.test("account deletion: clients and businesses remove only their own data", async () => {
     // A client deletes their own card; nobody else can.
     const bobCard = doc(bob.db, "cards", `${programRef.id}_${bob.uid()}`);
@@ -414,7 +472,7 @@ test("Loyi rules: full flow and abuse attempts", async (t) => {
 
     // The owner deletes everything, logs first and the business last.
     const mine = async (c) => (await getDocs(query(collection(biz.db, c), where("ownerUid", "==", owner.uid)))).docs;
-    for (const c of ["stampEvents", "redemptions", "cards", "tags", "programs"]) {
+    for (const c of ["stampEvents", "redemptions", "messages", "cards", "tags", "programs"]) {
       const batch = writeBatch(biz.db);
       for (const d of await mine(c)) batch.delete(d.ref);
       await batch.commit();

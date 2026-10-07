@@ -2,7 +2,7 @@
 // visuals in the Loyi house style. Output: marketing/out/<lang>/...
 //   npm run compose            (all languages)
 //   npm run compose -- nl      (one language)
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import puppeteer from "puppeteer-core";
 
 const CHROME = process.env.CHROME_PATH ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -145,7 +145,10 @@ const THEMES = {
 };
 
 const em = (s) => s.replace(/\*(.+?)\*/g, "<em>$1</em>");
-const img = (name) => `file://${RAW}${name}.png`;
+// Screens captured in the slide's language (LANG_CODE=<lang> npm run capture), else the Dutch ones.
+let lang = "nl";
+const img = (name) =>
+  `file://${RAW}${existsSync(`${RAW}${lang}/${name}.png`) ? lang : "nl"}/${name}.png`;
 
 const baseCss = `
   @font-face { font-family: Jakarta; font-weight: 500; src: url("file://${FONTS}PlusJakartaSans-Medium.ttf"); }
@@ -360,7 +363,7 @@ async function render(html, w, h, file, { scale = 1, type = "png" } = {}) {
 }
 
 try {
-  for (const lang of langs) {
+  for (lang of langs) {
     const out = `${root}out/${lang}/`;
     rmSync(out, { recursive: true, force: true });
     for (const [store, spec] of Object.entries(STORES)) {

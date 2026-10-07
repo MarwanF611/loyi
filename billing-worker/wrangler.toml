@@ -1,13 +1,14 @@
-# Cloudflare Worker that turns RevenueCat webhooks into Firestore subscription
-# records. Free tier (100k requests/day) is far more than Loyi needs.
-# Deploy: see README.md in this folder.
+# Loyi's billing server: Stripe Checkout, customer portal and webhook → Firestore.
+# Cloudflare's free tier (100k requests/day) is far more than Loyi needs.
+# Setup: docs/STRIPE.md. Secrets: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, FIREBASE_SERVICE_ACCOUNT.
 name = "loyi-billing"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
 
 [vars]
 FIREBASE_PROJECT_ID = "loyi-b530b"
-ENTITLEMENT_ID = "business"
-# Apple reviews in-app purchases in the sandbox, so sandbox purchases must unlock
-# tags too. Only TestFlight/review builds can make sandbox purchases.
-ALLOW_SANDBOX = "true"
+# The monthly price from Stripe → Product catalogue (price_…).
+STRIPE_PRICE_ID = "price_1UNAU5GX9uMphTPmmjOQsanm"
+# Where shops come back to after paying, and which sites may call this server.
+APP_URL = "https://loyi-b530b.web.app"
+ALLOWED_ORIGINS = "https://loyi-b530b.web.app,https://loyi-b530b.firebaseapp.com"

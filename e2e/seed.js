@@ -43,6 +43,7 @@ export const DEMO = {
       tags: { join: "Pk7wQ2mXn4Rt9LbA3cZe", stamp: "Hs8vD1qLr6Yp0KaN5tWu" },
       clients: 42,
       week: [12, 17, 15, 21, 9, 26, 19],
+      peaks: [8, 12],
       showcase: { stamps: 4, daysAgo: 2 },
     },
     {
@@ -62,6 +63,7 @@ export const DEMO = {
       tags: { join: "Mx3cV9nB2kQ7eR4tY1uI", stamp: "Zq5wE8rT2yU6iO9pA3sD" },
       clients: 64,
       week: [22, 25, 19, 30, 28, 35, 24],
+      peaks: [9, 15],
       showcase: { stamps: 4, daysAgo: 1 },
     },
     {
@@ -81,6 +83,8 @@ export const DEMO = {
       tags: { join: "Lf4gH7jK1lZ3xC6vB9nM", stamp: "Qw2eR5tY8uI1oP4aS7dF" },
       clients: 23,
       week: [4, 6, 3, 8, 11, 9, 7],
+      peaks: [11, 17],
+      announcement: { title: "De lentebloemen zijn binnen", body: "Tulpen en ranonkels de hele week. Toon je kaart voor een dubbele stempel op elk boeket." },
       showcase: { stamps: 2, daysAgo: 4 },
     },
   ],
@@ -124,7 +128,7 @@ async function deleteWhere(collection, field, value) {
 async function seedShop(shop) {
   const { owner, program } = shop;
   await upsertUser(owner);
-  for (const c of ["cards", "stampEvents", "redemptions"]) await deleteWhere(c, "businessId", shop.id);
+  for (const c of ["cards", "stampEvents", "redemptions", "messages"]) await deleteWhere(c, "businessId", shop.id);
 
   await db.doc(`businesses/${shop.id}`).set({
     ownerUid: owner.uid,
@@ -152,6 +156,32 @@ async function seedShop(shop) {
     createdAt: Timestamp.fromDate(new Date(Date.now() - 60 * 86400_000)),
   });
   const totalStamps = shop.week.reduce((a, b) => a + b, 0);
+  if (shop.announcement) {
+    await db.collection("messages").add({
+      businessId: shop.id,
+      ownerUid: owner.uid,
+      programId: null,
+      audience: "all",
+      active: true,
+      endsAt: Timestamp.fromMillis(Date.now() + 14 * 86400_000),
+      createdAt: Timestamp.fromMillis(Date.now() - 86400_000),
+      updatedAt: Timestamp.now(),
+      ...shop.announcement,
+    });
+  }
+  // A follow-up message for clients who haven't been back in a while.
+  await db.collection("messages").add({
+    businessId: shop.id,
+    ownerUid: owner.uid,
+    programId: null,
+    title: "We missen je!",
+    body: "Toon je kaart deze week aan de toog en krijg een dubbele stempel.",
+    audience: "slipping",
+    active: true,
+    endsAt: Timestamp.fromMillis(Date.now() + 10 * 86400_000),
+    createdAt: Timestamp.fromMillis(Date.now() - 2 * 86400_000),
+    updatedAt: Timestamp.now(),
+  });
   for (const [type, label] of [["join", "Ingang"], ["stamp", "Toog"]]) {
     await db.doc(`tags/${shop.tags[type]}`).set({
       businessId: shop.id,
@@ -166,56 +196,69 @@ async function seedShop(shop) {
     });
   }
 
-  // Clients with varied progress, plus a week of stamp events and redemptions.
-  const batch = db.batch();
-  const clientIds = Array.from({ length: shop.clients }, () => `demo-${randomBytes(6).toString("hex")}`);
-  for (const uid of clientIds) {
-    const total = 1 + Math.floor(Math.random() * program.stampsRequired * 3);
-    batch.set(db.doc(`cards/${program.id}_${uid}`), {
-      clientUid: uid,
-      businessId: shop.id,
-      ownerUid: owner.uid,
-      programId: program.id,
-      stamps: total % program.stampsRequired,
-      rewardsAvailable: Math.random() < 0.15 ? 1 : 0,
-      totalStamps: total,
-      totalRedeemed: Math.floor(total / program.stampsRequired),
-      lastStampAt: atShopHour(Math.floor(Math.random() * 7)),
-      createdAt: atShopHour(7 + Math.floor(Math.random() * 50)),
-      updatedAt: atShopHour(Math.floor(Math.random() * 7)),
+  // Clients with a realistic history: regulars, occasional visitors and people who
+  // stopped coming, with stamp and reward logs that add up to their cards.
+  const writes = [];
+  for (let n = 0; n < shop.clients; n++) {
+    const uid = `demo-${randomBytes(6).toString("hex")}`;
+    const cardId = `${program.id}_${uid}`;
+    const joinedDaysAgo = Math.floor(Math.random() ** 1.4 * 150);
+    const kind = Math.random();
+    const gap = kind < 0.35 ? 3 + Math.random() * 4 : kind < 0.75 ? 9 + Math.random() * 14 : 999; // regular, occasional, one-off
+    const stopsDaysAgo = Math.random() < 0.3 ? Math.floor(Math.random() * joinedDaysAgo) : 0; // some stop coming
+    const visits = [];
+    for (let d = joinedDaysAgo; d >= stopsDaysAgo; d -= Math.max(1, Math.round(gap * (0.6 + Math.random() * 0.8)))) {
+      visits.push(atBusyHour(d, shop.peaks));
+    }
+    visits.sort((a, b) => a.toMillis() - b.toMillis());
+    const total = visits.length;
+    const earned = Math.floor(total / program.stampsRequired);
+    const unused = earned > 0 && Math.random() < 0.3 ? 1 : 0;
+    const base = { businessId: shop.id, ownerUid: owner.uid, programId: program.id, cardId, clientUid: uid };
+    writes.push([
+      `cards/${cardId}`,
+      {
+        clientUid: uid,
+        businessId: shop.id,
+        ownerUid: owner.uid,
+        programId: program.id,
+        stamps: total % program.stampsRequired,
+        rewardsAvailable: unused,
+        totalStamps: total,
+        totalRedeemed: earned - unused,
+        lastStampAt: visits.at(-1),
+        createdAt: visits[0],
+        updatedAt: visits.at(-1),
+      },
+    ]);
+    visits.forEach((at, i) => {
+      writes.push([`stampEvents/${cardId}_${i + 1}`, { ...base, tagId: shop.tags.stamp, createdAt: at }]);
     });
+    for (let r = 0; r < earned - unused; r++) {
+      const reward = program.rewards[r % program.rewards.length];
+      const at = visits[Math.min(visits.length - 1, (r + 1) * program.stampsRequired)];
+      writes.push([
+        `redemptions/${cardId}_r${r + 1}`,
+        { ...base, rewardId: reward.id, rewardTitle: reward.title, createdAt: at },
+      ]);
+    }
   }
-  shop.week.forEach((count, i) => {
-    const daysAgo = shop.week.length - 1 - i;
-    for (let n = 0; n < count; n++) {
-      const uid = clientIds[Math.floor(Math.random() * clientIds.length)];
-      batch.set(db.collection("stampEvents").doc(), {
-        businessId: shop.id,
-        ownerUid: owner.uid,
-        programId: program.id,
-        cardId: `${program.id}_${uid}`,
-        clientUid: uid,
-        tagId: shop.tags.stamp,
-        createdAt: atShopHour(daysAgo),
-      });
-    }
-    // Roughly one reward per full card's worth of stamps.
-    for (let n = 0; n < Math.round(count / program.stampsRequired); n++) {
-      const uid = clientIds[Math.floor(Math.random() * clientIds.length)];
-      const reward = program.rewards[n % program.rewards.length];
-      batch.set(db.collection("redemptions").doc(), {
-        businessId: shop.id,
-        ownerUid: owner.uid,
-        programId: program.id,
-        cardId: `${program.id}_${uid}`,
-        clientUid: uid,
-        rewardId: reward.id,
-        rewardTitle: reward.title,
-        createdAt: atShopHour(daysAgo),
-      });
-    }
-  });
-  await batch.commit();
+  for (let i = 0; i < writes.length; i += 450) {
+    const batch = db.batch();
+    for (const [path, data] of writes.slice(i, i + 450)) batch.set(db.doc(path), data);
+    await batch.commit();
+  }
+}
+
+/** A timestamp `daysAgo` days back, clustered around the shop's busy hours (Saturdays busier). */
+function atBusyHour(daysAgo, peaks) {
+  const now = new Date();
+  const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo);
+  if (day.getDay() === 0 && Math.random() < 0.7) day.setDate(day.getDate() - 1); // mostly closed on Sunday
+  const peak = peaks[Math.random() < 0.6 ? 0 : 1];
+  const hour = Math.min(19.5, Math.max(7, peak + (Math.random() + Math.random() + Math.random() - 1.5) * 2.2));
+  const at = day.getTime() + hour * 3600_000;
+  return Timestamp.fromMillis(Math.min(at, now.getTime() - 60_000));
 }
 
 async function seedShowcaseClient() {

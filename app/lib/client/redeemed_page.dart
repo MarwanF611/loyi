@@ -1,14 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../models.dart';
+import '../services/language.dart';
 import '../theme.dart';
 import '../widgets/confetti.dart';
 import '../widgets/loyalty_card_view.dart';
+import '../widgets/loyi_icons.dart';
 
 class RedeemedArgs {
   const RedeemedArgs({
@@ -94,11 +96,11 @@ class _RedeemedPageState extends State<RedeemedPage> with SingleTickerProviderSt
                         child: CircleAvatar(
                           radius: 56,
                           backgroundColor: a.design.stampFill,
-                          child: Icon(Icons.check_rounded, size: 72, color: a.design.stampIconColor),
+                          child: Icon(LoyiIcons.check, size: 72, color: a.design.stampIconColor),
                         ),
                       ),
                       const SizedBox(height: 28),
-                      Text('Reward redeemed', style: text.titleMedium?.merge(white)),
+                      Text(context.l10n.rewardRedeemed, style: text.titleMedium?.merge(white)),
                       const SizedBox(height: 8),
                       Text(
                         a.rewardTitle,
@@ -122,7 +124,7 @@ class _RedeemedPageState extends State<RedeemedPage> with SingleTickerProviderSt
                             .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                       ),
                       Text(
-                        'Redeemed at ${DateFormat.Hm().format(a.redeemedAt)} · show this screen to staff',
+                        context.l10n.redeemedAtShowStaff(DateFormat.Hm().format(a.redeemedAt)),
                         style: text.bodyMedium?.copyWith(color: fg.withValues(alpha: 0.75)),
                         textAlign: TextAlign.center,
                       ),
@@ -134,7 +136,7 @@ class _RedeemedPageState extends State<RedeemedPage> with SingleTickerProviderSt
                           minimumSize: const Size(180, 56),
                         ),
                         onPressed: () => context.go('/c/${a.cardId}'),
-                        child: const Text('Done'),
+                        child: Text(context.l10n.done),
                       ),
                     ],
                   ),

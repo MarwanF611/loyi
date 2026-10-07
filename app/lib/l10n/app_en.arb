@@ -1,0 +1,1393 @@
+{
+  "@@locale": "en",
+  "cancel": "Cancel",
+  "@cancel": {},
+  "save": "Save",
+  "@save": {},
+  "saved": "Saved",
+  "@saved": {},
+  "continueAction": "Continue",
+  "@continueAction": {},
+  "done": "Done",
+  "@done": {},
+  "delete": "Delete",
+  "@delete": {},
+  "edit": "Edit",
+  "@edit": {},
+  "tryAgain": "Try again",
+  "@tryAgain": {},
+  "continueWithApple": "Continue with Apple",
+  "@continueWithApple": {},
+  "appleSignInFailed": "Sign in with Apple didn't work. Check that you're signed in to your Apple Account in Settings, or use email.",
+  "@appleSignInFailed": {},
+  "privacyPolicy": "Privacy policy",
+  "@privacyPolicy": {},
+  "termsOfUse": "Terms of use",
+  "@termsOfUse": {},
+  "wrongPassword": "Wrong password.",
+  "@wrongPassword": {},
+  "confirmSameAccount": "Confirm with the same account you are signed in with.",
+  "@confirmSameAccount": {},
+  "tooManyAttempts": "Too many attempts. Try again in a few minutes.",
+  "@tooManyAttempts": {},
+  "couldNotDeleteAccount": "Could not delete your account.",
+  "@couldNotDeleteAccount": {},
+  "deleteAccountQuestion": "Delete account?",
+  "@deleteAccountQuestion": {},
+  "deleteAccountBusinessBody": "Your shop, its loyalty cards and tags, your clients' stamps for your shop and your activity history are permanently deleted. Your tags stop working.",
+  "@deleteAccountBusinessBody": {},
+  "deleteAccountClientBody": "Your saved cards, stamps and rewards are permanently deleted. This can't be undone.",
+  "@deleteAccountClientBody": {},
+  "deleteAccountSubscriptionNote": "Your subscription is cancelled too, so you won't be charged again.",
+  "@deleteAccountSubscriptionNote": {},
+  "yourPassword": "Your password",
+  "@yourPassword": {},
+  "confirmWithApple": "You'll confirm with Apple.",
+  "@confirmWithApple": {},
+  "confirmWithGoogle": "You'll confirm with Google.",
+  "@confirmWithGoogle": {},
+  "deleteAccount": "Delete account",
+  "@deleteAccount": {},
+  "customColour": "Custom colour",
+  "@customColour": {},
+  "hexCode": "Hex code",
+  "@hexCode": {},
+  "hexCodeHint": "Use 6 hex digits, e.g. E8553D",
+  "@hexCodeHint": {},
+  "use": "Use",
+  "@use": {},
+  "colourNumber": "colour {number}",
+  "@colourNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "cardsLiveInBrowser": "Your cards live in this browser only. Add your email to keep them on a new phone or when you open Loyi from your home screen.",
+  "@cardsLiveInBrowser": {},
+  "shopNoLongerUsesLoyi": "This shop no longer uses Loyi.",
+  "@shopNoLongerUsesLoyi": {},
+  "messageTitlePlaceholder": "Your title",
+  "@messageTitlePlaceholder": {},
+  "messageBodyPlaceholder": "Your message",
+  "@messageBodyPlaceholder": {},
+  "hideThisMessage": "Hide this message",
+  "@hideThisMessage": {},
+  "couldNotLoadBusiness": "Could not load your business.",
+  "@couldNotLoadBusiness": {},
+  "stampsPerWeekdayAndHour": "Stamps per weekday and hour",
+  "@stampsPerWeekdayAndHour": {},
+  "couldNotCancelSubscription": "We couldn't cancel your subscription, so nothing was deleted. Check your connection and try again.",
+  "@couldNotCancelSubscription": {},
+  "light": "Light",
+  "@light": {},
+  "dark": "Dark",
+  "@dark": {},
+  "device": "Device",
+  "@device": {},
+  "tagNotActive": "This tag is not active.",
+  "@tagNotActive": {},
+  "cardPaused": "This loyalty card is paused.",
+  "@cardPaused": {},
+  "cardNotFound": "Card not found.",
+  "@cardNotFound": {},
+  "noFullCardYet": "No full card to redeem yet.",
+  "@noFullCardYet": {},
+  "rewardNoLongerAvailable": "This reward is no longer available.",
+  "@rewardNoLongerAvailable": {},
+  "noConnection": "No connection. Check your internet and try again.",
+  "@noConnection": {},
+  "somethingWentWrong": "Something went wrong. Please try again.",
+  "@somethingWentWrong": {},
+  "signInFirst": "Sign in first.",
+  "@signInFirst": {},
+  "logoWrongType": "Use a PNG, JPG or WebP image.",
+  "@logoWrongType": {},
+  "logoTooBig": "The logo must be smaller than 200 KB.",
+  "@logoTooBig": {},
+  "exportAbout": "Your data in Loyi. What it means and your rights: {url}",
+  "@exportAbout": {
+    "placeholders": {
+      "url": {}
+    }
+  },
+  "exportBusinessNote": "Clients appear only as anonymous IDs. Your logo image is not included.",
+  "@exportBusinessNote": {},
+  "accountAndPrivacy": "Account & privacy",
+  "@accountAndPrivacy": {},
+  "accountDeleted": "Your account is deleted.",
+  "@accountDeleted": {},
+  "language": "Language",
+  "@language": {},
+  "dontLoseCards": "{count, plural, =1{Don't lose your stamps} other{Don't lose your {count} cards}}",
+  "@dontLoseCards": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noPermission": "You don't have permission to do that.",
+  "@noPermission": {},
+  "shopNotActive": "This shop's Loyi cards aren't active right now. Your stamps are safe.",
+  "@shopNotActive": {},
+  "signInAgain": "Sign in again.",
+  "@signInAgain": {},
+  "onlyBusinessCanSubscribe": "Only business accounts can subscribe.",
+  "@onlyBusinessCanSubscribe": {},
+  "alreadySubscribed": "You're already subscribed.",
+  "@alreadySubscribed": {},
+  "noSubscriptionToManage": "There is no subscription to manage yet.",
+  "@noSubscriptionToManage": {},
+  "audienceAll": "Everyone",
+  "@audienceAll": {},
+  "audienceAllDesc": "Everyone with the card",
+  "@audienceAllDesc": {},
+  "audienceNew": "New clients",
+  "@audienceNew": {},
+  "audienceNewDesc": "Joined in the last 14 days",
+  "@audienceNewDesc": {},
+  "audienceAlmost": "Almost there",
+  "@audienceAlmost": {},
+  "audienceAlmostDesc": "1 or 2 stamps from a reward",
+  "@audienceAlmostDesc": {},
+  "audienceReward": "Reward waiting",
+  "@audienceReward": {},
+  "audienceRewardDesc": "Have a reward they haven't used yet",
+  "@audienceRewardDesc": {},
+  "audienceSlipping": "Slipping away",
+  "@audienceSlipping": {},
+  "audienceSlippingDesc": "Last visit 30 to 90 days ago",
+  "@audienceSlippingDesc": {},
+  "audienceLost": "Haven't been back",
+  "@audienceLost": {},
+  "audienceLostDesc": "No visit in more than 90 days",
+  "@audienceLostDesc": {},
+  "statusReward": "Reward waiting",
+  "@statusReward": {},
+  "statusNew": "New",
+  "@statusNew": {},
+  "statusAlmost": "Almost there",
+  "@statusAlmost": {},
+  "statusRegular": "Regular",
+  "@statusRegular": {},
+  "statusOccasional": "Occasional",
+  "@statusOccasional": {},
+  "statusSlipping": "Slipping away",
+  "@statusSlipping": {},
+  "statusLost": "Haven't been back",
+  "@statusLost": {},
+  "stampIconCheck": "Check",
+  "@stampIconCheck": {},
+  "stampIconStar": "Star",
+  "@stampIconStar": {},
+  "stampIconHeart": "Heart",
+  "@stampIconHeart": {},
+  "stampIconCoffee": "Coffee",
+  "@stampIconCoffee": {},
+  "stampIconBakery": "Bakery",
+  "@stampIconBakery": {},
+  "stampIconSandwich": "Sandwich",
+  "@stampIconSandwich": {},
+  "stampIconPizza": "Pizza",
+  "@stampIconPizza": {},
+  "stampIconIceCream": "Ice cream",
+  "@stampIconIceCream": {},
+  "stampIconCake": "Cake",
+  "@stampIconCake": {},
+  "stampIconDrink": "Drink",
+  "@stampIconDrink": {},
+  "stampIconHair": "Hair",
+  "@stampIconHair": {},
+  "stampIconBeauty": "Beauty",
+  "@stampIconBeauty": {},
+  "stampIconFlowers": "Flowers",
+  "@stampIconFlowers": {},
+  "stampIconPets": "Pets",
+  "@stampIconPets": {},
+  "stampIconCarWash": "Car wash",
+  "@stampIconCarWash": {},
+  "stampIconShopping": "Shopping",
+  "@stampIconShopping": {},
+  "enterBusinessName": "Enter your business name.",
+  "@enterBusinessName": {},
+  "chooseOneColour": "Choose at least one colour.",
+  "@chooseOneColour": {},
+  "businessName": "Business name",
+  "@businessName": {},
+  "businessNameHint": "e.g. Bakkerij Peeters",
+  "@businessNameHint": {},
+  "brandColours": "Brand colours",
+  "@brandColours": {},
+  "brandColoursHint": "Up to {max}. New cards start in these colours.",
+  "@brandColoursHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "cardColour": "Card colour",
+  "@cardColour": {},
+  "style": "Style",
+  "@style": {},
+  "styleSolid": "Solid",
+  "@styleSolid": {},
+  "styleGradient": "Gradient",
+  "@styleGradient": {},
+  "stylePattern": "Pattern",
+  "@stylePattern": {},
+  "secondColour": "Second colour",
+  "@secondColour": {},
+  "auto": "Auto",
+  "@auto": {},
+  "stampColour": "Stamp colour",
+  "@stampColour": {},
+  "stampIcon": "Stamp icon",
+  "@stampIcon": {},
+  "tabOverview": "Overview",
+  "@tabOverview": {},
+  "tabClients": "Clients",
+  "@tabClients": {},
+  "tabInsights": "Insights",
+  "@tabInsights": {},
+  "tabCards": "Cards",
+  "@tabCards": {},
+  "tabSettings": "Settings",
+  "@tabSettings": {},
+  "goodMorning": "Good morning",
+  "@goodMorning": {},
+  "goodAfternoon": "Good afternoon",
+  "@goodAfternoon": {},
+  "goodEvening": "Good evening",
+  "@goodEvening": {},
+  "newMessage": "New message",
+  "@newMessage": {},
+  "followUp": "Follow-up",
+  "@followUp": {},
+  "whoToReachOut": "Who to reach out to",
+  "@whoToReachOut": {},
+  "whoToReachOutSub": "Groups update by themselves. Your message appears on their card in Loyi.",
+  "@whoToReachOutSub": {},
+  "addYourLogo": "Add your logo",
+  "@addYourLogo": {},
+  "addYourLogoSub": "It appears on every card your clients carry.",
+  "@addYourLogoSub": {},
+  "live": "Live",
+  "@live": {},
+  "recentActivity": "Recent activity",
+  "@recentActivity": {},
+  "allInsights": "All insights",
+  "@allInsights": {},
+  "stampsToday": "Stamps today",
+  "@stampsToday": {},
+  "thisWeekCount": "{count} this week",
+  "@thisWeekCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "vsLastWeek": "{change} vs last week",
+  "@vsLastWeek": {
+    "placeholders": {
+      "change": {}
+    }
+  },
+  "vsBefore": "{change} vs before",
+  "@vsBefore": {
+    "placeholders": {
+      "change": {}
+    }
+  },
+  "stampsLast7Days": "Stamps per day, last 7 days: {values}",
+  "@stampsLast7Days": {
+    "placeholders": {
+      "values": {}
+    }
+  },
+  "kpiClients": "Clients",
+  "@kpiClients": {},
+  "kpiJoinedThisMonth": "+{count} this month",
+  "@kpiJoinedThisMonth": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kpiActive": "Active",
+  "@kpiActive": {},
+  "kpiActiveNote": "visited in 30 days",
+  "@kpiActiveNote": {},
+  "kpiRewardsWaiting": "Rewards waiting",
+  "@kpiRewardsWaiting": {},
+  "kpiRewardsWaitingNote": "earned, not used yet",
+  "@kpiRewardsWaitingNote": {},
+  "kpiRewardsGiven": "Rewards given",
+  "@kpiRewardsGiven": {},
+  "kpiRewardsGivenNote": "since you started",
+  "@kpiRewardsGivenNote": {},
+  "pitchSlipping": "Invite them back with a small treat.",
+  "@pitchSlipping": {},
+  "pitchAlmost": "One more visit gets them a reward.",
+  "@pitchAlmost": {},
+  "pitchReward": "Remind them a reward is waiting.",
+  "@pitchReward": {},
+  "pitchNew": "Welcome them and tell them how it works.",
+  "@pitchNew": {},
+  "writeAMessage": "Write a message",
+  "@writeAMessage": {},
+  "message": "Message",
+  "@message": {},
+  "justNow": "Just now",
+  "@justNow": {},
+  "minutesAgo": "{minutes} min ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "todayAt": "Today {time}",
+  "@todayAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "activityEmpty": "Stamps and redeemed rewards will show up here as clients tap your tags.",
+  "@activityEmpty": {},
+  "activityReward": "Reward: {title}",
+  "@activityReward": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "activityStamp": "Stamp given",
+  "@activityStamp": {},
+  "csvHeader": "client,status,joined,last_visit,total_stamps,rewards_waiting,rewards_used",
+  "@csvHeader": {},
+  "clientsTitle": "Your clients",
+  "@clientsTitle": {},
+  "clientsSubtitle": "{count} with a card · anonymous by design",
+  "@clientsSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadCsv": "Download as CSV",
+  "@downloadCsv": {},
+  "newShort": "New",
+  "@newShort": {},
+  "messages": "Messages",
+  "@messages": {},
+  "filterAll": "All",
+  "@filterAll": {},
+  "findClientHint": "Find a client code, e.g. K7Q2",
+  "@findClientHint": {},
+  "clientsEmpty": "Clients appear here after their first tap.",
+  "@clientsEmpty": {},
+  "noClientsMatch": "No clients match.",
+  "@noClientsMatch": {},
+  "showMore": "Show more ({count})",
+  "@showMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clientsPrivacyNote": "Clients are anonymous: each has a code that only works in your shop. Loyi never shares names, emails or phone numbers, and visits older than 2 years are deleted automatically.",
+  "@clientsPrivacyNote": {},
+  "today": "today",
+  "@today": {},
+  "yesterday": "yesterday",
+  "@yesterday": {},
+  "daysAgo": "{days} days ago",
+  "@daysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "clientRowSummary": "{count, plural, =1{1 stamp} other{{count} stamps}} · last visit {when}",
+  "@clientRowSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "factJoined": "Joined",
+  "@factJoined": {},
+  "factLastVisit": "Last visit",
+  "@factLastVisit": {},
+  "factStamps": "Stamps",
+  "@factStamps": {},
+  "factRewardsUsed": "Rewards used",
+  "@factRewardsUsed": {},
+  "rewardsWaitingCount": "{count} waiting",
+  "@rewardsWaitingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stampsOfRequired": "{stamps} of {required} stamps",
+  "@stampsOfRequired": {
+    "placeholders": {
+      "required": {
+        "type": "int"
+      },
+      "stamps": {
+        "type": "int"
+      }
+    }
+  },
+  "recentVisits": "Recent visits",
+  "@recentVisits": {},
+  "couldNotLoadVisits": "Could not load visits.",
+  "@couldNotLoadVisits": {},
+  "noStampsYet": "No stamps yet.",
+  "@noStampsYet": {},
+  "whyNoName": "Why no name? Clients use Loyi without telling shops who they are. Reach them with a message on their card instead.",
+  "@whyNoName": {},
+  "noLinksAllowed": "Links aren't allowed: they make messages look like phishing.",
+  "@noLinksAllowed": {},
+  "messageIsLive": "Message is live",
+  "@messageIsLive": {},
+  "messageUpdated": "Message updated",
+  "@messageUpdated": {},
+  "couldNotSaveMessage": "Could not save the message. Please try again.",
+  "@couldNotSaveMessage": {},
+  "editMessage": "Edit message",
+  "@editMessage": {},
+  "whoSeesIt": "Who sees it",
+  "@whoSeesIt": {},
+  "card": "Card",
+  "@card": {},
+  "allCards": "All cards",
+  "@allCards": {},
+  "title": "Title",
+  "@title": {},
+  "messageTitleHint": "We miss you!",
+  "@messageTitleHint": {},
+  "messageBodyHint": "Show this card at the counter this week for a free coffee with your next sandwich.",
+  "@messageBodyHint": {},
+  "addShortTitle": "Add a short title.",
+  "@addShortTitle": {},
+  "writeYourMessage": "Write your message.",
+  "@writeYourMessage": {},
+  "showItFor": "Show it for",
+  "@showItFor": {},
+  "oneWeek": "1 week",
+  "@oneWeek": {},
+  "twoWeeks": "2 weeks",
+  "@twoWeeks": {},
+  "oneMonth": "1 month",
+  "@oneMonth": {},
+  "preview": "Preview",
+  "@preview": {},
+  "messagePrivacyNote": "Shown inside Loyi only, never by email or push. Each client's phone decides if the message is for them, so you never see who read it.",
+  "@messagePrivacyNote": {},
+  "publishMessage": "Publish message",
+  "@publishMessage": {},
+  "deleteMessageQuestion": "Delete this message?",
+  "@deleteMessageQuestion": {},
+  "deleteMessageBody": "Clients won't see it anymore.",
+  "@deleteMessageBody": {},
+  "noMessagesYet": "No messages yet",
+  "@noMessagesYet": {},
+  "noMessagesBody": "Invite clients back, nudge those close to a reward, or welcome newcomers. Your message appears on their card in Loyi.",
+  "@noMessagesBody": {},
+  "messageEnded": "Ended",
+  "@messageEnded": {},
+  "messagePaused": "Paused",
+  "@messagePaused": {},
+  "messageEndedOn": "ended {date}",
+  "@messageEndedOn": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "messageReachUntil": "reaches {count} now · until {date}",
+  "@messageReachUntil": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "messageOptions": "Message options",
+  "@messageOptions": {},
+  "editAndRunAgain": "Edit and run again",
+  "@editAndRunAgain": {},
+  "pause": "Pause",
+  "@pause": {},
+  "resume": "Resume",
+  "@resume": {},
+  "days7": "7 days",
+  "@days7": {},
+  "days30": "30 days",
+  "@days30": {},
+  "days90": "90 days",
+  "@days90": {},
+  "insightsTitle": "How your cards do",
+  "@insightsTitle": {},
+  "couldNotLoadInsights": "Could not load your insights.",
+  "@couldNotLoadInsights": {},
+  "weekTo": "Week to {date}",
+  "@weekTo": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "chartNow": "Now",
+  "@chartNow": {},
+  "weeksAgoShort": "{weeks}w",
+  "@weeksAgoShort": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "busyShop": "Busy shop! This period has more than {count} stamps, so the charts show the first part only. Pick a shorter period for exact numbers.",
+  "@busyShop": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "kpiStamps": "Stamps",
+  "@kpiStamps": {},
+  "noEarlierData": "no earlier data yet",
+  "@noEarlierData": {},
+  "kpiActiveClients": "Active clients",
+  "@kpiActiveClients": {},
+  "cameBackCount": "{count} came back",
+  "@cameBackCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kpiNewClients": "New clients",
+  "@kpiNewClients": {},
+  "joinedInPeriod": "joined in this period",
+  "@joinedInPeriod": {},
+  "kpiRewardsUsed": "Rewards used",
+  "@kpiRewardsUsed": {},
+  "stillWaitingCount": "{count} still waiting",
+  "@stillWaitingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stampsPerDay": "Stamps per day",
+  "@stampsPerDay": {},
+  "stampsAppearHere": "Stamps appear here as clients tap your tags.",
+  "@stampsAppearHere": {},
+  "busiestAt": "Busiest: {day} around {time}",
+  "@busiestAt": {
+    "placeholders": {
+      "day": {},
+      "time": {}
+    }
+  },
+  "stampsCount": "{count, plural, =1{1 stamp} other{{count} stamps}}",
+  "@stampsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newClientsCount": "{count, plural, =1{1 new client} other{{count} new clients}}",
+  "@newClientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rewardsCount": "{count, plural, =1{1 reward} other{{count} rewards}}",
+  "@rewardsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clientsCount": "{count, plural, =1{1 client} other{{count} clients}}",
+  "@clientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stampsPerDaySemantic": "Stamps per day over the last {days} days, {total} in total",
+  "@stampsPerDaySemantic": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "perWeek": "Per week",
+  "@perWeek": {},
+  "perDay": "Per day",
+  "@perDay": {},
+  "legendNew": "New",
+  "@legendNew": {},
+  "legendRewards": "Rewards",
+  "@legendRewards": {},
+  "newClientsSemantic": "New clients: {values}",
+  "@newClientsSemantic": {
+    "placeholders": {
+      "values": {}
+    }
+  },
+  "rewardsUsedSemantic": "Rewards used: {values}",
+  "@rewardsUsedSemantic": {
+    "placeholders": {
+      "values": {}
+    }
+  },
+  "busyTimes": "Busy times",
+  "@busyTimes": {},
+  "busyTimesNote": "Stamps by weekday and hour, so you know when to plan an extra hand.",
+  "@busyTimesNote": {},
+  "clientMix": "Client mix",
+  "@clientMix": {},
+  "clientMixNote": "Where your {count} clients are now",
+  "@clientMixNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "clientsWord": "clients",
+  "@clientsWord": {},
+  "loyalty": "Loyalty",
+  "@loyalty": {},
+  "loyaltyNote": "How often clients come back",
+  "@loyaltyNote": {},
+  "cameBackAfterFirst": "Came back after their first visit",
+  "@cameBackAfterFirst": {},
+  "cameBackAfterFirstHint": "Clients who joined at least 30 days ago",
+  "@cameBackAfterFirstHint": {},
+  "visitsPerActive": "Visits per active client",
+  "@visitsPerActive": {},
+  "inThisPeriod": "In this period",
+  "@inThisPeriod": {},
+  "daysBetweenVisits": "Days between visits",
+  "@daysBetweenVisits": {},
+  "daysBetweenVisitsHint": "Average, for clients who came more than once",
+  "@daysBetweenVisitsHint": {},
+  "rewardsWaitingToUse": "Rewards waiting to be used",
+  "@rewardsWaitingToUse": {},
+  "rewardsWaitingToUseHint": "A good reason to send a reminder",
+  "@rewardsWaitingToUseHint": {},
+  "programInsightNote": "{clients} clients · {stamps} stamps and {rewards} rewards in this period. Bars: clients by stamps collected.",
+  "@programInsightNote": {
+    "placeholders": {
+      "clients": {
+        "type": "int"
+      },
+      "rewards": {
+        "type": "int"
+      },
+      "stamps": {
+        "type": "int"
+      }
+    }
+  },
+  "stampsOfRequiredShort": "{stamps} of {required} stamps",
+  "@stampsOfRequiredShort": {
+    "placeholders": {
+      "required": {
+        "type": "int"
+      },
+      "stamps": {
+        "type": "int"
+      }
+    }
+  },
+  "programDistributionSemantic": "Clients by stamps collected on {card}: {values}",
+  "@programDistributionSemantic": {
+    "placeholders": {
+      "card": {},
+      "values": {}
+    }
+  },
+  "insightsPrivacyNote": "Insights are counts, not people: Loyi never knows who your clients are. Stamp and reward logs older than 2 years are deleted automatically.",
+  "@insightsPrivacyNote": {},
+  "seeClients": "See clients",
+  "@seeClients": {},
+  "loyaltyCards": "Loyalty cards",
+  "@loyaltyCards": {},
+  "yourCards": "Your cards",
+  "@yourCards": {},
+  "yourCardsSub": "Stamps per card, rewards and design. Open a card to manage its NFC tags.",
+  "@yourCardsSub": {},
+  "newCard": "New card",
+  "@newCard": {},
+  "howTagsWork": "How the tags work",
+  "@howTagsWork": {},
+  "howTagsWorkBody": "A join tag at the entrance lets clients pick up the card. The stamp tag at the counter gives one stamp per tap, with the waiting time you set. Pause a tag any time.",
+  "@howTagsWorkBody": {},
+  "createFirstCard": "Create your first loyalty card",
+  "@createFirstCard": {},
+  "createFirstCardSub": "Choose how many stamps fill a card, your rewards and your colours.",
+  "@createFirstCardSub": {},
+  "paused": "Paused",
+  "@paused": {},
+  "programTileSummary": "{stamps} stamps · {rewards, plural, =1{1 reward} other{{rewards} rewards}}",
+  "@programTileSummary": {
+    "placeholders": {
+      "rewards": {
+        "type": "int"
+      },
+      "stamps": {
+        "type": "int"
+      }
+    }
+  },
+  "yourShop": "Your shop",
+  "@yourShop": {},
+  "logo": "Logo",
+  "@logo": {},
+  "logoHint": "Shown on all your loyalty cards. A square PNG with a transparent background works best.",
+  "@logoHint": {},
+  "details": "Details",
+  "@details": {},
+  "appearance": "Appearance",
+  "@appearance": {},
+  "appearanceHint": "Light is the default. Device follows your phone or computer.",
+  "@appearanceHint": {},
+  "languageHint": "Nederlands is the default.",
+  "@languageHint": {},
+  "subscription": "Subscription",
+  "@subscription": {},
+  "accountSettingsSub": "Email, password, your data, delete account",
+  "@accountSettingsSub": {},
+  "couldNotUpdateLogo": "Could not update the logo. Please try again.",
+  "@couldNotUpdateLogo": {},
+  "replaceLogo": "Replace logo",
+  "@replaceLogo": {},
+  "uploadLogo": "Upload logo",
+  "@uploadLogo": {},
+  "remove": "Remove",
+  "@remove": {},
+  "passwordTooShort": "Use at least 8 characters for your password.",
+  "@passwordTooShort": {},
+  "wrongEmailOrPassword": "Wrong email or password.",
+  "@wrongEmailOrPassword": {},
+  "emailInUse": "An account with this email already exists. Sign in instead.",
+  "@emailInUse": {},
+  "emailHasAccount": "This email already has a Loyi account. Sign in with your email and password.",
+  "@emailHasAccount": {},
+  "invalidEmail": "Enter a valid email address.",
+  "@invalidEmail": {},
+  "signInMethodDisabled": "This sign-in method is not enabled yet.",
+  "@signInMethodDisabled": {},
+  "couldNotSignIn": "Could not sign in.",
+  "@couldNotSignIn": {},
+  "enterEmailFirst": "Enter your email address first.",
+  "@enterEmailFirst": {},
+  "resetLinkSent": "If {email} has an account, a link to reset the password is on its way.",
+  "@resetLinkSent": {
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "startWithLoyi": "Start with Loyi",
+  "@startWithLoyi": {},
+  "welcomeBack": "Welcome back",
+  "@welcomeBack": {},
+  "signUpSteps": "Three steps: your account, your colours, your subscription. Then your dashboard is ready.",
+  "@signUpSteps": {},
+  "signInSub": "Sign in to manage your loyalty cards.",
+  "@signInSub": {},
+  "orWithEmail": "or with email",
+  "@orWithEmail": {},
+  "signIn": "Sign in",
+  "@signIn": {},
+  "createAccount": "Create account",
+  "@createAccount": {},
+  "email": "Email",
+  "@email": {},
+  "password": "Password",
+  "@password": {},
+  "hidePassword": "Hide password",
+  "@hidePassword": {},
+  "showPassword": "Show password",
+  "@showPassword": {},
+  "forgotPassword": "Forgot password?",
+  "@forgotPassword": {},
+  "agreeToTerms": "By creating an account you agree to the terms of use and privacy policy.",
+  "@agreeToTerms": {},
+  "collectingStamps": "Collecting stamps? Go to your cards",
+  "@collectingStamps": {},
+  "heroTitle": "Stamp cards your\nclients actually keep.",
+  "@heroTitle": {},
+  "heroSub": "One tap on an NFC tag. No app to install. Your logo, your colours, your rewards.",
+  "@heroSub": {},
+  "signOut": "Sign out",
+  "@signOut": {},
+  "stepOf": "Step {step} of {total}",
+  "@stepOf": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "yourBusiness": "Your business",
+  "@yourBusiness": {},
+  "yourBusinessSub": "The name your clients see on their loyalty card.",
+  "@yourBusinessSub": {},
+  "yourColours": "Your colours",
+  "@yourColours": {},
+  "yourColoursSub": "Pick up to {max}: the card, its gradient and the stamps. You can fine-tune each card later.",
+  "@yourColoursSub": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "loyaltyCard": "Loyalty card",
+  "@loyaltyCard": {},
+  "coloursChosen": "{count} of {max} chosen. Tap a colour again to remove it.",
+  "@coloursChosen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionEnded": "Your subscription has ended",
+  "@subscriptionEnded": {},
+  "startSubscription": "Start your subscription",
+  "@startSubscription": {},
+  "almostThere": "Almost there",
+  "@almostThere": {},
+  "tagsPausedSub": "Your tags are paused. Clients keep their stamps and can still use rewards they earned.",
+  "@tagsPausedSub": {},
+  "dashboardOpensWhenPaid": "Your dashboard opens and your tags work as soon as the payment is confirmed. Cancel anytime.",
+  "@dashboardOpensWhenPaid": {},
+  "dashboardOpensWhenActive": "Your dashboard opens as soon as this account has an active subscription.",
+  "@dashboardOpensWhenActive": {},
+  "paymentReceived": "Payment received",
+  "@paymentReceived": {},
+  "switchingOn": "Switching on your account. This takes a few seconds.",
+  "@switchingOn": {},
+  "takingLonger": "This is taking longer than usual. Your dashboard opens by itself as soon as the payment is confirmed. If you left the payment page without paying, go back to the payment step.",
+  "@takingLonger": {},
+  "backToPayment": "Back to payment",
+  "@backToPayment": {},
+  "paymentProblem": "Payment problem",
+  "@paymentProblem": {},
+  "paymentProblemSub": "Update your payment method to keep your tags working.",
+  "@paymentProblemSub": {},
+  "loyiForBusiness": "Loyi for business",
+  "@loyiForBusiness": {},
+  "planTagline": "Digital stamp cards your clients actually keep.",
+  "@planTagline": {},
+  "perkTags": "Your NFC join and stamp tags, switched on",
+  "@perkTags": {},
+  "perkUnlimited": "Unlimited loyalty cards and rewards",
+  "@perkUnlimited": {},
+  "perkBrand": "Your logo, colours and card design",
+  "@perkBrand": {},
+  "perkDashboard": "Live overview, client follow-up and insights",
+  "@perkDashboard": {},
+  "perkNoInstall": "Nothing for your clients to install",
+  "@perkNoInstall": {},
+  "youreSubscribed": "You're subscribed",
+  "@youreSubscribed": {},
+  "tagsLive": "Your tags are live.",
+  "@tagsLive": {},
+  "tagsLiveUntil": "Your tags are live until {date}.",
+  "@tagsLiveUntil": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "lastPaymentFailed": "Your last payment didn't go through. Update your payment method before {date} to keep your tags working.",
+  "@lastPaymentFailed": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "renewsOn": "Your tags are live. Renews on {date}.",
+  "@renewsOn": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "wontRenew": "Your tags are live until {date}. The subscription won't renew.",
+  "@wontRenew": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "manageSubscription": "Manage subscription",
+  "@manageSubscription": {},
+  "manageSubscriptionSub": "Change your payment method, download invoices or cancel.",
+  "@manageSubscriptionSub": {},
+  "switchingOnTags": "Payment received. Switching on your tags…",
+  "@switchingOnTags": {},
+  "monthly": "Monthly",
+  "@monthly": {},
+  "perMonthExclVat": " / month excl. VAT",
+  "@perMonthExclVat": {},
+  "cardOrBancontact": "Card or Bancontact. Cancel anytime.",
+  "@cardOrBancontact": {},
+  "subscribe": "Subscribe",
+  "@subscribe": {},
+  "stripeNote": "You pay securely with Stripe. The subscription renews every month until you cancel; cancel anytime under Subscription → Manage subscription. You get an invoice for every payment.",
+  "@stripeNote": {},
+  "noActiveSubscription": "No active subscription",
+  "@noActiveSubscription": {},
+  "noActiveSubscriptionSub": "This account doesn't have an active Loyi subscription.",
+  "@noActiveSubscriptionSub": {},
+  "subscriptionsNotSetUp": "Subscriptions aren't set up in this build.",
+  "@subscriptionsNotSetUp": {},
+  "noLimit": "No limit",
+  "@noLimit": {},
+  "minutesCount": "{count, plural, =1{1 minute} other{{count} minutes}}",
+  "@minutesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursCount": "{count, plural, =1{1 hour} other{{count} hours}}",
+  "@hoursCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysCount": "{count, plural, =1{1 day} other{{count} days}}",
+  "@daysCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "giveCardName": "Give your card a name.",
+  "@giveCardName": {},
+  "addOneReward": "Add at least one reward.",
+  "@addOneReward": {},
+  "cardCreated": "Card created. Now add your NFC tags below.",
+  "@cardCreated": {},
+  "couldNotSave": "Could not save. {reason}",
+  "@couldNotSave": {
+    "placeholders": {
+      "reason": {}
+    }
+  },
+  "yourCardName": "Your card name",
+  "@yourCardName": {},
+  "newLoyaltyCard": "New loyalty card",
+  "@newLoyaltyCard": {},
+  "editLoyaltyCard": "Edit loyalty card",
+  "@editLoyaltyCard": {},
+  "create": "Create",
+  "@create": {},
+  "cardName": "Card name",
+  "@cardName": {},
+  "cardNameSub": "Short and descriptive; clients see it under your business name.",
+  "@cardNameSub": {},
+  "cardNameHint": "e.g. Koffiekaart",
+  "@cardNameHint": {},
+  "design": "Design",
+  "@design": {},
+  "stampsForFullCard": "Stamps for a full card",
+  "@stampsForFullCard": {},
+  "stampsForFullCardSub": "6 to 10 stamps feels achievable for most clients; more can feel out of reach.",
+  "@stampsForFullCardSub": {},
+  "fewerStamps": "Fewer stamps",
+  "@fewerStamps": {},
+  "moreStamps": "More stamps",
+  "@moreStamps": {},
+  "rewards": "Rewards",
+  "@rewards": {},
+  "rewardsSub": "Clients with a full card choose one of the active rewards. Switch rewards on or off anytime, e.g. a different reward each week.",
+  "@rewardsSub": {},
+  "rewardHint": "e.g. Free coffee",
+  "@rewardHint": {},
+  "active": "Active",
+  "@active": {},
+  "hiddenFromClients": "Hidden from clients",
+  "@hiddenFromClients": {},
+  "addReward": "Add reward",
+  "@addReward": {},
+  "timeBetweenStamps": "Time between stamps",
+  "@timeBetweenStamps": {},
+  "timeBetweenStampsSub": "The minimum wait before the same client can get another stamp. Stops double taps.",
+  "@timeBetweenStampsSub": {},
+  "cardIsLive": "Card is live",
+  "@cardIsLive": {},
+  "cardIsLiveSub": "When paused, taps are refused but clients keep their stamps.",
+  "@cardIsLiveSub": {},
+  "createCard": "Create card",
+  "@createCard": {},
+  "saveChanges": "Save changes",
+  "@saveChanges": {},
+  "nfcTags": "NFC tags",
+  "@nfcTags": {},
+  "nfcTagsSub": "Every tag is a link. Write it onto an NFC sticker.",
+  "@nfcTagsSub": {},
+  "noTagsYet": "No tags yet. Create one join tag and one stamp tag to get started.",
+  "@noTagsYet": {},
+  "addJoinTag": "Add join tag",
+  "@addJoinTag": {},
+  "addStampTag": "Add stamp tag",
+  "@addStampTag": {},
+  "tagStep1": "Join tag, where clients can see it",
+  "@tagStep1": {},
+  "tagStep1Sub": "At the door or on the counter. Tapping it adds the card.",
+  "@tagStep1Sub": {},
+  "tagStep2": "Stamp tag, behind the counter",
+  "@tagStep2": {},
+  "tagStep2Sub": "Hold it out after a purchase. Every tap gives one stamp.",
+  "@tagStep2Sub": {},
+  "programStickers": "Program the stickers",
+  "@programStickers": {},
+  "programStickersSub": "Use NTAG213/215 stickers. Copy the link and write it as a URL record with a free app like NFC Tools.",
+  "@programStickersSub": {},
+  "never": "never",
+  "@never": {},
+  "joinTagLabel": "Join tag · {label}",
+  "@joinTagLabel": {
+    "placeholders": {
+      "label": {}
+    }
+  },
+  "stampTagLabel": "Stamp tag · {label}",
+  "@stampTagLabel": {
+    "placeholders": {
+      "label": {}
+    }
+  },
+  "tapsSummary": "{count, plural, =1{1 tap} other{{count} taps}} · last {when}",
+  "@tapsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "disabled": "Disabled",
+  "@disabled": {},
+  "copyLink": "Copy link",
+  "@copyLink": {},
+  "linkCopied": "Link copied",
+  "@linkCopied": {},
+  "showQrCode": "Show QR code",
+  "@showQrCode": {},
+  "joinQrCode": "Join QR code",
+  "@joinQrCode": {},
+  "joinQrCodeSub": "Print it for clients without NFC.",
+  "@joinQrCodeSub": {},
+  "defaultJoinTagLabel": "Entrance",
+  "@defaultJoinTagLabel": {},
+  "defaultStampTagLabel": "Counter",
+  "@defaultStampTagLabel": {},
+  "newJoinTag": "New join tag",
+  "@newJoinTag": {},
+  "newStampTag": "New stamp tag",
+  "@newStampTag": {},
+  "whereIsTag": "Where is this tag?",
+  "@whereIsTag": {},
+  "methodEmailPassword": "Email and password",
+  "@methodEmailPassword": {},
+  "methodApple": "Sign in with Apple",
+  "@methodApple": {},
+  "methodNotSaved": "Not saved (this browser only)",
+  "@methodNotSaved": {},
+  "yourAccount": "Your account",
+  "@yourAccount": {},
+  "signInMethod": "Sign-in",
+  "@signInMethod": {},
+  "memberSince": "Member since",
+  "@memberSince": {},
+  "signInSecurity": "Sign-in & security",
+  "@signInSecurity": {},
+  "changeEmail": "Change email",
+  "@changeEmail": {},
+  "changePassword": "Change password",
+  "@changePassword": {},
+  "noLoyiPassword": "You sign in with {provider}, so there is no Loyi password. Manage your email and security in your {provider} account.",
+  "@noLoyiPassword": {
+    "placeholders": {
+      "provider": {}
+    }
+  },
+  "yourData": "Your data",
+  "@yourData": {},
+  "yourDataBusiness": "Loyi stores your account, your shop (name, colours, logo), your loyalty cards and tags, your subscription status and your clients' stamps and rewards under anonymous IDs.",
+  "@yourDataBusiness": {},
+  "yourDataClient": "Loyi stores your cards, stamps and rewards per shop. Shops only see an anonymous ID, never your email.",
+  "@yourDataClient": {},
+  "yourDataClientEmail": "Loyi stores your cards, stamps and rewards per shop, and your email. Shops only see an anonymous ID, never your email.",
+  "@yourDataClientEmail": {},
+  "readPrivacyPolicy": "Read the privacy policy",
+  "@readPrivacyPolicy": {},
+  "deleteCardsOnDevice": "Delete the cards on this device",
+  "@deleteCardsOnDevice": {},
+  "downloadMyData": "Download my data",
+  "@downloadMyData": {},
+  "newPasswordTooShort": "Use at least 8 characters for your new password.",
+  "@newPasswordTooShort": {},
+  "emailUsedByOther": "Another account already uses this email.",
+  "@emailUsedByOther": {},
+  "signInAgainRetry": "Please sign in again and retry.",
+  "@signInAgainRetry": {},
+  "thatDidntWork": "That didn't work. Please try again.",
+  "@thatDidntWork": {},
+  "passwordsDontMatch": "The new passwords don't match.",
+  "@passwordsDontMatch": {},
+  "passwordChanged": "Your password is changed.",
+  "@passwordChanged": {},
+  "currentPassword": "Current password",
+  "@currentPassword": {},
+  "newPassword": "New password",
+  "@newPassword": {},
+  "repeatNewPassword": "Repeat new password",
+  "@repeatNewPassword": {},
+  "checkInbox": "Check your inbox",
+  "@checkInbox": {},
+  "emailChangeSent": "We sent a link to {newEmail}. Your email changes as soon as you open it. Until then, keep signing in with {oldEmail}.",
+  "@emailChangeSent": {
+    "placeholders": {
+      "newEmail": {},
+      "oldEmail": {}
+    }
+  },
+  "ok": "OK",
+  "@ok": {},
+  "newEmail": "New email",
+  "@newEmail": {},
+  "sendLink": "Send link",
+  "@sendLink": {},
+  "ofStamps": " / {total} stamps",
+  "@ofStamps": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "toGo": "{count} to go",
+  "@toGo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardSemantic": "{business}, {card}: {stamps} of {total} stamps",
+  "@cardSemantic": {
+    "placeholders": {
+      "business": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "stamps": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rewardsReadySuffix": ", {count} rewards ready",
+  "@rewardsReadySuffix": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rewardsBadge": "{count, plural, =1{1 reward} other{{count} rewards}}",
+  "@rewardsBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardsCount": "{count, plural, =1{1 card} other{{count} cards}}",
+  "@cardsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rewardsReady": "{count, plural, =1{1 reward ready} other{{count} rewards ready}}",
+  "@rewardsReady": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "iHaveABusiness": "I have a business",
+  "@iHaveABusiness": {},
+  "noCardsYet": "No cards yet",
+  "@noCardsYet": {},
+  "noCardsYetSub": "Hold your phone near a Loyi tag in a shop to get your first loyalty card.",
+  "@noCardsYetSub": {},
+  "cardsSaved": "Your cards are saved.",
+  "@cardsSaved": {},
+  "emailOtherMethod": "This email already has an account with another sign-in method. Use that one.",
+  "@emailOtherMethod": {},
+  "emailHasAccountChoose": "This email already has an account. Choose \"I have an account\".",
+  "@emailHasAccountChoose": {},
+  "passwordTooShort6": "Use at least 6 characters for your password.",
+  "@passwordTooShort6": {},
+  "accountAndCardsDeleted": "Your account and cards are deleted.",
+  "@accountAndCardsDeleted": {},
+  "yourCardsAreSaved": "Your cards are saved",
+  "@yourCardsAreSaved": {},
+  "yourCardsAreSavedSub": "Sign in with this account on any device to see your cards.",
+  "@yourCardsAreSavedSub": {},
+  "keepCardsSafe": "Keep your cards safe",
+  "@keepCardsSafe": {},
+  "keepCardsSafeSub": "Your stamps are stored in this browser. Save them to an account and they follow you to any phone. Already have an account? Your cards from this device are added to it.",
+  "@keepCardsSafeSub": {},
+  "continueWithGoogle": "Continue with Google",
+  "@continueWithGoogle": {},
+  "newAccount": "New account",
+  "@newAccount": {},
+  "iHaveAnAccount": "I have an account",
+  "@iHaveAnAccount": {},
+  "saveMyCards": "Save my cards",
+  "@saveMyCards": {},
+  "addingToCard": "Adding to your card…",
+  "@addingToCard": {},
+  "onlyAMoment": "This only takes a moment.",
+  "@onlyAMoment": {},
+  "thatDidntWorkTitle": "That didn't work",
+  "@thatDidntWorkTitle": {},
+  "rewardRedeemed": "Reward redeemed",
+  "@rewardRedeemed": {},
+  "redeemedAtShowStaff": "Redeemed at {time} · show this screen to staff",
+  "@redeemedAtShowStaff": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "myCards": "My cards",
+  "@myCards": {},
+  "cardNotOnDevice": "Card not found on this device",
+  "@cardNotOnDevice": {},
+  "goToMyCards": "Go to my cards",
+  "@goToMyCards": {},
+  "savedOnCard": "Saved on your card. Use it now or later.",
+  "@savedOnCard": {},
+  "noRewardsNow": "This shop has no rewards available right now.",
+  "@noRewardsNow": {},
+  "moreToGo": "more to go",
+  "@moreToGo": {},
+  "thenChooseOne": "Then choose one of these",
+  "@thenChooseOne": {},
+  "stampsCollected": "stamps collected",
+  "@stampsCollected": {},
+  "rewardsUsedLower": "rewards used",
+  "@rewardsUsedLower": {},
+  "useAReward": "Use a reward",
+  "@useAReward": {},
+  "chooseYourReward": "Choose your reward",
+  "@chooseYourReward": {},
+  "usesOneFullCard": "This uses one full card.",
+  "@usesOneFullCard": {},
+  "onlyAtCounter": "Only do this at the counter. Staff need to see the confirmation screen.",
+  "@onlyAtCounter": {},
+  "useItNow": "Use it now",
+  "@useItNow": {},
+  "notYet": "Not yet",
+  "@notYet": {},
+  "cardFull": "Card full!",
+  "@cardFull": {},
+  "cardFullSub": "You earned a reward. Use it now or on a later visit.",
+  "@cardFullSub": {},
+  "stampAdded": "Stamp added",
+  "@stampAdded": {},
+  "thanksForVisit": "Thanks for your visit!",
+  "@thanksForVisit": {},
+  "welcome": "Welcome!",
+  "@welcome": {},
+  "welcomeSub": "Your card is ready. Tap the counter tag after each purchase.",
+  "@welcomeSub": {},
+  "yourCard": "Your card",
+  "@yourCard": {},
+  "alreadyHaveCard": "You already have this card.",
+  "@alreadyHaveCard": {},
+  "alreadyStamped": "Already stamped",
+  "@alreadyStamped": {},
+  "nextStampIn": "Your next stamp is possible in {wait}.",
+  "@nextStampIn": {
+    "placeholders": {
+      "wait": {}
+    }
+  },
+  "waitHoursMinutes": "{hours} h {minutes} min",
+  "@waitHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "waitMinutes": "{minutes} min",
+  "@waitMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
+}

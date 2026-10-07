@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models.dart';
 import 'auth_service.dart';
+import 'language.dart';
 import 'repo.dart';
 import 'stamping.dart';
 
@@ -59,17 +60,17 @@ class Api {
     try {
       tagSnap = await tagRef.get();
     } on FirebaseException {
-      throw const LoyiException('This tag is not active.');
+      throw LoyiException(l10n.tagNotActive);
     }
-    if (!tagSnap.exists || tagSnap.get('active') != true) throw const LoyiException('This tag is not active.');
+    if (!tagSnap.exists || tagSnap.get('active') != true) throw LoyiException(l10n.tagNotActive);
     final tag = LoyiTag.fromDoc(tagSnap);
 
     final programSnap = await _db.doc('programs/${tag.programId}').get();
-    if (!programSnap.exists) throw const LoyiException('This tag is not active.');
+    if (!programSnap.exists) throw LoyiException(l10n.tagNotActive);
     final program = Program.fromDoc(programSnap);
-    if (!program.active) throw const LoyiException('This loyalty card is paused.');
+    if (!program.active) throw LoyiException(l10n.cardPaused);
     if (!await repo.isSubscribed(program.ownerUid)) {
-      throw const LoyiException("This shop's Loyi cards aren't active right now. Your stamps are safe.");
+      throw LoyiException(l10n.shopNotActive);
     }
 
     final cardId = '${program.id}_$uid';
@@ -177,12 +178,12 @@ class Api {
     final cardRef = _db.doc('cards/$cardId');
     return _db.runTransaction((tx) async {
       final cardSnap = await tx.get(cardRef);
-      if (!cardSnap.exists) throw const LoyiException('Card not found.');
+      if (!cardSnap.exists) throw LoyiException(l10n.cardNotFound);
       final card = LoyaltyCard.fromDoc(cardSnap);
       final program = Program.fromDoc(await tx.get(_db.doc('programs/${card.programId}')));
-      if (card.rewardsAvailable < 1) throw const LoyiException('No full card to redeem yet.');
+      if (card.rewardsAvailable < 1) throw LoyiException(l10n.noFullCardYet);
       final reward = program.activeRewards.where((r) => r.id == rewardId).firstOrNull;
-      if (reward == null) throw const LoyiException('This reward is no longer available.');
+      if (reward == null) throw LoyiException(l10n.rewardNoLongerAvailable);
 
       final totalRedeemed = card.totalRedeemed + 1;
       final now = FieldValue.serverTimestamp();
@@ -211,7 +212,7 @@ final api = Api();
 /// Readable message for errors from the API and Firebase.
 String friendlyError(Object error) => switch (error) {
   LoyiException(:final message) => message,
-  FirebaseException(code: 'unavailable') => 'No connection. Check your internet and try again.',
-  FirebaseException(code: 'permission-denied') => "You don't have permission to do that.",
-  _ => 'Something went wrong. Please try again.',
+  FirebaseException(code: 'unavailable') => l10n.noConnection,
+  FirebaseException(code: 'permission-denied') => l10n.noPermission,
+  _ => l10n.somethingWentWrong,
 };

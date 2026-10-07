@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models.dart';
 import '../services/api.dart';
 import '../services/auth_service.dart';
+import '../services/language.dart';
 import '../services/repo.dart';
 import '../theme.dart';
 import '../widgets/loyalty_card_view.dart';
-import 'business_scope.dart';
+import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
+import 'business_scope.dart';
 import 'design_editor.dart';
 import 'tags_section.dart';
 
@@ -61,15 +64,14 @@ class _RewardRow {
   bool active;
 }
 
-const _cooldownOptions = <int, String>{
-  0: 'No limit',
-  5: '5 minutes',
-  15: '15 minutes',
-  30: '30 minutes',
-  60: '1 hour',
-  120: '2 hours',
-  720: '12 hours',
-  1440: '1 day',
+/// Waiting times between two stamps, in minutes.
+const _cooldownOptions = [0, 5, 15, 30, 60, 120, 720, 1440];
+
+String _cooldownLabel(L10n l, int minutes) => switch (minutes) {
+  0 => l.noLimit,
+  < 60 => l.minutesCount(minutes),
+  < 1440 => l.hoursCount(minutes ~/ 60),
+  _ => l.daysCount(minutes ~/ 1440),
 };
 
 class _ProgramEditor extends StatefulWidget {
@@ -87,7 +89,8 @@ class _ProgramEditorState extends State<_ProgramEditor> {
   late int _stampsRequired = widget.initial?.stampsRequired ?? 10;
   late int _cooldown = widget.initial?.stampCooldownMinutes ?? 30;
   late bool _active = widget.initial?.active ?? true;
-  late CardDesign _design = widget.initial?.designFor(widget.business) ?? CardDesign.fromBrand(widget.business.brandColors);
+  late CardDesign _design =
+      widget.initial?.designFor(widget.business) ?? CardDesign.fromBrand(widget.business.brandColors);
   late final List<_RewardRow> _rewards = [
     for (final r in widget.initial?.rewards ?? const <Reward>[]) _RewardRow(r.id, r.title, r.active),
     if (widget.initial == null) _RewardRow(repo.newId(), '', true),
@@ -114,8 +117,8 @@ class _ProgramEditorState extends State<_ProgramEditor> {
         if (r.title.text.trim().isNotEmpty) Reward(id: r.id, title: r.title.text.trim(), active: r.active),
     ];
     final error = switch (()) {
-      _ when _name.text.trim().isEmpty => 'Give your card a name.',
-      _ when rewards.isEmpty => 'Add at least one reward.',
+      _ when _name.text.trim().isEmpty => context.l10n.giveCardName,
+      _ when rewards.isEmpty => context.l10n.addOneReward,
       _ => null,
     };
     setState(() => _error = error);
@@ -143,11 +146,11 @@ class _ProgramEditorState extends State<_ProgramEditor> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(_isNew ? 'Card created. Now add your NFC tags below.' : 'Saved')));
+      ).showSnackBar(SnackBar(content: Text(_isNew ? context.l10n.cardCreated : context.l10n.saved)));
       if (_isNew) context.go('/business/programs/$id');
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = 'Could not save. ${friendlyError(e)}');
+      setState(() => _error = context.l10n.couldNotSave(friendlyError(e)));
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_error!)));
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -157,34 +160,35 @@ class _ProgramEditorState extends State<_ProgramEditor> {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final l = context.l10n;
 
     final preview = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         LoyaltyCardView(
           businessName: widget.business.name,
-          programName: _name.text.isEmpty ? 'Your card name' : _name.text,
+          programName: _name.text.isEmpty ? l.yourCardName : _name.text,
           design: _design,
           logo: widget.business.logo,
           stamps: (_stampsRequired / 3).ceil(),
           stampsRequired: _stampsRequired,
         ),
         const SizedBox(height: 8),
-        Text('Preview', style: text.bodySmall, textAlign: TextAlign.center),
+        Text(l.preview, style: text.bodySmall, textAlign: TextAlign.center),
       ],
     );
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isNew ? 'New loyalty card' : 'Edit loyalty card'),
-        leading: BackButton(onPressed: () => context.go('/business')),
+        title: Text(_isNew ? l.newLoyaltyCard : l.editLoyaltyCard),
+        leading: BackButton(onPressed: () => context.go('/business/cards')),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: FilledButton(
               style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
               onPressed: _saving ? null : _save,
-              child: Text(_isNew ? 'Create' : 'Save'),
+              child: Text(_isNew ? l.create : l.save),
             ),
           ),
         ],
@@ -226,23 +230,23 @@ class _ProgramEditorState extends State<_ProgramEditor> {
 
   List<Widget> _formFields(TextTheme text) => [
     _Section(
-      title: 'Card name',
-      subtitle: 'Short and descriptive; clients see it under your business name.',
+      title: context.l10n.cardName,
+      subtitle: context.l10n.cardNameSub,
       child: TextField(
         controller: _name,
         maxLength: 30,
         autocorrect: false,
         textCapitalization: TextCapitalization.sentences,
-        decoration: const InputDecoration(hintText: 'e.g. Koffiekaart'),
+        decoration: InputDecoration(hintText: context.l10n.cardNameHint),
       ),
     ),
     _Section(
-      title: 'Design',
+      title: context.l10n.design,
       child: DesignEditor(design: _design, onChanged: (d) => setState(() => _design = d)),
     ),
     _Section(
-      title: 'Stamps for a full card',
-      subtitle: '6 to 10 stamps feels achievable for most clients; more can feel out of reach.',
+      title: context.l10n.stampsForFullCard,
+      subtitle: context.l10n.stampsForFullCardSub,
       child: Wrap(
         spacing: 12,
         runSpacing: 12,
@@ -252,9 +256,9 @@ class _ProgramEditorState extends State<_ProgramEditor> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton.filledTonal(
-                tooltip: 'Fewer stamps',
+                tooltip: context.l10n.fewerStamps,
                 onPressed: _stampsRequired > 1 ? () => setState(() => _stampsRequired--) : null,
-                icon: const Icon(Icons.remove_rounded),
+                icon: const Icon(LoyiIcons.minus),
               ),
               Container(
                 width: 72,
@@ -262,9 +266,9 @@ class _ProgramEditorState extends State<_ProgramEditor> {
                 child: Text('$_stampsRequired', style: text.headlineLarge),
               ),
               IconButton.filledTonal(
-                tooltip: 'More stamps',
+                tooltip: context.l10n.moreStamps,
                 onPressed: _stampsRequired < 50 ? () => setState(() => _stampsRequired++) : null,
-                icon: const Icon(Icons.add_rounded),
+                icon: const Icon(LoyiIcons.plus),
               ),
             ],
           ),
@@ -278,10 +282,8 @@ class _ProgramEditorState extends State<_ProgramEditor> {
       ),
     ),
     _Section(
-      title: 'Rewards',
-      subtitle:
-          'Clients with a full card choose one of the active rewards. '
-          'Switch rewards on or off anytime, e.g. a different reward each week.',
+      title: context.l10n.rewards,
+      subtitle: context.l10n.rewardsSub,
       child: Column(
         children: [
           for (final r in _rewards)
@@ -297,17 +299,17 @@ class _ProgramEditorState extends State<_ProgramEditor> {
                       autocorrect: false,
                       textCapitalization: TextCapitalization.sentences,
                       onChanged: (_) => _rebuild(),
-                      decoration: const InputDecoration(hintText: 'e.g. Free coffee', counterText: '', isDense: true),
+                      decoration: InputDecoration(hintText: context.l10n.rewardHint, counterText: '', isDense: true),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Tooltip(
-                    message: r.active ? 'Active' : 'Hidden from clients',
+                    message: r.active ? context.l10n.active : context.l10n.hiddenFromClients,
                     child: Switch(value: r.active, onChanged: (v) => setState(() => r.active = v)),
                   ),
                   IconButton(
-                    tooltip: 'Remove',
-                    icon: const Icon(Icons.delete_outline),
+                    tooltip: context.l10n.remove,
+                    icon: const Icon(LoyiIcons.trash),
                     onPressed: () {
                       setState(() => _rewards.remove(r));
                       WidgetsBinding.instance.addPostFrameCallback((_) => r.title.dispose());
@@ -322,19 +324,21 @@ class _ProgramEditorState extends State<_ProgramEditor> {
               onPressed: _rewards.length >= 20
                   ? null
                   : () => setState(() => _rewards.add(_RewardRow(repo.newId(), '', true))),
-              icon: const Icon(Icons.add),
-              label: const Text('Add reward'),
+              icon: const Icon(LoyiIcons.plus),
+              label: Text(context.l10n.addReward),
             ),
           ),
         ],
       ),
     ),
     _Section(
-      title: 'Time between stamps',
-      subtitle: 'The minimum wait before the same client can get another stamp. Stops double taps.',
+      title: context.l10n.timeBetweenStamps,
+      subtitle: context.l10n.timeBetweenStampsSub,
       child: DropdownButtonFormField<int>(
-        initialValue: _cooldownOptions.containsKey(_cooldown) ? _cooldown : 30,
-        items: [for (final e in _cooldownOptions.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
+        initialValue: _cooldownOptions.contains(_cooldown) ? _cooldown : 30,
+        items: [
+          for (final m in _cooldownOptions) DropdownMenuItem(value: m, child: Text(_cooldownLabel(context.l10n, m))),
+        ],
         onChanged: (v) => setState(() => _cooldown = v ?? 0),
       ),
     ),
@@ -346,8 +350,8 @@ class _ProgramEditorState extends State<_ProgramEditor> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Card is live', style: text.titleLarge),
-                Text('When paused, taps are refused but clients keep their stamps.', style: text.bodySmall),
+                Text(context.l10n.cardIsLive, style: text.titleLarge),
+                Text(context.l10n.cardIsLiveSub, style: text.bodySmall),
               ],
             ),
           ),
@@ -360,7 +364,10 @@ class _ProgramEditorState extends State<_ProgramEditor> {
       Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
     ],
     const SizedBox(height: 16),
-    FilledButton(onPressed: _saving ? null : _save, child: Text(_isNew ? 'Create card' : 'Save changes')),
+    FilledButton(
+      onPressed: _saving ? null : _save,
+      child: Text(_isNew ? context.l10n.createCard : context.l10n.saveChanges),
+    ),
     if (!_isNew) ...[const SizedBox(height: 36), TagsSection(program: widget.initial!)],
   ];
 }

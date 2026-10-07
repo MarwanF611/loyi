@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models.dart';
 import '../services/api.dart';
 import '../services/auth_service.dart';
+import '../services/language.dart';
 import '../services/repo.dart';
 import '../theme.dart';
 import '../widgets/confetti.dart';
 import '../widgets/loyalty_card_view.dart';
+import '../widgets/loyi_icons.dart';
+import '../widgets/message_card.dart';
 import '../widgets/save_cards_prompt.dart';
 import '../widgets/ui.dart';
 import 'card_data.dart';
@@ -38,8 +43,8 @@ class _CardPageState extends State<CardPage> {
         padding: const EdgeInsets.only(left: 8),
         child: TextButton.icon(
           onPressed: () => context.go('/cards'),
-          icon: const Icon(Icons.arrow_back_rounded, size: 20),
-          label: const Text('My cards'),
+          icon: const Icon(LoyiIcons.arrowLeft, size: 20),
+          label: Text(context.l10n.myCards),
         ),
       ),
     ),
@@ -94,15 +99,15 @@ class _CardNotFound extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconBadge(
-            icon: Icons.search_off_rounded,
+            icon: LoyiIcons.searchX,
             background: context.loyi.surfaceMuted,
             foreground: context.loyi.inkMuted,
             size: 64,
           ),
           const SizedBox(height: 16),
-          Text('Card not found on this device', style: context.text.titleLarge, textAlign: TextAlign.center),
+          Text(context.l10n.cardNotOnDevice, style: context.text.titleLarge, textAlign: TextAlign.center),
           const SizedBox(height: 20),
-          FilledButton(onPressed: () => context.go('/cards'), child: const Text('Go to my cards')),
+          FilledButton(onPressed: () => context.go('/cards'), child: Text(context.l10n.goToMyCards)),
         ],
       ),
     ),
@@ -183,6 +188,7 @@ class _CardDetailsState extends State<_CardDetails> {
                     rewardsAvailable: progress.rewards,
                     animateLatestStamp: tap?.outcome == TapOutcome.stamped && !tap!.completedCard,
                   ),
+                  _ShopMessages(card: widget.card, program: program, business: widget.business),
                   const SizedBox(height: 24),
                   if (hasReward)
                     Panel(
@@ -192,21 +198,14 @@ class _CardDetailsState extends State<_CardDetails> {
                         children: [
                           Row(
                             children: [
-                              IconBadge(
-                                icon: Icons.redeem_rounded,
-                                background: p.sun,
-                                foreground: LoyiPalette.light.ink,
-                              ),
+                              IconBadge(icon: LoyiIcons.gift, background: p.sun, foreground: LoyiPalette.light.ink),
                               const SizedBox(width: 14),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      progress.rewards == 1 ? '1 reward ready' : '${progress.rewards} rewards ready',
-                                      style: context.text.titleLarge,
-                                    ),
-                                    Text('Saved on your card. Use it now or later.', style: context.text.bodySmall),
+                                    Text(context.l10n.rewardsReady(progress.rewards), style: context.text.titleLarge),
+                                    Text(context.l10n.savedOnCard, style: context.text.bodySmall),
                                   ],
                                 ),
                               ),
@@ -214,7 +213,7 @@ class _CardDetailsState extends State<_CardDetails> {
                           ),
                           if (rewards.isEmpty) ...[
                             const SizedBox(height: 12),
-                            Text('This shop has no rewards available right now.', style: context.text.bodyMedium),
+                            Text(context.l10n.noRewardsNow, style: context.text.bodyMedium),
                           ],
                         ],
                       ),
@@ -231,7 +230,10 @@ class _CardDetailsState extends State<_CardDetails> {
                               const SizedBox(width: 8),
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
-                                child: Text('more to go', style: context.text.titleMedium?.copyWith(color: p.inkMuted)),
+                                child: Text(
+                                  context.l10n.moreToGo,
+                                  style: context.text.titleMedium?.copyWith(color: p.inkMuted),
+                                ),
                               ),
                             ],
                           ),
@@ -249,7 +251,7 @@ class _CardDetailsState extends State<_CardDetails> {
                           if (rewards.isNotEmpty) ...[
                             const SizedBox(height: 18),
                             Text(
-                              'Then choose one of these',
+                              context.l10n.thenChooseOne,
                               style: context.text.labelMedium?.copyWith(color: p.inkMuted),
                             ),
                             const SizedBox(height: 10),
@@ -258,7 +260,7 @@ class _CardDetailsState extends State<_CardDetails> {
                               runSpacing: 8,
                               children: [
                                 for (final r in rewards)
-                                  Pill(label: r.title, icon: Icons.redeem_rounded, background: p.sunSoft),
+                                  Pill(label: r.title, icon: LoyiIcons.gift, background: p.sunSoft),
                               ],
                             ),
                           ],
@@ -269,11 +271,11 @@ class _CardDetailsState extends State<_CardDetails> {
                   Row(
                     children: [
                       Expanded(
-                        child: _MiniStat(value: '${widget.card.totalStamps}', label: 'stamps collected'),
+                        child: _MiniStat(value: '${widget.card.totalStamps}', label: context.l10n.stampsCollected),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _MiniStat(value: '${widget.card.totalRedeemed}', label: 'rewards used'),
+                        child: _MiniStat(value: '${widget.card.totalRedeemed}', label: context.l10n.rewardsUsedLower),
                       ),
                     ],
                   ),
@@ -291,8 +293,8 @@ class _CardDetailsState extends State<_CardDetails> {
             child: BottomActionBar(
               child: FilledButton.icon(
                 onPressed: _chooseReward,
-                icon: const Icon(Icons.redeem_rounded),
-                label: const Text('Use a reward'),
+                icon: const Icon(LoyiIcons.gift),
+                label: Text(context.l10n.useAReward),
               ),
             ),
           ),
@@ -303,6 +305,72 @@ class _CardDetailsState extends State<_CardDetails> {
       ],
     );
   }
+}
+
+/// The shop's follow-up message for this card, if one is meant for this client.
+/// The match happens here, on the client's device: the shop never learns who saw it.
+class _ShopMessages extends StatefulWidget {
+  const _ShopMessages({required this.card, required this.program, required this.business});
+
+  final LoyaltyCard card;
+  final Program program;
+  final Business business;
+
+  @override
+  State<_ShopMessages> createState() => _ShopMessagesState();
+}
+
+class _ShopMessagesState extends State<_ShopMessages> {
+  static const _key = 'hiddenMessages';
+  late final Stream<List<ShopMessage>> _messages = repo.activeMessages(widget.business.id);
+  Set<String> _hidden = {};
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance()
+        .then((prefs) {
+          if (mounted) setState(() => _hidden = {...?prefs.getStringList(_key)});
+        })
+        .catchError((Object _) {});
+  }
+
+  Future<void> _hide(ShopMessage m) async {
+    setState(() => _hidden = {..._hidden, m.id});
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_key, _hidden.toList());
+    } catch (_) {
+      // Storage blocked: hidden for this visit only.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<List<ShopMessage>>(
+    stream: _messages,
+    builder: (context, snap) {
+      final now = DateTime.now();
+      final shown = [
+        for (final m in snap.data ?? const <ShopMessage>[])
+          if (!_hidden.contains(m.id) && m.showsFor(widget.card, widget.program, now)) m,
+      ]..sort((a, b) => (b.createdAt ?? now).compareTo(a.createdAt ?? now));
+      return AnimatedSize(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+        child: shown.isEmpty
+            ? const SizedBox(width: double.infinity)
+            : Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: MessageCard(
+                  business: widget.business,
+                  title: shown.first.title,
+                  body: shown.first.body,
+                  onDismiss: () => _hide(shown.first),
+                ),
+              ),
+      );
+    },
+  );
 }
 
 class _MiniStat extends StatelessWidget {
@@ -362,9 +430,9 @@ class _RewardSheetState extends State<_RewardSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Choose your reward', style: context.text.headlineSmall),
+        Text(context.l10n.chooseYourReward, style: context.text.headlineSmall),
         const SizedBox(height: 4),
-        Text('This uses one full card.', style: context.text.bodyMedium),
+        Text(context.l10n.usesOneFullCard, style: context.text.bodyMedium),
         const SizedBox(height: 18),
         for (final r in widget.program.activeRewards) ...[
           _RewardOption(title: r.title, selected: r.id == _selected, onTap: () => setState(() => _selected = r.id)),
@@ -376,13 +444,10 @@ class _RewardSheetState extends State<_RewardSheet> {
           decoration: BoxDecoration(color: p.surfaceMuted, borderRadius: BorderRadius.circular(Radii.md)),
           child: Row(
             children: [
-              Icon(Icons.storefront_rounded, color: p.inkMuted, size: 20),
+              Icon(LoyiIcons.store, color: p.inkMuted, size: 20),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  'Only do this at the counter. Staff need to see the confirmation screen.',
-                  style: context.text.bodySmall?.copyWith(color: p.ink),
-                ),
+                child: Text(context.l10n.onlyAtCounter, style: context.text.bodySmall?.copyWith(color: p.ink)),
               ),
             ],
           ),
@@ -396,10 +461,10 @@ class _RewardSheetState extends State<_RewardSheet> {
           onPressed: _busy ? null : _redeem,
           child: _busy
               ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
-              : const Text('Use it now'),
+              : Text(context.l10n.useItNow),
         ),
         const SizedBox(height: 6),
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Not yet')),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(context.l10n.notYet)),
       ],
     );
   }
@@ -436,14 +501,14 @@ class _RewardOption extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Row(
                   children: [
-                    IconBadge(icon: Icons.redeem_rounded, background: p.sunSoft, foreground: p.ink, size: 40),
+                    IconBadge(icon: LoyiIcons.gift, background: p.sunSoft, foreground: p.ink, size: 40),
                     const SizedBox(width: 14),
                     Expanded(child: Text(title, style: context.text.titleMedium)),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 180),
                       child: selected
-                          ? Icon(Icons.check_circle_rounded, key: const ValueKey(1), color: p.accent, size: 26)
-                          : Icon(Icons.circle_outlined, key: const ValueKey(0), color: p.line, size: 26),
+                          ? Icon(LoyiIcons.circleCheck, key: const ValueKey(1), color: p.accent, size: 26)
+                          : Icon(LoyiIcons.circle, key: const ValueKey(0), color: p.line, size: 26),
                     ),
                   ],
                 ),
@@ -464,33 +529,22 @@ class _TapBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.loyi;
+    final l = context.l10n;
     final (icon, title, subtitle, bg, fg) = switch (result.outcome) {
       TapOutcome.stamped when result.completedCard => (
-        Icons.celebration_rounded,
-        'Card full!',
-        'You earned a reward. Use it now or on a later visit.',
+        LoyiIcons.partyPopper,
+        l.cardFull,
+        l.cardFullSub,
         p.sunSoft,
         p.sun,
       ),
-      TapOutcome.stamped => (Icons.check_rounded, 'Stamp added', 'Thanks for your visit!', p.mintSoft, p.mint),
-      TapOutcome.joined => (
-        Icons.waving_hand_rounded,
-        'Welcome!',
-        'Your card is ready. Tap the counter tag after each purchase.',
-        p.accentSoft,
-        p.accent,
-      ),
-      TapOutcome.alreadyMember => (
-        Icons.style_rounded,
-        'Your card',
-        'You already have this card.',
-        p.surfaceMuted,
-        p.ink,
-      ),
+      TapOutcome.stamped => (LoyiIcons.check, l.stampAdded, l.thanksForVisit, p.mintSoft, p.mint),
+      TapOutcome.joined => (LoyiIcons.hand, l.welcome, l.welcomeSub, p.accentSoft, p.accent),
+      TapOutcome.alreadyMember => (LoyiIcons.walletCards, l.yourCard, l.alreadyHaveCard, p.surfaceMuted, p.ink),
       TapOutcome.cooldown => (
-        Icons.timer_outlined,
-        'Already stamped',
-        'Your next stamp is possible in ${_formatWait(result.retryAfter)}.',
+        LoyiIcons.timer,
+        l.alreadyStamped,
+        l.nextStampIn(_formatWait(l, result.retryAfter)),
         p.surfaceMuted,
         p.inkMuted,
       ),
@@ -533,8 +587,8 @@ class _TapBanner extends StatelessWidget {
     );
   }
 
-  static String _formatWait(Duration d) {
-    if (d.inHours >= 1) return '${d.inHours} h ${d.inMinutes.remainder(60)} min';
-    return '${d.inMinutes + 1} min';
+  static String _formatWait(L10n l, Duration d) {
+    if (d.inHours >= 1) return l.waitHoursMinutes(d.inHours, d.inMinutes.remainder(60));
+    return l.waitMinutes(d.inMinutes + 1);
   }
 }

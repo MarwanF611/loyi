@@ -5,12 +5,16 @@
 //   firebase emulators:start --project demo-loyi
 // Then: cd marketing && npm run capture   (re-seeds the demo data first)
 import { execFileSync } from "node:child_process";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import puppeteer from "puppeteer-core";
 
 const HOST = "http://localhost:5050";
 const CHROME = process.env.CHROME_PATH ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-const OUT = new URL("./raw/", import.meta.url).pathname;
+// LANG=nl|fr|en (default nl, like the app) captures the app in that language into raw/<lang>/.
+const LANG = process.env.LANG_CODE ?? "nl";
+const OUT = new URL(`./raw/${LANG}/`, import.meta.url).pathname;
+// Button labels in that language, straight from the app's translations.
+const t = JSON.parse(readFileSync(new URL(`../app/lib/l10n/app_${LANG}.arb`, import.meta.url), "utf8"));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // iPhone Pro Max: 440×956 pt at 3×. The top 54 pt are left for the status bar
@@ -26,6 +30,7 @@ const DEMO = {
   peetersStamp: "Hs8vD1qLr6Yp0KaN5tWu",
   mokkaStamp: "Zq5wE8rT2yU6iO9pA3sD",
   liesJoin: "Lf4gH7jK1lZ3xC6vB9nM",
+  liesProgram: "lies-bloemenkaart",
 };
 
 async function openApp(browser, viewport, path = "/cards") {
@@ -34,6 +39,7 @@ async function openApp(browser, viewport, path = "/cards") {
   page.on("pageerror", (e) => console.warn("  page error:", e.message.slice(0, 160)));
   await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
   await page.setViewport(viewport);
+  await page.evaluateOnNewDocument((lang) => localStorage.setItem("flutter.locale", JSON.stringify(lang)), LANG);
   await page.goto(HOST + path);
   await page.waitForFunction(() => window.firebase_auth && document.querySelector("flutter-view"), { timeout: 30000 });
   await sleep(2500);
@@ -94,6 +100,11 @@ async function scroll(page, dy, at = { x: 6, y: 600 }) {
   await sleep(900);
 }
 
+async function pageEscape(page) {
+  await page.keyboard.press("Escape");
+  await sleep(800);
+}
+
 const shot = (page, name) => {
   console.log("  ✓", name);
   return page.screenshot({ path: `${OUT}${name}.png` });
@@ -127,11 +138,14 @@ try {
   await go(sam, "/cards", 3500);
   await shot(sam, "client-my-cards");
   await go(sam, `/c/${DEMO.peetersProgram}_demo-client-sam`, 3000);
-  await tap(sam, "Use a reward");
+  await tap(sam, t.useAReward);
   await tap(sam, "Gratis koffie", 800);
   await shot(sam, "client-reward-sheet");
-  await tap(sam, "Use it now", 2600);
+  await tap(sam, t.useItNow, 2600);
   await shot(sam, "client-redeemed");
+  // A shop's follow-up message on the client's card.
+  await go(sam, `/c/${DEMO.liesProgram}_demo-client-sam`, 3500);
+  await shot(sam, "client-message");
 
   console.log("Business screens (phone)");
   const owner = await openApp(browser, PHONE, "/business/login");
@@ -139,7 +153,19 @@ try {
   await go(owner, "/business", 4000);
   await shot(owner, "business-dashboard");
   await scroll(owner, 900);
+  await shot(owner, "business-dashboard-followup");
+  await scroll(owner, 900);
   await shot(owner, "business-dashboard-activity");
+  await go(owner, "/business/clients", 3500);
+  await shot(owner, "business-clients");
+  await go(owner, "/business/insights", 4500);
+  await shot(owner, "business-insights");
+  await scroll(owner, 1250);
+  await shot(owner, "business-insights-busy");
+  await go(owner, "/business", 3000);
+  await tap(owner, t.audienceSlipping, 2000);
+  await shot(owner, "business-message-composer");
+  await pageEscape(owner);
   await go(owner, `/business/programs/${DEMO.peetersProgram}`, 3500);
   await shot(owner, "business-editor");
   await scroll(owner, 1400);
@@ -154,6 +180,10 @@ try {
   await signIn(desk, DEMO.peetersOwner);
   await go(desk, "/business", 4000);
   await shot(desk, "desktop-dashboard");
+  await go(desk, "/business/insights", 4500);
+  await shot(desk, "desktop-insights");
+  await go(desk, "/business/clients", 3500);
+  await shot(desk, "desktop-clients");
   await go(desk, `/business/programs/${DEMO.peetersProgram}`, 3500);
   await shot(desk, "desktop-editor");
   const login = await openApp(browser, DESKTOP, "/business/login");

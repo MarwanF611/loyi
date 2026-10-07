@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 
 import '../services/api.dart';
 import '../services/auth_service.dart';
+import '../services/language.dart';
 import '../theme.dart';
+import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 
 /// Landing page for `/t/<tagId>`, the URL written on every NFC tag.
@@ -54,9 +56,9 @@ class _TapPageState extends State<TapPage> {
                       children: [
                         const _Pulse(),
                         const SizedBox(height: 28),
-                        Text('Adding to your card…', style: context.text.headlineSmall, textAlign: TextAlign.center),
+                        Text(context.l10n.addingToCard, style: context.text.headlineSmall, textAlign: TextAlign.center),
                         const SizedBox(height: 6),
-                        Text('This only takes a moment.', style: context.text.bodyMedium),
+                        Text(context.l10n.onlyAMoment, style: context.text.bodyMedium),
                       ],
                     )
                   : Column(
@@ -65,20 +67,24 @@ class _TapPageState extends State<TapPage> {
                       children: [
                         Center(
                           child: IconBadge(
-                            icon: Icons.nfc_rounded,
+                            icon: LoyiIcons.nfc,
                             background: p.accentSoft,
                             foreground: p.accent,
                             size: 72,
                           ),
                         ),
                         const SizedBox(height: 20),
-                        Text('That didn’t work', style: context.text.headlineSmall, textAlign: TextAlign.center),
+                        Text(
+                          context.l10n.thatDidntWorkTitle,
+                          style: context.text.headlineSmall,
+                          textAlign: TextAlign.center,
+                        ),
                         const SizedBox(height: 6),
                         Text(_error!, style: context.text.bodyMedium, textAlign: TextAlign.center),
                         const SizedBox(height: 28),
-                        FilledButton(onPressed: _tap, child: const Text('Try again')),
+                        FilledButton(onPressed: _tap, child: Text(context.l10n.tryAgain)),
                         const SizedBox(height: 8),
-                        TextButton(onPressed: () => context.go('/cards'), child: const Text('Go to my cards')),
+                        TextButton(onPressed: () => context.go('/cards'), child: Text(context.l10n.goToMyCards)),
                       ],
                     ),
             ),
@@ -143,7 +149,7 @@ class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
             shape: BoxShape.circle,
             boxShadow: [BoxShadow(color: p.accent.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 8))],
           ),
-          child: const Icon(Icons.nfc_rounded, color: Colors.white, size: 36),
+          child: const Icon(LoyiIcons.nfc, color: Colors.white, size: 36),
         ),
       ),
     );

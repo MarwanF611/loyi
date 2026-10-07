@@ -36,26 +36,46 @@ referee. A write is only accepted if it's exactly what the app would do:
 | Security rules | `firestore.rules` |
 | End-to-end rules tests, plus demo seed data | `e2e/` |
 | Business sign-up steps (name, colours, payment) | `app/lib/business/onboarding.dart` |
-| Subscriptions (RevenueCat) and the paywall | `app/lib/services/billing.dart`, `app/lib/business/subscribe_page.dart` |
-| RevenueCat webhook → Firestore (Cloudflare Worker, free tier) | `billing-worker/` |
+| Subscriptions (Stripe) and the paywall | `app/lib/services/billing.dart`, `app/lib/business/subscribe_page.dart` |
+| Billing server: Stripe Checkout, portal, webhook → Firestore (Cloudflare Worker, free tier) | `billing-worker/`, setup in [`docs/STRIPE.md`](docs/STRIPE.md) |
 | Account & privacy: data export, email/password, deletion | `app/lib/account/`, `app/lib/services/data_export.dart` |
 | Privacy policy, terms, account deletion pages | `app/web/*.html` |
 | Store launch checklist | [`docs/LAUNCH.md`](docs/LAUNCH.md) |
 
 **Business sign-up** works in the app and in the browser, in three steps: (1) business name, email and
-password, (2) up to three brand colours with a live card preview, (3) the €19/month subscription through
-RevenueCat (App Store or Google Play in the app, Stripe via RevenueCat Web Billing in the browser). The
-dashboard only opens once the payment is confirmed; leaving halfway continues at the same step on the next
-sign-in. Clients find the way in through **I have a business** on their cards page.
+password, (2) up to three brand colours with a live card preview, (3) the €19/month subscription. Payment
+happens on the website through Stripe Checkout (card or Bancontact); the apps sell nothing and only show
+the status. The dashboard only opens once the payment is confirmed; leaving halfway continues at the same
+step on the next sign-in. Clients find the way in through **I have a business** on their cards page.
 
 **How payment switches a shop on.** `subscriptions/{ownerUid}.expiresAt` must be in the future for the
 dashboard to open and for tags to work (`firestore.rules` checks it on every join and stamp; clients can
-always use rewards they already earned). Only `billing-worker/` writes that document (a service account),
-when RevenueCat reports a purchase, renewal, cancellation or expiry. The Worker ignores the webhook body's
-claims and reads the real status from RevenueCat's API, so a forged webhook grants nothing. Pilot shops and
-the App Review demo account get access with `billing-worker/grant-access.js`.
+always use rewards they already earned). Only `billing-worker/` writes that document (a service account).
+It creates Stripe Checkout and customer-portal sessions for signed-in shops (it verifies their Firebase ID
+token), and on every Stripe webhook it reads the subscription back from Stripe's API and mirrors it. Deleting
+a shop's account cancels its Stripe subscription. Pilot shops and the App Review demo account get access with
+`billing-worker/grant-access.js`. Local tests: `cd billing-worker && npm test` (emulators running).
 
-**Account & privacy (GDPR).** Shops (avatar on the dashboard) and clients (avatar on My cards) see what is
+**The business app** has five tabs (a sidebar on wide screens, a bottom bar on phones), all fed by one
+live listener on the shop's cards (`app/lib/business/shell.dart`):
+
+- **Overview:** stamps today and this week (vs last week), key numbers, ready-made follow-up groups and the live feed.
+- **Clients:** every card holder as an anonymous code (`#K7Q2`, unique per shop, so shops can't match lists),
+  with a status (new, regular, almost there, reward waiting, slipping away, haven't been back), filters,
+  a visit history and CSV export. The **Messages** view holds follow-up messages.
+- **Insights:** 7/30/90 days: stamps per day, new clients, rewards used, busy times (weekday × hour),
+  client mix, return rate, visits per client, days between visits, and progress per card. Computed in the
+  app from the log (`app/lib/business/insights/analytics.dart`); one load is capped at 5,000 stamps to stay
+  inside the free Firestore quota, and shorter periods are cut from a longer one already loaded.
+- **Cards** and **Settings** (logo, name, colours, appearance, subscription).
+
+**Follow-up without personal data.** A shop writes a short message for a group ("slipping away",
+"reward waiting", ...). Clients see it on their card in Loyi; their own device decides whether they're in
+the group (`audiencesFor` in `app/lib/models.dart`), so the shop never learns who saw it. No email, no
+push, no links (enforced by `firestore.rules`), at most two months, and clients can hide a message.
+Stamp and reward logs older than two years are deleted by the owner's app when it opens (no server on Spark).
+
+**Account & privacy (GDPR).** Shops (Account & privacy in the sidebar, or the avatar on phones) and clients (avatar on My cards) see what is
 stored, download all of it as JSON (art. 15/20), change their email or password (art. 16), and delete their
 account and data (art. 17). `/delete-account` explains the same for Google Play.
 
@@ -66,9 +86,11 @@ account and data (art. 17). `/delete-account` explains the same for Google Play.
 - `programs/{id}`: a loyalty card: `stampsRequired`, `rewards[]` (each can be switched on or off), `stampCooldownMinutes`, `active`, and `design` (card colour, optional second colour, style `solid | gradient | pattern`, stamp colour, stamp icon). Designs are limited to colours, an icon and the logo, so the same design can later become an Apple/Google Wallet pass
 - `tags/{id}`: `type: join | stamp`, linked to one program. The tag's URL is `/t/<id>`
 - `cards/{programId_clientUid}`: a client's progress: `stamps`, `rewardsAvailable` (banked full cards)
-- `stampEvents/{cardId}_{n}`, `redemptions/{cardId}_r{n}`: the log behind the business dashboard
+- `stampEvents/{cardId}_{n}`, `redemptions/{cardId}_r{n}`: the log behind the business dashboard, deleted after 2 years
+- `messages/{id}`: a shop's follow-up message: `title`, `body`, `audience`, optional `programId`, `active`, `endsAt`; public like programs
 - `transfers/{anonUid}`: hand-off used when merging a device's cards into an account
-- `subscriptions/{ownerUid}`: `expiresAt`, `store`, `willRenew`, `billingIssue`, `source` (`revenuecat` or `grant`). Written only by the billing Worker or `grant-access.js`
+- `subscriptions/{ownerUid}`: `expiresAt`, `store`, `willRenew`, `billingIssue`, `source` (`stripe` or `grant`). Written only by the billing server or `grant-access.js`
+- `billing/{ownerUid}`: Stripe customer and subscription ids; only the billing server reads or writes it
 
 **Clients** start as anonymous Firebase users (nothing to sign up for at the
 counter). They can save their cards with **Google**, **Apple** or **email + password**. This
@@ -83,26 +105,31 @@ only 5 of those emails per day.
 
 ## Design system ("Coral & Ink")
 
-All styling lives in `app/lib/theme.dart` (colour tokens, typography, component themes) and
-`app/lib/widgets/ui.dart` (shared building blocks).
+The app and the website share one look: the same tokens are in `app/web/site/site.css`. All app styling
+lives in `app/lib/theme.dart` (colour tokens, typography, component themes) and `app/lib/widgets/ui.dart`
+(shared building blocks); charts are in `app/lib/widgets/charts.dart`, without a chart package.
 
 | Token | Light | Use |
 | --- | --- | --- |
-| canvas / surface | `#F7F5F2` / `#FFFFFF` | warm off-white page, white panels |
+| canvas / surface | `#FFFFFF` / `#FFFFFF` | white page, white cards |
+| surfaceMuted | `#F7F5F2` | warm panels that group cards |
 | ink / inkMuted | `#17161C` / `#6E6A73` | text |
 | accent / accentSoft | `#FF5A3C` / `#FFE9E3` | primary actions, highlights |
 | sun / sunSoft | `#FFC83D` / `#FFF4D6` | rewards |
 | mint / mintSoft | `#1FB57A` / `#DDF5EA` | success, stamps, switches |
 
-- **Type:** Plus Jakarta Sans (bundled in `app/assets/fonts`, SIL OFL), bold headings with tight tracking.
-- **Surfaces:** white `Panel`s with soft layered shadows instead of Material's tinted elevation. Pill-shaped 56px buttons.
-- **Patterns:** a bento grid on the dashboard, the primary action in a bottom bar within thumb reach, bottom sheets for choices, a frosted app bar only where content scrolls under it, shimmering loading placeholders, a press-scale on tappable cards, haptics when a stamp lands, and confetti when a card fills up (skipped when "reduce motion" is on).
+- **Type:** Plus Jakarta Sans (bundled in `app/assets/fonts`, SIL OFL), semibold headings with tight tracking;
+  small caps labels ("eyebrows") in JetBrains Mono (OFL).
+- **Icons:** Lucide line icons, like the website (`LoyiIcons`; the font is tree-shaken to the icons used).
+- **Surfaces:** white `Panel`s with a soft drop shadow, warm `Panel(muted: true)` groups, and the coral
+  `CoralStage` hero with its dotted texture. Pill-shaped 52px buttons.
+- **Patterns:** a coral hero with this week's stamps on the overview, the primary action in a bottom bar within thumb reach, bottom sheets for choices, a frosted app bar only where content scrolls under it, shimmering loading placeholders, a press-scale on tappable cards, haptics when a stamp lands, and confetti when a card fills up (skipped when "reduce motion" is on).
 - **Dark mode:** its own palette (`LoyiPalette.dark`), not an inversion.
 
 ## Run locally (no Firebase account needed)
 
 ```bash
-cd app && flutter build web --dart-define=USE_EMULATORS=true && cd ..
+./scripts/build-web.sh --dart-define=USE_EMULATORS=true
 firebase emulators:start --project demo-loyi
 ```
 
@@ -130,7 +157,7 @@ On an Android emulator, add `--dart-define=EMULATOR_HOST=10.0.2.2`.
 ## Tests
 
 ```bash
-cd app && flutter test           # stamp maths, models, design
+cd app && flutter test           # stamp maths, models, design, insights, follow-up groups, translations
 cd e2e && npm test               # full flow + abuse attempts against firestore.rules (emulators running)
 ```
 
@@ -162,6 +189,34 @@ data, and 100 new accounts per hour per IP address (anonymous clients count too)
 
 **Later, with Blaze:** Apple/Google Wallet passes need a server to sign passes. The
 earlier Cloud Functions version is in git history (commit `d3a53f6`).
+
+## Website
+
+The page at `/` is a static website (`app/web/home.html`, `app/web/site/`) in the same Coral & Ink style:
+what Loyi does, for clients and shops, features, pricing and FAQ, with **Get started** buttons that open
+the app on *Create account* (`/business/login?signup=1`). `scripts/build-web.sh` builds the Flutter app and
+puts the website in front of it: `index.html` is the website and the app shell is `app.html`, which
+Firebase Hosting serves for every other path (`/t/…`, `/cards`, `/business`, …). Always build with that
+script (or `./scripts/deploy-web.sh`), not with a bare `flutter build web`.
+
+## Languages
+
+Loyi speaks **Dutch (default)**, French and English. The choice is stored once (`localStorage["flutter.locale"]`)
+and shared by the website and the app, so a shop that signs up from the French site gets the app in French.
+
+- **App:** strings live in `app/lib/l10n/app_{en,nl,fr}.arb` (English is the template with the
+  placeholders; Flutter generates `L10n` on build). Widgets use `context.l10n.someKey`; code without a
+  `BuildContext` (services, error messages) uses the global `l10n`. Shops pick the language under
+  Settings or Account & privacy, clients on their cards page and on the sign-in screen
+  (`app/lib/services/language.dart`). Stripe Checkout, the billing portal and Firebase's password emails
+  follow the same language. Add a string to all three ARB files; `flutter gen-l10n` warns about missing ones.
+- **Website:** `app/web/home.html` is the English source. `app/web_i18n/home.json` holds the Dutch and French
+  text for every piece of it, and `scripts/build-site.mjs` renders `/` (Dutch), `/fr/` and `/en/` at build
+  time. The build stops when a sentence has no translation. Screenshots come from `app/web/site/img/<lang>/`
+  (`cd marketing && npm run capture:all`).
+- **Legal pages:** edit `app/web_i18n/legal.py` and run `python3 app/web_i18n/legal.py`; it writes
+  `app/web/{privacy,terms,delete-account}.html` (Dutch) and the `fr/` and `en/` versions. The Dutch terms
+  prevail if the versions differ.
 
 ## Marketing visuals
 

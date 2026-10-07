@@ -3,15 +3,19 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models.dart';
+import '../services/appearance.dart';
+import '../services/language.dart';
 import '../services/repo.dart';
 import '../theme.dart';
 import '../widgets/account_widgets.dart';
 import '../widgets/loyalty_card_view.dart';
+import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 import 'business_form.dart';
 import 'business_scope.dart';
+import 'shell.dart';
 
-/// Business name, brand colour and logo.
+/// The Settings tab: logo, name and brand colours, appearance, subscription and account.
 class BusinessSettingsPage extends StatelessWidget {
   const BusinessSettingsPage({super.key});
 
@@ -19,15 +23,15 @@ class BusinessSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) => BusinessScope(
     builder: (context, business) {
       if (business == null) return const Scaffold();
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Business settings'),
-          leading: BackButton(onPressed: () => context.go('/business')),
-        ),
-        body: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-          children: [
-            PageBody(
+      final l = context.l10n;
+      return TabPage(
+        eyebrow: l.tabSettings,
+        title: l.yourShop,
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -36,12 +40,9 @@ class BusinessSettingsPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Logo', style: context.text.titleLarge),
+                        Text(l.logo, style: context.text.titleLarge),
                         const SizedBox(height: 4),
-                        Text(
-                          'Shown on all your loyalty cards. A square PNG with a transparent background works best.',
-                          style: context.text.bodySmall,
-                        ),
+                        Text(l.logoHint, style: context.text.bodySmall),
                         const SizedBox(height: 18),
                         _LogoEditor(business: business),
                       ],
@@ -53,21 +54,49 @@ class BusinessSettingsPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text('Details', style: context.text.titleLarge),
+                        Text(l.details, style: context.text.titleLarge),
                         const SizedBox(height: 16),
                         BusinessForm(
                           // Re-create the form if the stored values change elsewhere.
                           key: ValueKey('${business.name}-${business.brandColors}'),
                           initialName: business.name,
                           initialColors: business.brandColors,
-                          submitLabel: 'Save',
+                          submitLabel: l.save,
                           onSubmit: (name, colors) async {
                             await repo.updateBusiness(business.id, name: name, colors: colors);
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saved')));
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.saved)));
                             }
                           },
                         ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Panel(
+                    padding: const EdgeInsets.all(22),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l.appearance, style: context.text.titleLarge),
+                        const SizedBox(height: 4),
+                        Text(l.appearanceHint, style: context.text.bodySmall),
+                        const SizedBox(height: 16),
+                        const AppearancePicker(),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Panel(
+                    padding: const EdgeInsets.all(22),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l.language, style: context.text.titleLarge),
+                        const SizedBox(height: 4),
+                        Text(l.languageHint, style: context.text.bodySmall),
+                        const SizedBox(height: 16),
+                        const LanguagePicker(),
                       ],
                     ),
                   ),
@@ -77,13 +106,13 @@ class BusinessSettingsPage extends StatelessWidget {
                     child: Row(
                       children: [
                         IconBadge(
-                          icon: Icons.workspace_premium_rounded,
+                          icon: LoyiIcons.badgeCheck,
                           background: context.loyi.sunSoft,
                           foreground: context.loyi.ink,
                         ),
                         const SizedBox(width: 14),
-                        Expanded(child: Text('Subscription', style: context.text.titleMedium)),
-                        const Icon(Icons.chevron_right_rounded),
+                        Expanded(child: Text(l.subscription, style: context.text.titleMedium)),
+                        const Icon(LoyiIcons.chevronRight),
                       ],
                     ),
                   ),
@@ -93,7 +122,7 @@ class BusinessSettingsPage extends StatelessWidget {
                     child: Row(
                       children: [
                         IconBadge(
-                          icon: Icons.shield_outlined,
+                          icon: LoyiIcons.shield,
                           background: context.loyi.mintSoft,
                           foreground: context.loyi.mint,
                         ),
@@ -102,15 +131,12 @@ class BusinessSettingsPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Account & privacy', style: context.text.titleMedium),
-                              Text(
-                                'Email, password, your data, delete account',
-                                style: context.text.bodySmall,
-                              ),
+                              Text(l.accountAndPrivacy, style: context.text.titleMedium),
+                              Text(l.accountSettingsSub, style: context.text.bodySmall),
                             ],
                           ),
                         ),
-                        const Icon(Icons.chevron_right_rounded),
+                        const Icon(LoyiIcons.chevronRight),
                       ],
                     ),
                   ),
@@ -119,8 +145,8 @@ class BusinessSettingsPage extends StatelessWidget {
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     },
   );
@@ -145,7 +171,7 @@ class _LogoEditorState extends State<_LogoEditor> {
     } on FormatException catch (e) {
       _snack(e.message);
     } catch (e) {
-      _snack('Could not update the logo. Please try again.');
+      if (mounted) _snack(context.l10n.couldNotUpdateLogo);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -189,13 +215,13 @@ class _LogoEditorState extends State<_LogoEditor> {
                 onPressed: _busy ? null : _pick,
                 icon: _busy
                     ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.upload),
-                label: Text(hasLogo ? 'Replace logo' : 'Upload logo'),
+                    : const Icon(LoyiIcons.upload),
+                label: Text(hasLogo ? context.l10n.replaceLogo : context.l10n.uploadLogo),
               ),
               if (hasLogo)
                 TextButton(
                   onPressed: _busy ? null : () => _run(() => repo.removeLogo(widget.business)),
-                  child: const Text('Remove'),
+                  child: Text(context.l10n.remove),
                 ),
             ],
           ),

@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../account/account_privacy.dart';
 import '../services/api.dart';
 import '../services/auth_service.dart';
+import '../services/language.dart';
 import '../theme.dart';
 import '../widgets/account_widgets.dart';
+import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 
 /// Lets a client save their cards (so they survive a new phone or browser)
@@ -41,7 +43,7 @@ class _AccountPageState extends State<AccountPage> {
     try {
       await action();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Your cards are saved.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.cardsSaved)));
       context.go('/cards');
     } on FirebaseAuthException catch (e) {
       final apple = appleSignInMessage(e);
@@ -50,15 +52,13 @@ class _AccountPageState extends State<AccountPage> {
             ? (apple.isEmpty ? null : apple)
             : switch (e.code) {
                 'popup-closed-by-user' || 'cancelled-popup-request' || 'canceled' || 'web-context-canceled' => null,
-                'account-exists-with-different-credential' =>
-                  'This email already has an account with another sign-in method. Use that one.',
-                'email-already-in-use' ||
-                'credential-already-in-use' => 'This email already has an account. Choose "I have an account".',
-                'invalid-credential' || 'wrong-password' || 'user-not-found' => 'Wrong email or password.',
-                'weak-password' => 'Use at least 6 characters for your password.',
-                'invalid-email' => 'Enter a valid email address.',
-                'operation-not-allowed' => 'This sign-in method is not enabled yet.',
-                _ => e.message ?? 'Could not sign in.',
+                'account-exists-with-different-credential' => l10n.emailOtherMethod,
+                'email-already-in-use' || 'credential-already-in-use' => l10n.emailHasAccountChoose,
+                'invalid-credential' || 'wrong-password' || 'user-not-found' => l10n.wrongEmailOrPassword,
+                'weak-password' => l10n.passwordTooShort6,
+                'invalid-email' => l10n.invalidEmail,
+                'operation-not-allowed' => l10n.signInMethodDisabled,
+                _ => e.message ?? l10n.couldNotSignIn,
               },
       );
     } catch (e) {
@@ -71,7 +71,7 @@ class _AccountPageState extends State<AccountPage> {
   Future<void> _resetPassword() async {
     final email = _email.text.trim();
     if (!email.contains('@')) {
-      setState(() => _error = 'Enter your email address first.');
+      setState(() => _error = l10n.enterEmailFirst);
       return;
     }
     try {
@@ -82,13 +82,13 @@ class _AccountPageState extends State<AccountPage> {
     if (mounted) {
       setState(() {
         _error = null;
-        _info = 'If $email has an account, a link to reset the password is on its way.';
+        _info = l10n.resetLinkSent(email);
       });
     }
   }
 
   void _onDeleted() {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Your account and cards are deleted.')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.accountAndCardsDeleted)));
     context.go('/cards');
   }
 
@@ -127,31 +127,32 @@ class _AccountPageState extends State<AccountPage> {
               children: [
                 if (signedIn) ...[
                   header(
-                    Icons.verified_user_rounded,
+                    LoyiIcons.shieldCheck,
                     p.mintSoft,
                     p.mint,
-                    'Your cards are saved',
-                    'Sign in with this account on any device to see your cards.',
+                    context.l10n.yourCardsAreSaved,
+                    context.l10n.yourCardsAreSavedSub,
                   ),
                   AccountPrivacySections(business: false, onDeleted: _onDeleted),
                 ] else ...[
                   header(
-                    Icons.cloud_done_rounded,
+                    LoyiIcons.cloudCheck,
                     p.mintSoft,
                     p.mint,
-                    'Keep your cards safe',
-                    'Your stamps are stored in this browser. Save them to an account and they '
-                        'follow you to any phone. Already have an account? Your cards from this '
-                        'device are added to it.',
+                    context.l10n.keepCardsSafe,
+                    context.l10n.keepCardsSafeSub,
                   ),
                   OutlinedButton.icon(
                     onPressed: _busy ? null : () => _run(auth.saveWithGoogle),
                     icon: const _GoogleMark(),
-                    label: const Text('Continue with Google'),
+                    label: Text(context.l10n.continueWithGoogle),
                   ),
                   const SizedBox(height: 12),
                   AppleSignInButton(onPressed: _busy ? null : () => _run(auth.saveWithApple)),
-                  const Padding(padding: EdgeInsets.symmetric(vertical: 20), child: LabeledDivider('or with email')),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: LabeledDivider(context.l10n.orWithEmail),
+                  ),
                   Panel(
                     padding: const EdgeInsets.all(20),
                     child: AutofillGroup(
@@ -160,9 +161,9 @@ class _AccountPageState extends State<AccountPage> {
                         children: [
                           SegmentedButton<bool>(
                             showSelectedIcon: false,
-                            segments: const [
-                              ButtonSegment(value: false, label: Text('New account')),
-                              ButtonSegment(value: true, label: Text('I have an account')),
+                            segments: [
+                              ButtonSegment(value: false, label: Text(context.l10n.newAccount)),
+                              ButtonSegment(value: true, label: Text(context.l10n.iHaveAnAccount)),
                             ],
                             selected: {_existing},
                             onSelectionChanged: (s) => setState(() {
@@ -177,9 +178,9 @@ class _AccountPageState extends State<AccountPage> {
                             keyboardType: TextInputType.emailAddress,
                             autofillHints: const [AutofillHints.email],
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Email',
-                              prefixIcon: Icon(Icons.alternate_email_rounded),
+                            decoration: InputDecoration(
+                              labelText: context.l10n.email,
+                              prefixIcon: const Icon(LoyiIcons.atSign),
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -187,16 +188,16 @@ class _AccountPageState extends State<AccountPage> {
                             controller: _password,
                             obscureText: true,
                             autofillHints: [_existing ? AutofillHints.password : AutofillHints.newPassword],
-                            decoration: const InputDecoration(
-                              labelText: 'Password',
-                              prefixIcon: Icon(Icons.lock_outline_rounded),
+                            decoration: InputDecoration(
+                              labelText: context.l10n.password,
+                              prefixIcon: const Icon(LoyiIcons.lock),
                             ),
                             onSubmitted: (_) => _submitPassword(),
                           ),
                           if (_existing)
                             Align(
                               alignment: Alignment.centerRight,
-                              child: TextButton(onPressed: _resetPassword, child: const Text('Forgot password?')),
+                              child: TextButton(onPressed: _resetPassword, child: Text(context.l10n.forgotPassword)),
                             ),
                           const SizedBox(height: 16),
                           FilledButton(
@@ -207,7 +208,7 @@ class _AccountPageState extends State<AccountPage> {
                                     height: 22,
                                     child: CircularProgressIndicator(strokeWidth: 2.5),
                                   )
-                                : Text(_existing ? 'Sign in' : 'Save my cards'),
+                                : Text(_existing ? context.l10n.signIn : context.l10n.saveMyCards),
                           ),
                         ],
                       ),

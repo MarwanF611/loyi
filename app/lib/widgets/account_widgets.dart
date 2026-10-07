@@ -5,14 +5,17 @@ import 'package:url_launcher/url_launcher.dart';
 import '../config.dart';
 import '../services/api.dart';
 import '../services/auth_service.dart';
+import '../services/language.dart';
 import '../theme.dart';
 
 /// "Sign in with Apple" in Apple's style: black in light mode, white in dark mode.
 class AppleSignInButton extends StatelessWidget {
-  const AppleSignInButton({super.key, required this.onPressed, this.label = 'Continue with Apple'});
+  const AppleSignInButton({super.key, required this.onPressed, this.label});
 
   final VoidCallback? onPressed;
-  final String label;
+
+  /// Defaults to "Continue with Apple".
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +31,7 @@ class AppleSignInButton extends StatelessWidget {
       ),
       onPressed: onPressed,
       icon: const Icon(Icons.apple, size: 24),
-      label: Text(label),
+      label: Text(label ?? context.l10n.continueWithApple),
     );
   }
 }
@@ -40,8 +43,7 @@ String? appleSignInMessage(FirebaseAuthException e) {
   final message = e.message ?? '';
   if (!message.contains('AuthorizationError')) return null;
   if (message.contains('1001')) return '';
-  return 'Sign in with Apple didn\'t work. Check that you\'re signed in to your Apple Account in Settings, '
-      'or use email.';
+  return l10n.appleSignInFailed;
 }
 
 /// Divider with a short label in the middle ("or with email").
@@ -82,8 +84,8 @@ class LegalLinks extends StatelessWidget {
     return Wrap(
       alignment: alignment,
       children: [
-        TextButton(style: style, onPressed: () => openUrl(privacyUrl), child: const Text('Privacy policy')),
-        TextButton(style: style, onPressed: () => openUrl(termsUrl), child: const Text('Terms of use')),
+        TextButton(style: style, onPressed: () => openUrl(privacyUrl), child: Text(context.l10n.privacyPolicy)),
+        TextButton(style: style, onPressed: () => openUrl(termsUrl), child: Text(context.l10n.termsOfUse)),
       ],
     );
   }
@@ -134,11 +136,11 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
         () => _error = apple != null
             ? (apple.isEmpty ? null : apple)
             : switch (e.code) {
-                'wrong-password' || 'invalid-credential' => 'Wrong password.',
+                'wrong-password' || 'invalid-credential' => l10n.wrongPassword,
                 'popup-closed-by-user' || 'cancelled-popup-request' || 'web-context-canceled' || 'canceled' => null,
-                'user-mismatch' => 'Confirm with the same account you are signed in with.',
-                'too-many-requests' => 'Too many attempts. Try again in a few minutes.',
-                _ => e.message ?? 'Could not delete your account.',
+                'user-mismatch' => l10n.confirmSameAccount,
+                'too-many-requests' => l10n.tooManyAttempts,
+                _ => e.message ?? l10n.couldNotDeleteAccount,
               },
       );
     } catch (e) {
@@ -151,27 +153,21 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
   @override
   Widget build(BuildContext context) {
     final error = Theme.of(context).colorScheme.error;
+    final l = context.l10n;
     return AlertDialog(
-      title: const Text('Delete account?'),
+      title: Text(l.deleteAccountQuestion),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              widget.business
-                  ? 'Your shop, its loyalty cards and tags, your clients\' stamps for your shop and your '
-                        'activity history are permanently deleted. Your tags stop working.'
-                  : 'Your saved cards, stamps and rewards are permanently deleted. This can\'t be undone.',
+              widget.business ? l.deleteAccountBusinessBody : l.deleteAccountClientBody,
               style: context.text.bodyMedium,
             ),
             if (widget.business) ...[
               const SizedBox(height: 12),
-              Text(
-                'Deleting your account doesn\'t cancel a subscription. If you subscribed, cancel it first '
-                'under Subscription → Manage subscription.',
-                style: context.text.bodySmall,
-              ),
+              Text(l.deleteAccountSubscriptionNote, style: context.text.bodySmall),
             ],
             const SizedBox(height: 16),
             switch (_method) {
@@ -180,11 +176,11 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
                 obscureText: true,
                 autofocus: true,
                 autofillHints: const [AutofillHints.password],
-                decoration: const InputDecoration(labelText: 'Your password'),
+                decoration: InputDecoration(labelText: l.yourPassword),
                 onSubmitted: (_) => _busy ? null : _delete(),
               ),
-              ReauthMethod.apple => Text('You\'ll confirm with Apple.', style: context.text.bodySmall),
-              ReauthMethod.google => Text('You\'ll confirm with Google.', style: context.text.bodySmall),
+              ReauthMethod.apple => Text(l.confirmWithApple, style: context.text.bodySmall),
+              ReauthMethod.google => Text(l.confirmWithGoogle, style: context.text.bodySmall),
               ReauthMethod.none => const SizedBox.shrink(),
             },
             if (_error != null) ...[
@@ -195,13 +191,13 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: _busy ? null : () => Navigator.pop(context, false), child: const Text('Cancel')),
+        TextButton(onPressed: _busy ? null : () => Navigator.pop(context, false), child: Text(l.cancel)),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: error, foregroundColor: Colors.white),
           onPressed: _busy ? null : _delete,
           child: _busy
               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5))
-              : const Text('Delete account'),
+              : Text(l.deleteAccount),
         ),
       ],
     );

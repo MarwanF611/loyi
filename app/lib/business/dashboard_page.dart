@@ -5,75 +5,66 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models.dart';
-import '../services/auth_service.dart';
+import '../services/language.dart';
 import '../services/repo.dart';
 import '../theme.dart';
-import '../widgets/loyalty_card_view.dart';
-import '../widgets/stamp_icons.dart';
+import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
-import 'business_scope.dart';
-import 'onboarding.dart';
+import 'insights/analytics.dart';
+import 'messages.dart';
+import 'shell.dart';
 import 'subscribe_page.dart';
 
-class DashboardPage extends StatelessWidget {
-  const DashboardPage({super.key});
-
-  /// Sign-up steps first (name, colours, payment); the dashboard once the shop is paid.
-  @override
-  Widget build(BuildContext context) => BusinessScope(
-    builder: (context, business) {
-      if (business == null) return const NameStep();
-      if (business.colors.isEmpty) return ColorsStep(business: business);
-      return PlanBuilder(
-        builder: (context, status) => switch (status.state) {
-          PlanState.loading => const Scaffold(body: Center(child: CircularProgressIndicator())),
-          PlanState.active => _Dashboard(business: business),
-          PlanState.activating => const ActivatingStep(),
-          PlanState.none || PlanState.expired => PayStep(status: status),
-        },
-      );
-    },
-  );
-}
-
-String _greeting() {
+String _greeting(L10n l) {
   final h = DateTime.now().hour;
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
+  if (h < 12) return l.goodMorning;
+  if (h < 18) return l.goodAfternoon;
+  return l.goodEvening;
 }
 
-class _Dashboard extends StatefulWidget {
-  const _Dashboard({required this.business});
+/// "+12%" / "-5%", in the local style (French: "+12 %").
+String signedPercent(double change) => '${change >= 0 ? '+' : ''}${NumberFormat.percentPattern().format(change)}';
 
-  final Business business;
+/// The Overview tab: today at a glance, who to follow up with, and the live feed.
+class OverviewPage extends StatefulWidget {
+  const OverviewPage({super.key});
 
   @override
-  State<_Dashboard> createState() => _DashboardState();
+  State<OverviewPage> createState() => _OverviewPageState();
 }
 
-class _DashboardState extends State<_Dashboard> {
-  late final String _uid = auth.user!.uid;
-  late final Stream<List<Program>> _programs = repo.programsForBusiness(widget.business.id);
-  late final Stream<List<ActivityItem>> _stamps = repo.recentStamps(_uid, widget.business.id);
-  late final Stream<List<ActivityItem>> _redemptions = repo.recentRedemptions(_uid, widget.business.id);
-  late Future<({int clients, int stampsToday, int redeemed})> _stats = repo.stats(_uid, widget.business.id);
-  late Future<List<int>> _week = repo.stampsPerDay(_uid, widget.business.id);
+class _OverviewPageState extends State<OverviewPage> {
+  late BusinessData _data;
+  bool _started = false;
+  late Future<({int clients, int stampsToday, int redeemed})> _stats;
+  late Future<List<int>> _days;
+  late Stream<List<ActivityItem>> _stamps;
+  late Stream<List<ActivityItem>> _redemptions;
   final _subscriptions = <StreamSubscription<Object?>>[];
   Timer? _debounce;
 
   @override
-  void initState() {
-    super.initState();
-    // Refresh the counts whenever a client joins, stamps or redeems (skip the initial snapshot).
-    for (final stream in <Stream<Object?>>[
-      repo.newestCard(_uid, widget.business.id),
-      repo.recentStamps(_uid, widget.business.id),
-      repo.recentRedemptions(_uid, widget.business.id),
-    ]) {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _data = BusinessData.of(context);
+    if (_started) return;
+    _started = true;
+    final (uid, id) = (_data.uid, _data.business.id);
+    _stamps = repo.recentStamps(uid, id);
+    _redemptions = repo.recentRedemptions(uid, id);
+    _load();
+    // Refresh the counts whenever a client stamps or redeems (skip the initial snapshot).
+    for (final stream in [_stamps, _redemptions]) {
       _subscriptions.add(stream.skip(1).listen((_) => _scheduleRefresh(), onError: (_) {}));
     }
+  }
+
+  void _load() {
+    final (uid, id) = (_data.uid, _data.business.id);
+    _stats = repo.stats(uid, id);
+    _days = repo.stampsPerDay(uid, id, days: 14);
   }
 
   @override
@@ -88,489 +79,260 @@ class _DashboardState extends State<_Dashboard> {
   void _scheduleRefresh() {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 800), () {
-      if (mounted) _refresh();
+      if (mounted) setState(_load);
     });
   }
 
   Future<void> _refresh() async {
-    setState(() {
-      _stats = repo.stats(_uid, widget.business.id);
-      _week = repo.stampsPerDay(_uid, widget.business.id);
-    });
-    await Future.wait([_stats, _week]);
+    setState(_load);
+    await Future.wait([_stats, _days]);
   }
 
   @override
   Widget build(BuildContext context) {
-    final b = widget.business;
+    final data = BusinessData.of(context);
+    final b = data.business;
     final p = context.loyi;
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          onRefresh: _refresh,
-          child: StreamBuilder<List<Program>>(
-            stream: _programs,
-            builder: (context, programsSnap) {
-              final programs = programsSnap.data ?? const <Program>[];
-              final names = {for (final p in programs) p.id: p.name};
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-                children: [
-                  PageBody(
-                    maxWidth: 960,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _Header(business: b),
-                        const SubscriptionBanner(),
-                        const SizedBox(height: 24),
-                        _Bento(stats: _stats, week: _week),
-                        if (b.logo == null) ...[
-                          const SizedBox(height: 16),
-                          Panel(
-                            onTap: () => context.go('/business/settings'),
-                            child: Row(
-                              children: [
-                                IconBadge(
-                                  icon: Icons.add_photo_alternate_outlined,
-                                  background: p.accentSoft,
-                                  foreground: p.onAccentSoft,
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Add your logo', style: context.text.titleMedium),
-                                      Text(
-                                        'It appears on every card your clients carry.',
-                                        style: context.text.bodySmall,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const Icon(Icons.chevron_right_rounded),
-                              ],
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 32),
-                        SectionHeader(
-                          title: 'Loyalty cards',
-                          action: FilledButton.icon(
-                            style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
-                            onPressed: () => context.go('/business/programs/new'),
-                            icon: const Icon(Icons.add_rounded, size: 20),
-                            label: const Text('New card'),
-                          ),
-                        ),
-                        if (!programsSnap.hasData)
-                          const Skeleton(height: 140, radius: Radii.lg)
-                        else if (programs.isEmpty)
-                          const _EmptyPrograms()
-                        else
-                          _ProgramGrid(programs: programs, business: b),
-                        const SizedBox(height: 32),
-                        const SectionHeader(title: 'Recent activity'),
-                        _ActivityFeed(stamps: _stamps, redemptions: _redemptions, programNames: names),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
+    final l = context.l10n;
+    return TabPage(
+      eyebrow: _greeting(l),
+      title: b.name,
+      onRefresh: _refresh,
+      actions: [
+        if (wideLayout(context))
+          FilledButton.icon(
+            onPressed: () => showMessageComposer(context),
+            icon: const Icon(LoyiIcons.megaphone, size: 18),
+            label: Text(l.newMessage),
           ),
+      ],
+      children: [
+        const SubscriptionBanner(),
+        _Hero(stats: _stats, days: _days),
+        const SizedBox(height: 16),
+        _Kpis(stats: _stats),
+        const SizedBox(height: 36),
+        SectionHeader(eyebrow: l.followUp, title: l.whoToReachOut, subtitle: l.whoToReachOutSub),
+        const _FollowUps(),
+        if (b.logo == null) ...[
+          const SizedBox(height: 16),
+          Panel(
+            muted: true,
+            onTap: () => context.go('/business/settings'),
+            child: Row(
+              children: [
+                IconBadge(icon: LoyiIcons.imagePlus, background: p.accentSoft, foreground: p.accent),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l.addYourLogo, style: context.text.titleMedium),
+                      Text(l.addYourLogoSub, style: context.text.bodySmall),
+                    ],
+                  ),
+                ),
+                const Icon(LoyiIcons.chevronRight),
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: 36),
+        SectionHeader(
+          eyebrow: l.live,
+          title: l.recentActivity,
+          action: TextButton(onPressed: () => context.go('/business/insights'), child: Text(l.allInsights)),
         ),
-      ),
+        _ActivityFeed(stamps: _stamps, redemptions: _redemptions),
+      ],
     );
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required this.business});
-
-  final Business business;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      BusinessLogo(logo: business.logo, name: business.name, size: 52),
-      const SizedBox(width: 14),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(_greeting(), style: context.text.bodyMedium),
-            Text(business.name, style: context.text.headlineMedium, overflow: TextOverflow.ellipsis),
-          ],
-        ),
-      ),
-      RoundIconButton(
-        icon: Icons.storefront_outlined,
-        tooltip: 'Business settings',
-        onPressed: () => context.go('/business/settings'),
-      ),
-      const SizedBox(width: 8),
-      RoundIconButton(
-        icon: Icons.person_outline_rounded,
-        tooltip: 'Account & privacy',
-        onPressed: () => context.go('/business/account'),
-      ),
-    ],
-  );
-}
-
-/// Bento grid: a hero tile with today's stamps and a 7-day chart, plus two small tiles.
-class _Bento extends StatelessWidget {
-  const _Bento({required this.stats, required this.week});
+/// Coral stage like the website's hero: today's stamps and the last 7 days.
+class _Hero extends StatelessWidget {
+  const _Hero({required this.stats, required this.days});
 
   final Future<({int clients, int stampsToday, int redeemed})> stats;
-  final Future<List<int>> week;
+  final Future<List<int>> days;
 
   @override
   Widget build(BuildContext context) {
-    final p = context.loyi;
-    return FutureBuilder(
-      future: stats,
-      builder: (context, s) {
-        final clients = _SmallTile(
-          label: 'Clients',
-          value: s.data?.clients,
-          icon: Icons.people_alt_rounded,
-          background: p.surface,
-          badge: p.mintSoft,
-          badgeFg: p.mint,
-        );
-        final rewards = _SmallTile(
-          label: 'Rewards given',
-          value: s.data?.redeemed,
-          icon: Icons.redeem_rounded,
-          background: p.sunSoft,
-          badge: p.sun,
-          badgeFg: LoyiPalette.light.ink,
-        );
-        final hero = _HeroTile(today: s.data?.stampsToday, week: week);
-        return LayoutBuilder(
-          builder: (context, c) {
-            if (c.maxWidth >= 720) {
-              return SizedBox(
-                height: 236,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(flex: 3, child: hero),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(child: clients),
-                          const SizedBox(height: 14),
-                          Expanded(child: rewards),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return Column(
+    const white = Colors.white;
+    return FutureBuilder<List<int>>(
+      future: days,
+      builder: (context, d) {
+        final values = d.data ?? List.filled(14, 0);
+        final week = values.sublist(7);
+        final thisWeek = week.fold(0, (a, b) => a + b);
+        final lastWeek = values.sublist(0, 7).fold(0, (a, b) => a + b);
+        final delta = change(thisWeek, lastWeek);
+        final summary = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Eyebrow(context.l10n.stampsToday, color: white.withValues(alpha: 0.8)),
+            const SizedBox(height: 10),
+            FutureBuilder(
+              future: stats,
+              builder: (context, s) => _Count(
+                value: s.data?.stampsToday,
+                style: context.text.displayLarge!.copyWith(color: white, fontSize: 72),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                SizedBox(height: 220, child: hero),
-                const SizedBox(height: 14),
-                SizedBox(
-                  height: 120,
-                  child: Row(
+                _GlassChip(label: context.l10n.thisWeekCount(thisWeek)),
+                if (delta != null)
+                  _GlassChip(
+                    icon: delta >= 0 ? LoyiIcons.trendingUp : LoyiIcons.trendingDown,
+                    label: context.l10n.vsLastWeek(signedPercent(delta)),
+                  ),
+              ],
+            ),
+          ],
+        );
+        final bars = _WeekBars(values: week);
+        return CoralStage(
+          padding: const EdgeInsets.all(26),
+          child: LayoutBuilder(
+            builder: (context, c) => c.maxWidth >= 620
+                ? SizedBox(
+                    height: 210,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(child: summary),
+                        const SizedBox(width: 24),
+                        Expanded(child: bars),
+                      ],
+                    ),
+                  )
+                : Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(child: clients),
-                      const SizedBox(width: 14),
-                      Expanded(child: rewards),
+                      summary,
+                      const SizedBox(height: 22),
+                      SizedBox(height: 130, child: bars),
                     ],
                   ),
-                ),
-              ],
-            );
-          },
+          ),
         );
       },
     );
   }
 }
 
-class _HeroTile extends StatelessWidget {
-  const _HeroTile({required this.today, required this.week});
+/// Animates a number counting up, like the website's stats.
+class _Count extends StatelessWidget {
+  const _Count({required this.value, required this.style});
 
-  final int? today;
-  final Future<List<int>> week;
+  final int? value;
+  final TextStyle style;
 
   @override
   Widget build(BuildContext context) {
-    final p = context.loyi;
-    const white = Colors.white;
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Radii.lg),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [p.accent, Color.lerp(p.accent, const Color(0xFF7A1D0C), 0.3)!],
-        ),
-        boxShadow: [BoxShadow(color: p.accent.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 10))],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Stamps today', style: context.text.labelLarge?.copyWith(color: white.withValues(alpha: 0.85))),
-              const Spacer(),
-              Text(today?.toString() ?? '–', style: context.text.displayLarge?.copyWith(color: white, fontSize: 64)),
-              Text('Last 7 days →', style: context.text.labelMedium?.copyWith(color: white.withValues(alpha: 0.75))),
-            ],
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: FutureBuilder<List<int>>(
-              future: week,
-              builder: (context, s) => _WeekBars(values: s.data ?? List.filled(7, 0), highlight: p.sun),
-            ),
-          ),
-        ],
-      ),
+    final v = value;
+    if (v == null) return Text('–', style: style);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: v.toDouble()),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.easeOutCubic,
+      builder: (context, x, _) => Text(NumberFormat.decimalPattern().format(x.round()), style: style),
     );
   }
 }
 
-/// Tiny bar chart: one bar per day, today highlighted.
-class _WeekBars extends StatelessWidget {
-  const _WeekBars({required this.values, required this.highlight});
-
-  final List<int> values;
-  final Color highlight;
-
-  @override
-  Widget build(BuildContext context) {
-    final max = values.fold(1, math.max);
-    final days = [
-      for (var i = values.length - 1; i >= 0; i--) DateFormat.E().format(DateTime.now().subtract(Duration(days: i)))[0],
-    ];
-    return Semantics(
-      label: 'Stamps per day, last 7 days: ${values.join(', ')}',
-      child: ExcludeSemantics(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < values.length; i++)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: FractionallySizedBox(
-                            heightFactor: 0.06 + 0.94 * values[i] / max,
-                            widthFactor: 1,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: i == values.length - 1 ? highlight : Colors.white.withValues(alpha: 0.35),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        days[i],
-                        style: context.text.labelSmall?.copyWith(color: Colors.white.withValues(alpha: 0.8)),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SmallTile extends StatelessWidget {
-  const _SmallTile({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.background,
-    required this.badge,
-    required this.badgeFg,
-  });
+class _GlassChip extends StatelessWidget {
+  const _GlassChip({required this.label, this.icon});
 
   final String label;
-  final int? value;
-  final IconData icon;
-  final Color background;
-  final Color badge;
-  final Color badgeFg;
+  final IconData? icon;
 
   @override
-  Widget build(BuildContext context) {
-    final p = context.loyi;
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(Radii.lg),
-        boxShadow: background == p.surface ? p.panelShadow : null,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(value?.toString() ?? '–', style: context.text.headlineLarge),
-                Text(label, style: context.text.labelMedium?.copyWith(color: p.inkMuted)),
-              ],
-            ),
-          ),
-          IconBadge(icon: icon, background: badge, foreground: badgeFg),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyPrograms extends StatelessWidget {
-  const _EmptyPrograms();
-
-  @override
-  Widget build(BuildContext context) => Panel(
-    padding: const EdgeInsets.all(28),
-    child: Column(
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+    decoration: BoxDecoration(
+      color: const Color(0x2917161C),
+      borderRadius: BorderRadius.circular(99),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        IconBadge(
-          icon: Icons.style_rounded,
-          background: context.loyi.accentSoft,
-          foreground: context.loyi.accent,
-          size: 56,
-        ),
-        const SizedBox(height: 14),
-        Text('Create your first loyalty card', style: context.text.titleLarge, textAlign: TextAlign.center),
-        const SizedBox(height: 4),
-        Text(
-          'Choose how many stamps fill a card, your rewards and your colours.',
-          style: context.text.bodyMedium,
-          textAlign: TextAlign.center,
-        ),
+        if (icon != null) ...[Icon(icon, size: 15, color: Colors.white), const SizedBox(width: 6)],
+        Text(label, style: context.text.labelMedium?.copyWith(color: Colors.white)),
       ],
     ),
   );
 }
 
-/// Programs as mini cards in their own design colours.
-class _ProgramGrid extends StatelessWidget {
-  const _ProgramGrid({required this.programs, required this.business});
+/// One white bar per day on the coral stage, today in sunny yellow.
+class _WeekBars extends StatelessWidget {
+  const _WeekBars({required this.values});
 
-  final List<Program> programs;
-  final Business business;
-
-  @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, c) {
-      final columns = c.maxWidth >= 720 ? 3 : (c.maxWidth >= 440 ? 2 : 1);
-      const gap = 14.0;
-      final width = (c.maxWidth - gap * (columns - 1)) / columns;
-      return Wrap(
-        spacing: gap,
-        runSpacing: gap,
-        children: [
-          for (final p in programs)
-            SizedBox(
-              width: width,
-              child: _ProgramTile(program: p, design: p.designFor(business)),
-            ),
-        ],
-      );
-    },
-  );
-}
-
-class _ProgramTile extends StatelessWidget {
-  const _ProgramTile({required this.program, required this.design});
-
-  final Program program;
-  final CardDesign design;
+  final List<int> values;
 
   @override
   Widget build(BuildContext context) {
-    final fg = design.textColor;
-    final active = program.activeRewards.length;
-    void open() => context.go('/business/programs/${program.id}');
-    return Pressable(
-      onTap: open,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
-          boxShadow: [
-            BoxShadow(color: design.backgroundColor.withValues(alpha: 0.3), blurRadius: 18, offset: const Offset(0, 8)),
-          ],
-        ),
-        child: Material(
-          borderRadius: BorderRadius.circular(22),
-          clipBehavior: Clip.antiAlias,
-          color: design.backgroundColor,
-          child: Ink(
-            height: 140,
-            decoration: BoxDecoration(
-              gradient: design.style == CardStyle.solid
-                  ? null
-                  : LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [design.backgroundColor, design.secondaryColor],
-                    ),
-            ),
-            child: InkWell(
-              onTap: open,
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+    final max = values.fold(1, math.max);
+    final now = DateTime.now();
+    final days = [
+      for (var i = values.length - 1; i >= 0; i--)
+        DateFormat.E().format(now.subtract(Duration(days: i)))[0].toUpperCase(),
+    ];
+    return Semantics(
+      label: context.l10n.stampsLast7Days(values.join(', ')),
+      child: ExcludeSemantics(
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeOutCubic,
+          builder: (context, t, _) => Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < values.length; i++)
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Column(
                       children: [
-                        CircleAvatar(
-                          radius: 18,
-                          backgroundColor: design.stampFill,
-                          child: Icon(stampIconData(design.stampIcon), size: 20, color: design.stampIconColor),
+                        Text(
+                          '${values[i]}',
+                          style: context.text.labelSmall?.copyWith(color: Colors.white.withValues(alpha: 0.85)),
                         ),
-                        const Spacer(),
-                        if (!program.active)
-                          Pill(label: 'Paused', background: Colors.white, foreground: LoyiPalette.light.ink),
+                        const SizedBox(height: 4),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: FractionallySizedBox(
+                              heightFactor: (0.05 + 0.95 * values[i] / max) * t,
+                              widthFactor: 1,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: i == values.length - 1
+                                      ? const Color(0xFFFFC83D)
+                                      : Colors.white.withValues(alpha: 0.38),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          days[i],
+                          style: context.text.labelSmall?.copyWith(color: Colors.white.withValues(alpha: 0.8)),
+                        ),
                       ],
                     ),
-                    const Spacer(),
-                    Text(
-                      program.name,
-                      style: context.text.titleLarge?.copyWith(color: fg),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      '${program.stampsRequired} stamps · $active ${active == 1 ? 'reward' : 'rewards'} active',
-                      style: context.text.labelMedium?.copyWith(color: fg.withValues(alpha: 0.75)),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+            ],
           ),
         ),
       ),
@@ -578,25 +340,255 @@ class _ProgramTile extends StatelessWidget {
   }
 }
 
-String _relativeTime(DateTime t) {
-  final now = DateTime.now();
-  final diff = now.difference(t);
-  if (diff.inMinutes < 1) return 'Just now';
-  if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
-  if (now.year == t.year && now.month == t.month && now.day == t.day) return 'Today ${DateFormat.Hm().format(t)}';
-  return DateFormat('d MMM · HH:mm').format(t);
+/// Four key numbers, from the live card list and the reward count.
+class _Kpis extends StatelessWidget {
+  const _Kpis({required this.stats});
+
+  final Future<({int clients, int stampsToday, int redeemed})> stats;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = BusinessData.of(context);
+    final p = context.loyi;
+    final l = context.l10n;
+    final cards = data.cards;
+    final now = DateTime.now();
+    final clients = cards == null ? null : summarizeClients(data.business.id, cards, data.programById);
+    final joinedThisMonth = clients?.where((c) => c.joined != null && now.difference(c.joined!).inDays < 30).length;
+    final active = clients?.where((c) => c.lastVisit != null && now.difference(c.lastVisit!).inDays < 30).length;
+    final waiting = clients?.fold(0, (a, c) => a + c.rewardsWaiting);
+    return FutureBuilder(
+      future: stats,
+      builder: (context, s) {
+        final tiles = [
+          KpiTile(
+            icon: LoyiIcons.users,
+            tone: (p.mintSoft, p.mint),
+            label: l.kpiClients,
+            value: clients?.length,
+            note: joinedThisMonth == null ? null : l.kpiJoinedThisMonth(joinedThisMonth),
+          ),
+          KpiTile(
+            icon: LoyiIcons.repeat,
+            tone: (p.accentSoft, p.accent),
+            label: l.kpiActive,
+            value: active,
+            note: l.kpiActiveNote,
+          ),
+          KpiTile(
+            icon: LoyiIcons.hourglass,
+            tone: (p.sunSoft, p.onSunSoft),
+            label: l.kpiRewardsWaiting,
+            value: waiting,
+            note: l.kpiRewardsWaitingNote,
+          ),
+          KpiTile(
+            icon: LoyiIcons.gift,
+            tone: (p.surfaceMuted, p.ink),
+            label: l.kpiRewardsGiven,
+            value: s.data?.redeemed,
+            note: l.kpiRewardsGivenNote,
+          ),
+        ];
+        return KpiGrid(tiles: tiles);
+      },
+    );
+  }
 }
 
-class _ActivityFeed extends StatelessWidget {
-  const _ActivityFeed({required this.stamps, required this.redemptions, required this.programNames});
+/// Lays tiles out 4, 2 or 1 per row.
+class KpiGrid extends StatelessWidget {
+  const KpiGrid({super.key, required this.tiles});
 
-  final Stream<List<ActivityItem>> stamps;
-  final Stream<List<ActivityItem>> redemptions;
-  final Map<String, String> programNames;
+  final List<Widget> tiles;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, c) {
+      final columns = c.maxWidth >= 860 ? 4 : 2;
+      return GridRows(columns: columns, gap: 14, children: tiles);
+    },
+  );
+}
+
+/// A key number with an icon, a label and a small note (or a change).
+class KpiTile extends StatelessWidget {
+  const KpiTile({
+    super.key,
+    required this.icon,
+    required this.tone,
+    required this.label,
+    required this.value,
+    this.note,
+    this.delta,
+    this.format,
+  });
+
+  final IconData icon;
+
+  /// Badge background and icon colour.
+  final (Color, Color) tone;
+  final String label;
+  final num? value;
+  final String? note;
+
+  /// Change against the previous period, shown instead of [note] when set.
+  final double? delta;
+  final String Function(num value)? format;
 
   @override
   Widget build(BuildContext context) {
     final p = context.loyi;
+    final v = value;
+    final d = delta;
+    return Panel(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          IconBadge(icon: icon, background: tone.$1, foreground: tone.$2, size: 36),
+          const SizedBox(height: 14),
+          if (v == null)
+            const Skeleton(width: 64, height: 34, radius: 10)
+          else if (format != null)
+            Text(format!(v), style: context.text.headlineLarge)
+          else
+            _Count(value: v.round(), style: context.text.headlineLarge!),
+          const SizedBox(height: 2),
+          Text(label, style: context.text.titleSmall, maxLines: 2, overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 2),
+          if (d != null)
+            Row(
+              children: [
+                Icon(
+                  d >= 0 ? LoyiIcons.trendingUp : LoyiIcons.trendingDown,
+                  size: 15,
+                  color: d >= 0 ? p.mint : p.accent,
+                ),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    context.l10n.vsBefore(signedPercent(d)),
+                    style: context.text.bodySmall?.copyWith(color: d >= 0 ? p.mint : p.accent),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            )
+          else
+            Text(note ?? ' ', style: context.text.bodySmall, maxLines: 2, overflow: TextOverflow.ellipsis),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ready-made groups to follow up with, each opening the message composer.
+class _FollowUps extends StatelessWidget {
+  const _FollowUps();
+
+  @override
+  Widget build(BuildContext context) {
+    final data = BusinessData.of(context);
+    final p = context.loyi;
+    final l = context.l10n;
+    final groups = [
+      (Audience.slipping, LoyiIcons.clock, l.pitchSlipping),
+      (Audience.almost, LoyiIcons.target, l.pitchAlmost),
+      (Audience.reward, LoyiIcons.gift, l.pitchReward),
+      (Audience.newcomers, LoyiIcons.hand, l.pitchNew),
+    ];
+    final cards = data.cards;
+    final programs = data.programById;
+    final now = DateTime.now();
+    final tones = [(p.accentSoft, p.accent), (p.mintSoft, p.mint), (p.sunSoft, p.onSunSoft), (p.surface, p.ink)];
+    return Panel(
+      muted: true,
+      radius: Radii.xl,
+      padding: const EdgeInsets.all(14),
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final columns = c.maxWidth >= 860 ? 4 : 2;
+          const gap = 12.0;
+          final width = (c.maxWidth - gap * (columns - 1)) / columns;
+          final roomy = width >= 200;
+          return GridRows(
+            columns: columns,
+            gap: gap,
+            children: [
+              for (final (i, (audience, icon, pitch)) in groups.indexed)
+                SizedBox(
+                  width: width,
+                  child: Panel(
+                    padding: EdgeInsets.all(roomy ? 18 : 14),
+                    onTap: () => showMessageComposer(context, audience: audience),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            IconBadge(icon: icon, background: tones[i].$1, foreground: tones[i].$2, size: 36),
+                            const Spacer(),
+                            if (cards == null)
+                              const Skeleton(width: 32, height: 28, radius: 8)
+                            else
+                              Text(
+                                '${reach(cards, programs, audience, null, now)}',
+                                style: context.text.headlineMedium,
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        Text(audience.label(l), style: context.text.titleMedium, maxLines: 2),
+                        if (roomy) ...[
+                          const SizedBox(height: 2),
+                          Text(pitch, style: context.text.bodySmall, maxLines: 3),
+                        ],
+                        const SizedBox(height: 12),
+                        const Spacer(), // the link sits at the bottom of every card in the row
+                        Row(
+                          children: [
+                            Text(
+                              roomy ? l.writeAMessage : l.message,
+                              style: context.text.labelMedium?.copyWith(color: p.accent),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(LoyiIcons.arrowRight, size: 15, color: p.accent),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+String relativeTime(L10n l, DateTime t) {
+  final now = DateTime.now();
+  final diff = now.difference(t);
+  if (diff.inMinutes < 1) return l.justNow;
+  if (diff.inMinutes < 60) return l.minutesAgo(diff.inMinutes);
+  if (now.year == t.year && now.month == t.month && now.day == t.day) return l.todayAt(DateFormat.Hm().format(t));
+  return DateFormat('d MMM · HH:mm').format(t);
+}
+
+class _ActivityFeed extends StatelessWidget {
+  const _ActivityFeed({required this.stamps, required this.redemptions});
+
+  final Stream<List<ActivityItem>> stamps;
+  final Stream<List<ActivityItem>> redemptions;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.loyi;
+    final data = BusinessData.of(context);
+    final names = {for (final pr in data.programs ?? const <Program>[]) pr.id: pr.name};
     return StreamBuilder<List<ActivityItem>>(
       stream: stamps,
       builder: (context, s) => StreamBuilder<List<ActivityItem>>(
@@ -607,19 +599,14 @@ class _ActivityFeed extends StatelessWidget {
             return Panel(
               child: Row(
                 children: [
-                  IconBadge(icon: Icons.nfc_rounded, background: p.surfaceMuted, foreground: p.inkMuted),
+                  IconBadge(icon: LoyiIcons.nfc, background: p.surfaceMuted, foreground: p.inkMuted),
                   const SizedBox(width: 14),
-                  Expanded(
-                    child: Text(
-                      'Stamps and redeemed rewards will show up here as clients tap your tags.',
-                      style: context.text.bodyMedium,
-                    ),
-                  ),
+                  Expanded(child: Text(context.l10n.activityEmpty, style: context.text.bodyMedium)),
                 ],
               ),
             );
           }
-          final shown = items.take(15).toList();
+          final shown = items.take(12).toList();
           return Panel(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(
@@ -631,9 +618,9 @@ class _ActivityFeed extends StatelessWidget {
                     child: Row(
                       children: [
                         IconBadge(
-                          icon: item.isRedemption ? Icons.redeem_rounded : Icons.approval_rounded,
+                          icon: item.isRedemption ? LoyiIcons.gift : LoyiIcons.stamp,
                           background: item.isRedemption ? p.sunSoft : p.mintSoft,
-                          foreground: item.isRedemption ? p.ink : p.mint,
+                          foreground: item.isRedemption ? p.onSunSoft : p.mint,
                           size: 40,
                         ),
                         const SizedBox(width: 14),
@@ -642,14 +629,22 @@ class _ActivityFeed extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.isRedemption ? 'Reward: ${item.rewardTitle}' : 'Stamp given',
+                                item.isRedemption
+                                    ? context.l10n.activityReward(item.rewardTitle ?? '')
+                                    : context.l10n.activityStamp,
                                 style: context.text.titleSmall,
                               ),
-                              Text(programNames[item.programId] ?? '', style: context.text.bodySmall),
+                              Text(
+                                [
+                                  if (item.clientUid.isNotEmpty) clientCode(data.business.id, item.clientUid),
+                                  names[item.programId] ?? '',
+                                ].join(' · '),
+                                style: context.text.bodySmall,
+                              ),
                             ],
                           ),
                         ),
-                        Text(_relativeTime(item.at), style: context.text.bodySmall),
+                        Text(relativeTime(context.l10n, item.at), style: context.text.bodySmall),
                       ],
                     ),
                   ),

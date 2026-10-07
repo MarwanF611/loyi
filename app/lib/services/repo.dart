@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models.dart';
+import 'language.dart';
 
 /// Firestore reads, plus the business-side writes that security rules allow.
 /// Everything that changes stamps goes through [Api] instead.
@@ -49,8 +50,8 @@ class Repo {
   /// Loyi on the free Spark plan.
   Future<void> uploadLogo(Business business, Uint8List bytes) async {
     final type = imageContentType(bytes);
-    if (type == null) throw const FormatException('Use a PNG, JPG or WebP image.');
-    if (bytes.length > maxLogoBytes) throw const FormatException('The logo must be smaller than 200 KB.');
+    if (type == null) throw FormatException(l10n.logoWrongType);
+    if (bytes.length > maxLogoBytes) throw FormatException(l10n.logoTooBig);
     final batch = _db.batch()
       ..set(_db.doc('logos/${business.id}'), {
         'data': Blob(bytes),
@@ -153,7 +154,7 @@ class Repo {
   /// logs, tags, cards (programs), logo and the business. The business goes
   /// last because the rules for the logo check who owns it.
   Future<void> deleteBusinessData(String ownerUid) async {
-    for (final c in ['stampEvents', 'redemptions', 'cards', 'tags', 'programs']) {
+    for (final c in ['stampEvents', 'redemptions', 'messages', 'cards', 'tags', 'programs']) {
       await _deleteAll(_db.collection(c).where('ownerUid', isEqualTo: ownerUid));
     }
     final businesses = await _businesses.where('ownerUid', isEqualTo: ownerUid).get();
@@ -225,6 +226,107 @@ class Repo {
           .limit(20)
           .snapshots()
           .map((s) => [for (final d in s.docs) ActivityItem.fromDoc(d, isRedemption: false)]);
+
+  /// Every client card of the business (one per client per loyalty card), live.
+  Stream<List<LoyaltyCard>> cardsForBusiness(String ownerUid, String businessId) =>
+      _owned('cards', ownerUid, businessId).snapshots().map((s) => s.docs.map(LoyaltyCard.fromDoc).toList());
+
+  /// Safety cap for one insights load, to stay well inside the free Firestore quota.
+  static const maxInsightEvents = 5000;
+
+  /// Stamps since [since], oldest first.
+  Future<List<ActivityItem>> stampsSince(String ownerUid, String businessId, DateTime since) async {
+    final s = await _owned('stampEvents', ownerUid, businessId)
+        .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(since))
+        .orderBy('createdAt')
+        .limit(maxInsightEvents)
+        .get();
+    return [for (final d in s.docs) ActivityItem.fromDoc(d, isRedemption: false)];
+  }
+
+  /// Redeemed rewards since [since], newest first.
+  Future<List<ActivityItem>> redemptionsSince(String ownerUid, String businessId, DateTime since) async {
+    final s = await _owned('redemptions', ownerUid, businessId)
+        .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(since))
+        .orderBy('createdAt', descending: true)
+        .limit(maxInsightEvents)
+        .get();
+    return [for (final d in s.docs) ActivityItem.fromDoc(d, isRedemption: true)];
+  }
+
+  /// Stamps between [from] and [to] (a count, so it costs one read per 1000).
+  Future<int> countStamps(String ownerUid, String businessId, DateTime from, DateTime to) async {
+    final c = await _owned('stampEvents', ownerUid, businessId)
+        .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(from))
+        .where('createdAt', isLessThan: Timestamp.fromDate(to))
+        .count()
+        .get();
+    return c.count ?? 0;
+  }
+
+  /// The latest visits on a client's cards, newest first.
+  Future<List<ActivityItem>> visitsOfCards(String ownerUid, List<String> cardIds, {int limit = 30}) async {
+    if (cardIds.isEmpty) return const [];
+    final s = await _db
+        .collection('stampEvents')
+        .where('ownerUid', isEqualTo: ownerUid)
+        .where('cardId', whereIn: cardIds.take(10).toList())
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
+        .get();
+    return [for (final d in s.docs) ActivityItem.fromDoc(d, isRedemption: false)];
+  }
+
+  /// How long the business keeps its stamp and reward logs (GDPR storage limitation).
+  static const logRetention = Duration(days: 730);
+
+  /// Deletes stamp and reward log entries older than [logRetention]. Loyi has no
+  /// server on the free plan, so the owner's app does this when it opens.
+  Future<void> pruneOldLogs(String ownerUid, String businessId) async {
+    final cutoff = Timestamp.fromDate(DateTime.now().subtract(logRetention));
+    for (final c in ['stampEvents', 'redemptions']) {
+      final page = await _owned(c, ownerUid, businessId).where('createdAt', isLessThan: cutoff).limit(400).get();
+      if (page.docs.isEmpty) continue;
+      final batch = _db.batch();
+      for (final d in page.docs) {
+        batch.delete(d.reference);
+      }
+      await batch.commit();
+    }
+  }
+
+  // ── Follow-up messages ────────────────────────────────────────────────────
+
+  CollectionReference<Map<String, dynamic>> get _messages => _db.collection('messages');
+
+  /// All of a shop's messages, newest first.
+  Stream<List<ShopMessage>> messagesForBusiness(String ownerUid, String businessId) =>
+      _owned('messages', ownerUid, businessId).snapshots().map(
+        (s) =>
+            s.docs.map(ShopMessage.fromDoc).toList()
+              ..sort((a, b) => (b.createdAt ?? DateTime.now()).compareTo(a.createdAt ?? DateTime.now())),
+      );
+
+  /// The messages a shop has switched on; the client's device picks the ones meant for it.
+  Stream<List<ShopMessage>> activeMessages(String businessId) => _messages
+      .where('businessId', isEqualTo: businessId)
+      .where('active', isEqualTo: true)
+      .snapshots()
+      .map((s) => s.docs.map(ShopMessage.fromDoc).toList());
+
+  Future<void> saveMessage(ShopMessage message) async {
+    final data = {...message.toMap(), 'updatedAt': FieldValue.serverTimestamp()};
+    if (message.id.isEmpty) {
+      await _messages.add({...data, 'createdAt': FieldValue.serverTimestamp()});
+    } else {
+      await _messages.doc(message.id).update(data);
+    }
+  }
+
+  Future<void> setMessageActive(ShopMessage message, {required bool active}) =>
+      _messages.doc(message.id).update({'active': active, 'updatedAt': FieldValue.serverTimestamp()});
+
+  Future<void> deleteMessage(ShopMessage message) => _messages.doc(message.id).delete();
 
   Stream<List<ActivityItem>> recentRedemptions(String ownerUid, String businessId) =>
       _owned('redemptions', ownerUid, businessId)

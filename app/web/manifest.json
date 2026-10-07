@@ -5,7 +5,8 @@
     "display": "standalone",
     "background_color": "#F7F5F2",
     "theme_color": "#FF5A3C",
-    "description": "Your digital loyalty cards",
+    "description": "Je digitale klantenkaarten",
+    "lang": "nl",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

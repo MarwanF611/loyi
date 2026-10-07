@@ -1,126 +1,69 @@
-import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 import '../config.dart';
+import 'api.dart';
+import 'auth_service.dart';
+import 'language.dart';
 
-/// Business subscriptions through RevenueCat: App Store and Google Play in the
-/// app, RevenueCat Web Billing on the website when a web key is configured.
+/// Business subscriptions through Stripe, sold on the website only.
 ///
-/// The app only uses RevenueCat to buy, restore and show the status right away.
-/// What actually switches a business's tags on is `subscriptions/{uid}` in
-/// Firestore, written by billing-worker/ from RevenueCat's webhook.
+/// The billing server (billing-worker/) creates Stripe Checkout and customer
+/// portal sessions, and turns Stripe's webhooks into `subscriptions/{uid}`,
+/// which is what the dashboard and tags follow. The native apps are free
+/// companions: they show the status but never sell (App Store rule 3.1.3).
 class Billing {
-  /// RevenueCat entitlement that unlocks Loyi for a business.
-  static const entitlementId = 'business';
+  /// False in builds without a billing server, such as local emulator builds.
+  bool get available => billingApiUrl.isNotEmpty;
 
-  String get _apiKey {
-    if (kIsWeb) return revenueCatWebKey;
-    return switch (defaultTargetPlatform) {
-      TargetPlatform.iOS || TargetPlatform.macOS => revenueCatAppleKey,
-      TargetPlatform.android => revenueCatGoogleKey,
-      _ => '',
-    };
+  /// Buying and managing the subscription happens in the browser.
+  bool get canManageHere => kIsWeb && available;
+
+  /// Sends the shop to Stripe Checkout; Stripe returns it to /business?checkout=done.
+  Future<void> startCheckout() async => _go(await _post('/checkout'));
+
+  /// Stripe's customer portal: change card, download invoices, cancel.
+  Future<void> openPortal() async => _go(await _post('/portal'));
+
+  /// Account deletion: cancel the subscription so the shop is never charged again.
+  Future<void> cancelForAccountDeletion() async {
+    if (!available) return;
+    await _post('/delete-account');
   }
 
-  /// False in builds without a RevenueCat key, such as local emulator builds.
-  bool get available => _apiKey.isNotEmpty && !useEmulators;
-
-  bool _configured = false;
-  String? _userId;
-  CustomerInfo? _last;
-  final _updates = StreamController<CustomerInfo?>.broadcast();
-
-  /// Latest known customer info, then every change.
-  Stream<CustomerInfo?> get customerInfo async* {
-    yield _last;
-    yield* _updates.stream;
-  }
-
-  CustomerInfo? get lastCustomerInfo => _last;
-
-  void _emit(CustomerInfo? info) {
-    _last = info;
-    _updates.add(info);
-  }
-
-  /// Links purchases to the business owner's Firebase uid (the webhook uses it
-  /// to find the Firestore document). Safe to call repeatedly.
-  Future<void> identify(String uid) async {
-    if (!available || _userId == uid) return;
-    _userId = uid;
+  Future<Map<String, dynamic>> _post(String path) async {
+    final token = await auth.user?.getIdToken();
+    if (token == null) throw LoyiException(l10n.signInFirst);
+    final http.Response res;
     try {
-      if (_configured) {
-        _emit((await Purchases.logIn(uid)).customerInfo);
-      } else {
-        await Purchases.configure(PurchasesConfiguration(_apiKey)..appUserID = uid);
-        _configured = true;
-        Purchases.addCustomerInfoUpdateListener(_emit);
-        _emit(await Purchases.getCustomerInfo());
-      }
-    } catch (e) {
-      _userId = null;
-      debugPrint('RevenueCat setup failed: $e');
-    }
-  }
-
-  Future<void> signOut() async {
-    if (!_configured || _userId == null) return;
-    _userId = null;
-    _emit(null);
-    try {
-      await Purchases.logOut();
+      // The language makes Stripe's checkout and billing pages match the app.
+      final uri = Uri.parse('$billingApiUrl$path').replace(queryParameters: {'locale': language.code});
+      res = await http.post(uri, headers: {'Authorization': 'Bearer $token'});
     } catch (_) {
-      // Already anonymous in RevenueCat.
+      throw LoyiException(l10n.noConnection);
     }
-  }
-
-  static bool isActive(CustomerInfo? info) => info?.entitlements.active.containsKey(entitlementId) ?? false;
-
-  /// The monthly plan from RevenueCat's current offering, with the store's localized price.
-  Future<Package?> monthlyPackage() async {
-    final offering = (await Purchases.getOfferings()).current;
-    return offering?.monthly ?? offering?.availablePackages.firstOrNull;
-  }
-
-  /// Buys [package]. Returns false when the user cancelled. [email] pre-fills web checkout.
-  Future<bool> purchase(Package package, {String? email}) async {
-    try {
-      final result = await Purchases.purchase(PurchaseParams.package(package, customerEmail: kIsWeb ? email : null));
-      _emit(result.customerInfo);
-      return isActive(result.customerInfo);
-    } on PlatformException catch (e) {
-      if (PurchasesErrorHelper.getErrorCode(e) == PurchasesErrorCode.purchaseCancelledError) return false;
-      rethrow;
+    final body = jsonDecode(res.body.isEmpty ? '{}' : res.body) as Map<String, dynamic>;
+    if (res.statusCode >= 400) {
+      throw LoyiException(switch ((res.statusCode, path)) {
+        (401, _) => l10n.signInAgain,
+        (403, _) => l10n.onlyBusinessCanSubscribe,
+        (409, '/checkout') => l10n.alreadySubscribed,
+        (404, '/portal') => l10n.noSubscriptionToManage,
+        _ => l10n.somethingWentWrong,
+      });
     }
+    return body;
   }
 
-  /// Restores an App Store / Google Play subscription bought earlier. Returns true if it's active.
-  Future<bool> restore() async {
-    final info = await Purchases.restorePurchases();
-    _emit(info);
-    return isActive(info);
+  Future<void> _go(Map<String, dynamic> body) async {
+    final url = body['url'] as String?;
+    if (url == null) throw LoyiException(l10n.somethingWentWrong);
+    // Same tab on the web, so Stripe brings the shop back into Loyi.
+    await launchUrl(Uri.parse(url), webOnlyWindowName: '_self', mode: LaunchMode.externalApplication);
   }
-
-  /// Store page where the subscription can be changed or cancelled.
-  String? get managementUrl => _last?.managementURL;
-}
-
-/// Readable message for a failed purchase or restore.
-String billingError(Object error) {
-  if (error is PlatformException) {
-    return switch (PurchasesErrorHelper.getErrorCode(error)) {
-      PurchasesErrorCode.networkError => 'No connection. Check your internet and try again.',
-      PurchasesErrorCode.purchaseNotAllowedError => 'Purchases are not allowed on this device.',
-      PurchasesErrorCode.paymentPendingError => 'Your payment is pending. Loyi switches on as soon as it goes through.',
-      PurchasesErrorCode.productAlreadyPurchasedError => 'You already have this subscription. Tap "Restore purchases".',
-      PurchasesErrorCode.storeProblemError => 'The store is having trouble. Please try again in a moment.',
-      _ => 'The purchase didn\'t go through. Please try again.',
-    };
-  }
-  return 'Something went wrong. Please try again.';
 }
 
 final billing = Billing();

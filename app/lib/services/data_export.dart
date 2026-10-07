@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../config.dart';
 import 'auth_service.dart';
+import 'language.dart';
 
 /// Everything Loyi stores about the signed-in user, as JSON (GDPR art. 15 and 20:
 /// access and portability). Businesses also get their shop, cards, tags,
@@ -23,7 +24,7 @@ Future<Uint8List> exportMyData() async {
 
   final data = <String, Object?>{
     'exportedAt': DateTime.now().toUtc().toIso8601String(),
-    'about': 'Your data in Loyi. What it means and your rights: $privacyUrl',
+    'about': l10n.exportAbout(privacyUrl),
     'account': {
       'id': uid,
       'email': user.email,
@@ -50,7 +51,8 @@ Future<Uint8List> exportMyData() async {
         'clientCards': await all('cards', 'ownerUid'),
         'stampsGiven': await all('stampEvents', 'ownerUid'),
         'rewardsGiven': await all('redemptions', 'ownerUid'),
-        'note': 'Clients appear only as anonymous IDs. Your logo image is not included.',
+        'followUpMessages': await all('messages', 'ownerUid'),
+        'note': l10n.exportBusinessNote,
       };
     }
   }

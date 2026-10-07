@@ -1,81 +1,113 @@
 import 'package:flutter/material.dart';
 
-/// Loyi house style: "Coral & Ink" on warm white.
+/// Loyi house style, shared with the website (app/web/site/site.css).
 ///
-/// Light mode is the primary look: a warm off-white canvas with white panels,
-/// deep ink text, coral for actions, sunny yellow for rewards and mint for
-/// success. Dark mode uses its own palette rather than an inverted one.
+/// Light mode is the default: a white page, warm grey panels holding white
+/// cards with a soft drop shadow, deep ink text and coral for actions. Sunny
+/// yellow marks rewards and mint marks success. Dark mode has its own palette.
 class LoyiPalette extends ThemeExtension<LoyiPalette> {
   const LoyiPalette({
     required this.canvas,
     required this.surface,
     required this.surfaceMuted,
+    required this.panelDeep,
     required this.ink,
     required this.inkMuted,
     required this.line,
     required this.accent,
+    required this.accentDeep,
     required this.accentSoft,
     required this.onAccentSoft,
     required this.sun,
     required this.sunSoft,
+    required this.onSunSoft,
     required this.mint,
     required this.mintSoft,
     required this.shadow,
   });
 
+  /// The page background (site: --page).
   final Color canvas;
+
+  /// Cards and inputs (site: --card).
   final Color surface;
+
+  /// Panels that group cards, chips and tracks (site: --panel).
   final Color surfaceMuted;
+
+  /// Hover and pressed panels (site: --panel-deep).
+  final Color panelDeep;
   final Color ink;
   final Color inkMuted;
   final Color line;
   final Color accent;
+  final Color accentDeep;
   final Color accentSoft;
   final Color onAccentSoft;
   final Color sun;
   final Color sunSoft;
+
+  /// Text and icons on [sunSoft].
+  final Color onSunSoft;
   final Color mint;
   final Color mintSoft;
   final Color shadow;
 
   static const light = LoyiPalette(
-    canvas: Color(0xFFF7F5F2),
+    canvas: Color(0xFFFFFFFF),
     surface: Color(0xFFFFFFFF),
-    surfaceMuted: Color(0xFFF1EEEA),
+    surfaceMuted: Color(0xFFF7F5F2),
+    panelDeep: Color(0xFFEFEBE5),
     ink: Color(0xFF17161C),
     inkMuted: Color(0xFF6E6A73),
-    line: Color(0xFFEAE6E1),
+    line: Color(0xFFE7E3DE),
     accent: Color(0xFFFF5A3C),
+    accentDeep: Color(0xFFE0442A),
     accentSoft: Color(0xFFFFE9E3),
     onAccentSoft: Color(0xFFB8321B),
     sun: Color(0xFFFFC83D),
     sunSoft: Color(0xFFFFF4D6),
+    onSunSoft: Color(0xFF8A6500),
     mint: Color(0xFF1FB57A),
     mintSoft: Color(0xFFDDF5EA),
-    shadow: Color(0x1417161C),
+    shadow: Color(0xFF17161C),
   );
 
   static const dark = LoyiPalette(
     canvas: Color(0xFF111015),
-    surface: Color(0xFF1B1A21),
-    surfaceMuted: Color(0xFF25232C),
+    surface: Color(0xFF24232A),
+    surfaceMuted: Color(0xFF1A191F),
+    panelDeep: Color(0xFF222128),
     ink: Color(0xFFF5F3EF),
-    inkMuted: Color(0xFFA5A1AB),
-    line: Color(0xFF2E2C36),
+    inkMuted: Color(0xFFA7A3AB),
+    line: Color(0xFF2E2C34),
     accent: Color(0xFFFF6B4F),
-    accentSoft: Color(0xFF3A1E19),
+    accentDeep: Color(0xFFF0523A),
+    accentSoft: Color(0xFF3A1F19),
     onAccentSoft: Color(0xFFFFB4A3),
     sun: Color(0xFFFFCF57),
-    sunSoft: Color(0xFF3A3019),
+    sunSoft: Color(0xFF3A3220),
+    onSunSoft: Color(0xFFFFD98A),
     mint: Color(0xFF3CCB91),
     mintSoft: Color(0xFF16332A),
-    shadow: Color(0x66000000),
+    shadow: Color(0xFF000000),
   );
 
-  /// Soft, layered shadow for white panels (depth without heavy borders).
+  bool get isDark => canvas.computeLuminance() < 0.2;
+
+  /// The website's card shadow: a hairline plus a long, soft drop.
   List<BoxShadow> get panelShadow => [
-    BoxShadow(color: shadow, blurRadius: 24, offset: const Offset(0, 8)),
-    BoxShadow(color: shadow, blurRadius: 2, offset: const Offset(0, 1)),
+    BoxShadow(
+      color: shadow.withValues(alpha: isDark ? 0.3 : 0.05),
+      blurRadius: 2,
+      offset: const Offset(0, 1),
+    ),
+    BoxShadow(
+      color: shadow.withValues(alpha: isDark ? 0.7 : 0.22),
+      blurRadius: 40,
+      spreadRadius: -18,
+      offset: const Offset(0, 18),
+    ),
   ];
 
   @override
@@ -89,14 +121,17 @@ class LoyiPalette extends ThemeExtension<LoyiPalette> {
       canvas: l(canvas, other.canvas),
       surface: l(surface, other.surface),
       surfaceMuted: l(surfaceMuted, other.surfaceMuted),
+      panelDeep: l(panelDeep, other.panelDeep),
       ink: l(ink, other.ink),
       inkMuted: l(inkMuted, other.inkMuted),
       line: l(line, other.line),
       accent: l(accent, other.accent),
+      accentDeep: l(accentDeep, other.accentDeep),
       accentSoft: l(accentSoft, other.accentSoft),
       onAccentSoft: l(onAccentSoft, other.onAccentSoft),
       sun: l(sun, other.sun),
       sunSoft: l(sunSoft, other.sunSoft),
+      onSunSoft: l(onSunSoft, other.onSunSoft),
       mint: l(mint, other.mint),
       mintSoft: l(mintSoft, other.mintSoft),
       shadow: l(shadow, other.shadow),
@@ -107,6 +142,16 @@ class LoyiPalette extends ThemeExtension<LoyiPalette> {
 extension LoyiThemeX on BuildContext {
   LoyiPalette get loyi => Theme.of(this).extension<LoyiPalette>()!;
   TextTheme get text => Theme.of(this).textTheme;
+
+  /// Small mono caps label above headings and numbers, like the website's `.eyebrow`.
+  TextStyle get eyebrow => TextStyle(
+    fontFamily: 'JetBrainsMono',
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 1,
+    height: 1.4,
+    color: loyi.inkMuted,
+  );
 }
 
 /// Radii used across the app.
@@ -114,7 +159,7 @@ abstract final class Radii {
   static const sm = 12.0;
   static const md = 16.0;
   static const lg = 24.0;
-  static const xl = 28.0;
+  static const xl = 32.0;
 }
 
 const _font = 'PlusJakartaSans';
@@ -128,22 +173,25 @@ TextTheme _textTheme(Color ink, Color muted) {
     height: height,
     color: color ?? ink,
   );
+  // Headings follow the website: semibold with tight tracking (-0.035em).
+  TextStyle h(double size, {FontWeight w = FontWeight.w600, double height = 1.08}) =>
+      s(size, w, spacing: -size * 0.035, height: height);
   return TextTheme(
-    displayLarge: s(56, FontWeight.w800, spacing: -2, height: 1.05),
-    displayMedium: s(44, FontWeight.w800, spacing: -1.5, height: 1.08),
-    displaySmall: s(34, FontWeight.w800, spacing: -1, height: 1.1),
-    headlineLarge: s(30, FontWeight.w800, spacing: -0.8, height: 1.15),
-    headlineMedium: s(26, FontWeight.w800, spacing: -0.6, height: 1.18),
-    headlineSmall: s(22, FontWeight.w700, spacing: -0.4, height: 1.2),
-    titleLarge: s(19, FontWeight.w700, spacing: -0.3),
-    titleMedium: s(16, FontWeight.w700, spacing: -0.1),
-    titleSmall: s(14, FontWeight.w600),
-    bodyLarge: s(16, FontWeight.w500, height: 1.45),
-    bodyMedium: s(14.5, FontWeight.w500, height: 1.45, color: muted),
+    displayLarge: h(56, height: 1.02),
+    displayMedium: h(44, height: 1.04),
+    displaySmall: h(36, height: 1.06),
+    headlineLarge: h(30, height: 1.12),
+    headlineMedium: h(26, height: 1.15),
+    headlineSmall: h(22, height: 1.2),
+    titleLarge: s(19, FontWeight.w700, spacing: -0.4),
+    titleMedium: s(16, FontWeight.w700, spacing: -0.2),
+    titleSmall: s(14.5, FontWeight.w600),
+    bodyLarge: s(16, FontWeight.w500, height: 1.5),
+    bodyMedium: s(14.5, FontWeight.w500, height: 1.5, color: muted),
     bodySmall: s(12.5, FontWeight.w500, height: 1.4, color: muted),
-    labelLarge: s(15, FontWeight.w700, spacing: -0.1),
+    labelLarge: s(15.5, FontWeight.w700, spacing: -0.1),
     labelMedium: s(13, FontWeight.w600),
-    labelSmall: s(11.5, FontWeight.w700, spacing: 0.6),
+    labelSmall: s(11.5, FontWeight.w700, spacing: 0.4),
   );
 }
 
@@ -182,7 +230,7 @@ ThemeData buildTheme(Brightness brightness) {
   );
   final text = _textTheme(p.ink, p.inkMuted);
   const pill = StadiumBorder();
-  const buttonSize = Size(64, 56);
+  const buttonSize = Size(64, 52);
 
   return ThemeData(
     useMaterial3: true,
@@ -213,11 +261,13 @@ ThemeData buildTheme(Brightness brightness) {
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
+      // The website's soft button: a warm pill without a border.
       style: OutlinedButton.styleFrom(
         minimumSize: buttonSize,
         shape: pill,
         foregroundColor: p.ink,
-        side: BorderSide(color: p.line, width: 1.5),
+        backgroundColor: p.surfaceMuted,
+        side: BorderSide.none,
         textStyle: text.labelLarge,
         padding: const EdgeInsets.symmetric(horizontal: 22),
       ),
@@ -282,7 +332,10 @@ ThemeData buildTheme(Brightness brightness) {
       side: BorderSide.none,
       backgroundColor: p.surfaceMuted,
       selectedColor: p.ink,
-      labelStyle: text.labelMedium?.copyWith(color: p.ink),
+      // Ink text, inverted on the dark selected pill.
+      labelStyle: text.labelMedium?.copyWith(
+        color: WidgetStateColor.resolveWith((s) => s.contains(WidgetState.selected) ? p.canvas : p.ink),
+      ),
       secondaryLabelStyle: text.labelMedium?.copyWith(color: p.canvas),
       checkmarkColor: p.canvas,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -312,6 +365,23 @@ ThemeData buildTheme(Brightness brightness) {
       circularTrackColor: Colors.transparent,
     ),
     dividerTheme: DividerThemeData(color: p.line, thickness: 1, space: 1),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: p.canvas,
+      surfaceTintColor: Colors.transparent,
+      indicatorColor: p.accentSoft,
+      height: 68,
+      elevation: 0,
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (s) => text.labelSmall?.copyWith(
+          letterSpacing: 0,
+          fontSize: 12,
+          color: s.contains(WidgetState.selected) ? p.ink : p.inkMuted,
+        ),
+      ),
+      iconTheme: WidgetStateProperty.resolveWith(
+        (s) => IconThemeData(size: 22, color: s.contains(WidgetState.selected) ? p.accent : p.inkMuted),
+      ),
+    ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: p.ink,

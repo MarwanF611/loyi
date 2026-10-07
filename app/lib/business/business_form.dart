@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models.dart';
 import '../services/api.dart';
+import '../services/language.dart';
 import '../widgets/color_picker.dart';
 
 /// Name + up to three brand colours, in business settings.
@@ -39,8 +40,8 @@ class _BusinessFormState extends State<BusinessForm> {
   Future<void> _submit() async {
     final name = _name.text.trim();
     setState(() {
-      _nameError = name.isEmpty ? 'Enter your business name.' : null;
-      _colorsError = _colors.isEmpty ? 'Choose at least one colour.' : null;
+      _nameError = name.isEmpty ? context.l10n.enterBusinessName : null;
+      _colorsError = _colors.isEmpty ? context.l10n.chooseOneColour : null;
     });
     if (_nameError != null || _colorsError != null) return;
     setState(() => _busy = true);
@@ -56,6 +57,7 @@ class _BusinessFormState extends State<BusinessForm> {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final l = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -65,18 +67,11 @@ class _BusinessFormState extends State<BusinessForm> {
           maxLength: 80,
           autocorrect: false,
           textCapitalization: TextCapitalization.words,
-          decoration: InputDecoration(
-            labelText: 'Business name',
-            hintText: 'e.g. Bakkerij Peeters',
-            errorText: _nameError,
-          ),
+          decoration: InputDecoration(labelText: l.businessName, hintText: l.businessNameHint, errorText: _nameError),
         ),
         const SizedBox(height: 8),
-        Text('Brand colours', style: text.titleSmall),
-        Text(
-          'Up to ${Business.maxBrandColors}. New cards start in these colours.',
-          style: text.bodySmall,
-        ),
+        Text(l.brandColours, style: text.titleSmall),
+        Text(l.brandColoursHint(Business.maxBrandColors), style: text.bodySmall),
         const SizedBox(height: 12),
         MultiColorPicker(values: _colors, onChanged: (c) => setState(() => _colors = c)),
         if (_colorsError != null) ...[

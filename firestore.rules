@@ -50,7 +50,7 @@ service cloud.firestore {
     }
 
     // Tags only work while the business owner has an active subscription.
-    // subscriptions/{ownerUid} is written by the billing webhook (billing-worker/),
+    // subscriptions/{ownerUid} is written by the billing server (billing-worker/),
     // never by the app.
     function subscribed(ownerUid) {
       let path = /databases/$(database)/documents/subscriptions/$(ownerUid);
@@ -348,6 +348,37 @@ service cloud.firestore {
       allow delete: if isBusinessUser() && resource.data.ownerUid == uid(); // account deletion
     }
 
+    // ── Follow-up messages ─────────────────────────────────────────────────
+
+    // A short in-app note from a shop to a group of its card holders. It holds no
+    // personal data: the group is matched on the client's own device.
+    function validMessage(d) {
+      return d.keys().hasOnly(['businessId', 'ownerUid', 'programId', 'title', 'body', 'audience', 'active',
+                               'endsAt', 'createdAt', 'updatedAt'])
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 60
+        && d.body is string && d.body.size() > 0 && d.body.size() <= 240
+        // No links: messages must not become a phishing channel.
+        && !d.title.lower().matches('.*(https?:|www[.]).*')
+        && !d.body.lower().matches('.*(https?:|www[.]).*')
+        && d.audience in ['all', 'newcomers', 'almost', 'reward', 'slipping', 'lost']
+        && d.active is bool
+        && d.endsAt is timestamp
+        && d.endsAt < request.time + duration.value(62, 'd')
+        && d.updatedAt == request.time
+        && (d.programId == null || programOf(d.programId).businessId == d.businessId);
+    }
+
+    match /messages/{messageId} {
+      allow read: if true; // shown on client cards, like the program itself
+      allow create: if validOwnedWrite()
+        && validMessage(request.resource.data)
+        && request.resource.data.createdAt == request.time;
+      allow update: if validOwnedWrite()
+        && validMessage(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isBusinessUser() && resource.data.ownerUid == uid();
+    }
+
     // ── Account merge hand-off ─────────────────────────────────────────────
 
     // An anonymous device session names the account it hands its cards to.
@@ -365,12 +396,17 @@ service cloud.firestore {
 
     // ── Subscriptions ──────────────────────────────────────────────────────
 
-    // {expiresAt, ...} per business owner, written only by the billing webhook
+    // {expiresAt, ...} per business owner, written only by the billing server
     // (service account, bypasses these rules). Readable so a client's tap can
     // explain why a shop's tags are paused.
     match /subscriptions/{ownerUid} {
       allow get: if true;
       allow list, write: if false;
+    }
+
+    // Stripe customer/subscription ids, for the billing server only.
+    match /billing/{ownerUid} {
+      allow read, write: if false;
     }
   }
 }

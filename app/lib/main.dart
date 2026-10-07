@@ -9,7 +9,10 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'config.dart';
 import 'demo_firebase_options.dart';
 import 'firebase_options.dart';
+import 'l10n/app_localizations.dart';
 import 'router.dart';
+import 'services/appearance.dart';
+import 'services/language.dart';
 import 'theme.dart';
 
 Future<void> main() async {
@@ -28,6 +31,7 @@ Future<void> main() async {
   // Wait for the persisted session so the first screen knows who is signed in.
   await FirebaseAuth.instance.authStateChanges().first;
 
+  await Future.wait([appearance.load(), language.load()]);
   runApp(const LoyiApp());
 }
 
@@ -58,11 +62,19 @@ class _LoyiAppState extends State<LoyiApp> {
   final _router = buildRouter();
 
   @override
-  Widget build(BuildContext context) => MaterialApp.router(
-    title: 'Loyi',
-    debugShowCheckedModeBanner: false,
-    theme: buildTheme(Brightness.light),
-    darkTheme: buildTheme(Brightness.dark),
-    routerConfig: _router,
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([appearance, language]),
+    builder: (context, _) => MaterialApp.router(
+      title: 'Loyi',
+      debugShowCheckedModeBanner: false,
+      theme: buildTheme(Brightness.light),
+      darkTheme: buildTheme(Brightness.dark),
+      themeMode: appearance.value,
+      // Dutch by default; French and English on request (Settings or Account & privacy).
+      locale: language.value,
+      supportedLocales: L10n.supportedLocales,
+      localizationsDelegates: L10n.localizationsDelegates,
+      routerConfig: _router,
+    ),
   );
 }

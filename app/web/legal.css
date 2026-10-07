@@ -8,25 +8,23 @@
   --accent: #ff5a3c;
   --note: #fff4d6;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --canvas: #121116;
-    --surface: #1c1b21;
-    --ink: #f4f2f0;
-    --muted: #a7a3ab;
-    --line: #2e2c34;
-    --accent: #ff7a5f;
-    --note: #3a3220;
-  }
+:root[data-theme="dark"] {
+  --canvas: #121116;
+  --surface: #1c1b21;
+  --ink: #f4f2f0;
+  --muted: #a7a3ab;
+  --line: #2e2c34;
+  --accent: #ff7a5f;
+  --note: #3a3220;
 }
 @font-face {
   font-family: "Plus Jakarta Sans";
-  src: url("assets/assets/fonts/PlusJakartaSans-Regular.ttf") format("truetype");
+  src: url("/assets/assets/fonts/PlusJakartaSans-Regular.ttf") format("truetype");
   font-weight: 400;
 }
 @font-face {
   font-family: "Plus Jakarta Sans";
-  src: url("assets/assets/fonts/PlusJakartaSans-Bold.ttf") format("truetype");
+  src: url("/assets/assets/fonts/PlusJakartaSans-Bold.ttf") format("truetype");
   font-weight: 700;
 }
 * { box-sizing: border-box; }
@@ -69,3 +67,7 @@ li { margin: 4px 0; }
 }
 footer { margin-top: 48px; color: var(--muted); font-size: 14px; }
 footer a { color: var(--muted); margin-right: 16px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.lang-links { display: flex; gap: 4px 14px; flex-wrap: wrap; font-size: 14px; }
+.lang-links a { color: var(--muted); text-decoration: none; }
+.lang-links a[aria-current="true"] { color: var(--ink); font-weight: 700; }

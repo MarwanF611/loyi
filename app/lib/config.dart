@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'services/language.dart';
+
 /// Connect to the local Firebase emulators:
 ///   flutter run -d chrome --dart-define=USE_EMULATORS=true
 const useEmulators = bool.fromEnvironment('USE_EMULATORS');
@@ -20,19 +22,20 @@ String tagUrl(String tagId) => '$publicBaseUrl/t/$tagId';
 // Set in config/prod.json and passed with `--dart-define-from-file=config/prod.json`.
 // All of these are public client keys (they ship inside the app), not secrets.
 
-/// RevenueCat public SDK keys. Empty → subscriptions are unavailable in this build.
-const revenueCatAppleKey = String.fromEnvironment('REVENUECAT_APPLE_KEY');
-const revenueCatGoogleKey = String.fromEnvironment('REVENUECAT_GOOGLE_KEY');
+/// Loyi's billing server (billing-worker/ on Cloudflare), e.g. https://loyi-billing.you.workers.dev.
+/// Empty → subscriptions are unavailable in this build.
+const billingApiUrl = String.fromEnvironment('BILLING_API_URL');
 
-/// RevenueCat Web Billing key (needs Stripe connected in RevenueCat). Empty →
-/// businesses on the website are asked to subscribe in the app.
-const revenueCatWebKey = String.fromEnvironment('REVENUECAT_WEB_KEY');
+/// Shown next to the Subscribe button; Stripe's checkout shows the exact amount incl. VAT.
+const subscriptionPrice = String.fromEnvironment('SUBSCRIPTION_PRICE', defaultValue: '€19');
 
 /// reCAPTCHA v3 site key for Firebase App Check on the web. Empty → App Check off on web.
 const appCheckWebKey = String.fromEnvironment('APP_CHECK_WEB_KEY');
 
-/// Legal pages, served as static files from Firebase Hosting (app/web/*.html).
+/// Legal pages, served as static files from Firebase Hosting (app/web/*.html):
+/// Dutch at the root, French and English under /fr and /en.
 const legalBaseUrl = 'https://loyi-b530b.web.app';
-const privacyUrl = '$legalBaseUrl/privacy';
-const termsUrl = '$legalBaseUrl/terms';
+String get _legalLanguagePrefix => language.code == 'nl' ? '' : '/${language.code}';
+String get privacyUrl => '$legalBaseUrl$_legalLanguagePrefix/privacy';
+String get termsUrl => '$legalBaseUrl$_legalLanguagePrefix/terms';
 const supportEmail = String.fromEnvironment('SUPPORT_EMAIL', defaultValue: 'support@loyi.be');

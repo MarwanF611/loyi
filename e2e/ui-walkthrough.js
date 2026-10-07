@@ -4,6 +4,8 @@
 //   firebase emulators:start --project demo
 // Then: cd e2e && npm run test:ui
 import assert from "node:assert/strict";
+import { initializeApp } from "firebase-admin/app";
+import { Timestamp, getFirestore } from "firebase-admin/firestore";
 import puppeteer from "puppeteer-core";
 
 const HOST = process.env.LOYI_URL ?? "http://localhost:5050";
@@ -11,6 +13,9 @@ const CHROME = process.env.CHROME_PATH ?? "/Applications/Google Chrome.app/Conte
 const DESKTOP = { width: 1280, height: 900 };
 const PHONE = { width: 400, height: 860, isMobile: true };
 const run = Date.now();
+process.env.FIRESTORE_EMULATOR_HOST ??= "127.0.0.1:8085";
+// Stands in for the billing webhook, which writes subscriptions with a service account.
+const admin = getFirestore(initializeApp({ projectId: "demo-loyi" }));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function step(name) {
@@ -27,6 +32,8 @@ async function openApp(browser, viewport, path) {
     if (process.env.STACKS) console.warn(e.stack?.split("\n").slice(0, 8).join("\n"));
   });
   await page.setViewport(viewport);
+  // The app opens in Dutch by default; this walkthrough checks the English texts.
+  await page.evaluateOnNewDocument(() => localStorage.setItem("flutter.locale", '"en"'));
   await page.goto(HOST + path);
   await page.waitForFunction(() => window.firebase_auth && document.querySelector("flutter-view"), { timeout: 30000 });
   await sleep(1500);
@@ -179,18 +186,23 @@ try {
   const biz = await openApp(browser, DESKTOP, "/business/login");
   step("create a business account");
   await tap(biz, "Create account", { role: "button" });
+  await fill(biz, "Business name", "Testbakker");
   await fill(biz, "Email", ownerEmail);
   await fill(biz, "Password", password);
   await tap(biz, "Create account");
-  await see(biz, "Welcome to Loyi");
+  await see(biz, "Your colours");
 
-  step("set up the shop");
-  await fill(biz, "Business name", "Testbakker");
-  await tap(biz, "Create my shop");
+  step("pick colours; the subscription comes from the billing webhook");
+  await tap(biz, "Continue");
+  await see(biz, "Step 3 of 3");
+  const ownerUid = await inPage(biz, () => window.firebase_auth.getAuth(window.firebase_core.getApp()).currentUser.uid);
+  await admin.doc(`subscriptions/${ownerUid}`).set({ expiresAt: Timestamp.fromMillis(Date.now() + 30 * 86400_000) });
   await see(biz, "Testbakker");
-  await see(biz, "Create your first loyalty card");
+  await see(biz, "Who to reach out to");
 
   step("create a loyalty card");
+  await go(biz, "/business/cards");
+  await see(biz, "Create your first loyalty card");
   await tap(biz, "New card");
   await see(biz, "New loyalty card");
   await fill(biz, "Koffiekaart", "Testkaart");
@@ -274,7 +286,28 @@ try {
   await see(biz, "Reward: Gratis koffie");
   await see(biz, "Stamp given");
 
+  step("clients and insights count the anonymous activity");
+  await go(biz, "/business/clients");
+  await see(biz, "1 with a card");
+  await go(biz, "/business/insights");
+  await see(biz, "Stamps per day");
+  await see(biz, "Busy times");
+
+  step("a follow-up message shows on the client's card");
+  await go(biz, "/business/clients");
+  await tap(biz, "Messages");
+  await tap(biz, "Write a message");
+  await tap(biz, "Everyone");
+  await fill(biz, "Title", "Double stamps");
+  await fill(biz, "Message", "Every sandwich counts twice this Saturday.");
+  await tap(biz, "Publish message", { wait: 1500 });
+  await see(biz, "Live");
+  await go(phone2, "/cards");
+  await tap(phone2, "Testbakker");
+  await see(phone2, "Double stamps");
+
   step("pause the card; taps are refused");
+  await go(biz, "/business/cards");
   await tap(biz, "Testkaart");
   await see(biz, "Edit loyalty card");
   await see(biz, "Card is live");
@@ -304,7 +337,7 @@ try {
   await see(biz, "Saved");
 
   step("forgot password sends a reset link");
-  await go(biz, "/business");
+  await go(biz, "/business/account");
   await tap(biz, "Sign out");
   await see(biz, "Welcome back");
   await fill(biz, "Email", ownerEmail);

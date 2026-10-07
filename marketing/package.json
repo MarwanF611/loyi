@@ -5,7 +5,8 @@
   "scripts": {
     "capture": "node capture.js",
     "compose": "node compose.js",
-    "all": "node capture.js && node compose.js"
+    "all": "node capture.js && node compose.js",
+    "capture:all": "LANG_CODE=nl node capture.js && LANG_CODE=fr node capture.js && LANG_CODE=en node capture.js && ./site-images.sh"
   },
   "type": "module",
   "private": true,

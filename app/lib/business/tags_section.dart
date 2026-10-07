@@ -6,8 +6,10 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../config.dart';
 import '../models.dart';
 import '../services/api.dart';
+import '../services/language.dart';
 import '../services/repo.dart';
 import '../theme.dart';
+import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 
 /// Lists a program's NFC tags and lets the business create new ones.
@@ -45,7 +47,7 @@ class _TagsSectionState extends State<TagsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionHeader(title: 'NFC tags', subtitle: 'Every tag is a link. Write it onto an NFC sticker.'),
+        SectionHeader(title: context.l10n.nfcTags, subtitle: context.l10n.nfcTagsSub),
         const _HowTo(),
         const SizedBox(height: 16),
         StreamBuilder<List<LoyiTag>>(
@@ -59,10 +61,7 @@ class _TagsSectionState extends State<TagsSection> {
                 if (snap.hasData && tags.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      'No tags yet. Create one join tag and one stamp tag to get started.',
-                      style: context.text.bodyMedium,
-                    ),
+                    child: Text(context.l10n.noTagsYet, style: context.text.bodyMedium),
                   ),
               ],
             );
@@ -74,13 +73,13 @@ class _TagsSectionState extends State<TagsSection> {
           children: [
             OutlinedButton.icon(
               onPressed: () => _addTag(TagType.join),
-              icon: const Icon(Icons.person_add_alt_rounded),
-              label: const Text('Add join tag'),
+              icon: const Icon(LoyiIcons.userPlus),
+              label: Text(context.l10n.addJoinTag),
             ),
             OutlinedButton.icon(
               onPressed: () => _addTag(TagType.stamp),
-              icon: const Icon(Icons.approval_rounded),
-              label: const Text('Add stamp tag'),
+              icon: const Icon(LoyiIcons.stamp),
+              label: Text(context.l10n.addStampTag),
             ),
           ],
         ),
@@ -123,13 +122,9 @@ class _HowTo extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 4),
       child: Column(
         children: [
-          step(1, 'Join tag, where clients can see it', 'At the door or on the counter. Tapping it adds the card.'),
-          step(2, 'Stamp tag, behind the counter', 'Hold it out after a purchase. Every tap gives one stamp.'),
-          step(
-            3,
-            'Program the stickers',
-            'Use NTAG213/215 stickers. Copy the link and write it as a URL record with a free app like NFC Tools.',
-          ),
+          step(1, context.l10n.tagStep1, context.l10n.tagStep1Sub),
+          step(2, context.l10n.tagStep2, context.l10n.tagStep2Sub),
+          step(3, context.l10n.programStickers, context.l10n.programStickersSub),
         ],
       ),
     );
@@ -146,7 +141,7 @@ class _TagTile extends StatelessWidget {
     final p = context.loyi;
     final url = tagUrl(tag.id);
     final isJoin = tag.type == TagType.join;
-    final lastTap = tag.lastTapAt == null ? 'never' : DateFormat('d MMM HH:mm').format(tag.lastTapAt!);
+    final lastTap = tag.lastTapAt == null ? context.l10n.never : DateFormat('d MMM HH:mm').format(tag.lastTapAt!);
     return Panel(
       padding: const EdgeInsets.fromLTRB(18, 16, 12, 12),
       child: Column(
@@ -155,7 +150,7 @@ class _TagTile extends StatelessWidget {
           Row(
             children: [
               IconBadge(
-                icon: isJoin ? Icons.person_add_alt_rounded : Icons.approval_rounded,
+                icon: isJoin ? LoyiIcons.userPlus : LoyiIcons.stamp,
                 background: isJoin ? p.accentSoft : p.mintSoft,
                 foreground: isJoin ? p.accent : p.mint,
               ),
@@ -164,13 +159,16 @@ class _TagTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${isJoin ? 'Join' : 'Stamp'} tag · ${tag.label}', style: context.text.titleMedium),
-                    Text('${tag.tapCount} taps · last $lastTap', style: context.text.bodySmall),
+                    Text(
+                      isJoin ? context.l10n.joinTagLabel(tag.label) : context.l10n.stampTagLabel(tag.label),
+                      style: context.text.titleMedium,
+                    ),
+                    Text(context.l10n.tapsSummary(tag.tapCount, lastTap), style: context.text.bodySmall),
                   ],
                 ),
               ),
               Tooltip(
-                message: tag.active ? 'Active' : 'Disabled',
+                message: tag.active ? context.l10n.active : context.l10n.disabled,
                 child: Switch(
                   value: tag.active,
                   onChanged: (v) => repo.setTagActive(tag, active: v).catchError((Object e) {
@@ -192,28 +190,28 @@ class _TagTile extends StatelessWidget {
                   child: SelectableText(url, maxLines: 1, style: context.text.bodySmall?.copyWith(color: p.ink)),
                 ),
                 IconButton(
-                  tooltip: 'Copy link',
-                  icon: const Icon(Icons.copy_rounded, size: 20),
+                  tooltip: context.l10n.copyLink,
+                  icon: const Icon(LoyiIcons.copy, size: 20),
                   onPressed: () async {
                     await Clipboard.setData(ClipboardData(text: url));
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Link copied')));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.linkCopied)));
                     }
                   },
                 ),
                 // QR is only offered for join tags: a visible stamp QR could be photographed and reused.
                 if (isJoin)
                   IconButton(
-                    tooltip: 'Show QR code',
-                    icon: const Icon(Icons.qr_code_2_rounded, size: 22),
+                    tooltip: context.l10n.showQrCode,
+                    icon: const Icon(LoyiIcons.qrCode, size: 22),
                     onPressed: () => showLoyiSheet<void>(
                       context,
                       builder: (context) => Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Join QR code', style: context.text.headlineSmall),
+                          Text(context.l10n.joinQrCode, style: context.text.headlineSmall),
                           const SizedBox(height: 4),
-                          Text('Print it for clients without NFC.', style: context.text.bodyMedium),
+                          Text(context.l10n.joinQrCodeSub, style: context.text.bodyMedium),
                           const SizedBox(height: 20),
                           Container(
                             padding: const EdgeInsets.all(16),
@@ -249,7 +247,9 @@ class _TagLabelDialog extends StatefulWidget {
 }
 
 class _TagLabelDialogState extends State<_TagLabelDialog> {
-  late final _label = TextEditingController(text: widget.type == TagType.join ? 'Entrance' : 'Counter');
+  late final _label = TextEditingController(
+    text: widget.type == TagType.join ? l10n.defaultJoinTagLabel : l10n.defaultStampTagLabel,
+  );
 
   @override
   void dispose() {
@@ -261,18 +261,18 @@ class _TagLabelDialogState extends State<_TagLabelDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text(widget.type == TagType.join ? 'New join tag' : 'New stamp tag'),
+    title: Text(widget.type == TagType.join ? context.l10n.newJoinTag : context.l10n.newStampTag),
     content: TextField(
       controller: _label,
       autofocus: true,
       autocorrect: false,
       textCapitalization: TextCapitalization.sentences,
-      decoration: const InputDecoration(labelText: 'Where is this tag?'),
+      decoration: InputDecoration(labelText: context.l10n.whereIsTag),
       onSubmitted: (_) => _create(),
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-      FilledButton(onPressed: _create, child: const Text('Create')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(context.l10n.cancel)),
+      FilledButton(onPressed: _create, child: Text(context.l10n.create)),
     ],
   );
 }

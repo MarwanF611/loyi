@@ -1,13 +1,18 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models.dart';
 import '../services/api.dart';
 import '../services/auth_service.dart';
+import '../services/language.dart';
 import '../services/repo.dart';
 import '../theme.dart';
 import '../widgets/color_picker.dart';
 import '../widgets/loyalty_card_view.dart';
+import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 import 'subscribe_page.dart';
 
@@ -36,13 +41,15 @@ class SetupScaffold extends StatelessWidget {
       appBar: AppBar(
         title: const LoyiWordmark(size: 26),
         actions: [
+          const LanguageMenu(),
+          const SizedBox(width: 4),
           RoundIconButton(
-            icon: Icons.person_outline_rounded,
-            tooltip: 'Account & privacy',
+            icon: LoyiIcons.userRound,
+            tooltip: context.l10n.accountAndPrivacy,
             onPressed: () => context.go('/business/account'),
           ),
           const SizedBox(width: 8),
-          RoundIconButton(icon: Icons.logout_rounded, tooltip: 'Sign out', onPressed: auth.signOut),
+          RoundIconButton(icon: LoyiIcons.logOut, tooltip: context.l10n.signOut, onPressed: auth.signOut),
           const SizedBox(width: 12),
         ],
       ),
@@ -55,7 +62,7 @@ class SetupScaffold extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (step != null) ...[
-                  Text('Step $step of 3', style: context.text.labelLarge?.copyWith(color: p.accent)),
+                  Text(context.l10n.stepOf(step!, 3), style: context.text.labelLarge?.copyWith(color: p.accent)),
                   const SizedBox(height: 8),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
@@ -104,7 +111,7 @@ class _NameStepState extends State<NameStep> {
   Future<void> _save() async {
     final name = _name.text.trim();
     if (name.isEmpty) {
-      setState(() => _error = 'Enter your business name.');
+      setState(() => _error = context.l10n.enterBusinessName);
       return;
     }
     setState(() {
@@ -123,8 +130,8 @@ class _NameStepState extends State<NameStep> {
   @override
   Widget build(BuildContext context) => SetupScaffold(
     step: 1,
-    title: 'Your business',
-    subtitle: 'The name your clients see on their loyalty card.',
+    title: context.l10n.yourBusiness,
+    subtitle: context.l10n.yourBusinessSub,
     child: Panel(
       padding: const EdgeInsets.all(22),
       child: Column(
@@ -137,14 +144,14 @@ class _NameStepState extends State<NameStep> {
             autocorrect: false,
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
-              labelText: 'Business name',
-              hintText: 'e.g. Bakkerij Peeters',
+              labelText: context.l10n.businessName,
+              hintText: context.l10n.businessNameHint,
               errorText: _error,
             ),
             onSubmitted: (_) => _busy ? null : _save(),
           ),
           const SizedBox(height: 16),
-          FilledButton(onPressed: _busy ? null : _save, child: const Text('Continue')),
+          FilledButton(onPressed: _busy ? null : _save, child: Text(context.l10n.continueAction)),
         ],
       ),
     ),
@@ -179,16 +186,14 @@ class _ColorsStepState extends State<ColorsStep> {
   @override
   Widget build(BuildContext context) => SetupScaffold(
     step: 2,
-    title: 'Your colours',
-    subtitle:
-        'Pick up to ${Business.maxBrandColors}: the card, its gradient and the stamps. You can fine-tune each '
-        'card later.',
+    title: context.l10n.yourColours,
+    subtitle: context.l10n.yourColoursSub(Business.maxBrandColors),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         LoyaltyCardView(
           businessName: widget.business.name,
-          programName: 'Loyalty card',
+          programName: context.l10n.loyaltyCard,
           design: CardDesign.fromBrand(_colors.isEmpty ? [cardPalette.first.toARGB32()] : _colors),
           stamps: 3,
           stampsRequired: 8,
@@ -203,14 +208,14 @@ class _ColorsStepState extends State<ColorsStep> {
               const SizedBox(height: 12),
               Text(
                 _colors.isEmpty
-                    ? 'Choose at least one colour.'
-                    : '${_colors.length} of ${Business.maxBrandColors} chosen. Tap a colour again to remove it.',
+                    ? context.l10n.chooseOneColour
+                    : context.l10n.coloursChosen(_colors.length, Business.maxBrandColors),
                 style: context.text.bodySmall,
               ),
               const SizedBox(height: 20),
               FilledButton(
                 onPressed: _busy || _colors.isEmpty ? null : _save,
-                child: const Text('Continue'),
+                child: Text(context.l10n.continueAction),
               ),
             ],
           ),
@@ -229,18 +234,23 @@ class PayStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final expired = status.state == PlanState.expired;
+    final l = context.l10n;
     return SetupScaffold(
       step: expired ? null : 3,
-      title: expired ? 'Your subscription has ended' : 'Start your subscription',
+      title: expired
+          ? l.subscriptionEnded
+          : kIsWeb
+          ? l.startSubscription
+          : l.almostThere,
       subtitle: expired
-          ? 'Your tags are paused. Clients keep their stamps and can still use rewards they earned. Renew to open '
-                'your dashboard again.'
-          : 'Your dashboard opens and your tags work as soon as the payment is confirmed. Cancel anytime.',
+          ? l.tagsPausedSub
+          : kIsWeb
+          ? l.dashboardOpensWhenPaid
+          : l.dashboardOpensWhenActive,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const PlanHero(),
-          const SizedBox(height: 16),
+          if (kIsWeb) ...[const PlanHero(), const SizedBox(height: 16)],
           PlanSection(status: status),
         ],
       ),
@@ -248,14 +258,43 @@ class PayStep extends StatelessWidget {
   }
 }
 
-/// Paid; waiting a few seconds for the billing webhook to switch the shop on.
-class ActivatingStep extends StatelessWidget {
+/// Paid; waiting a few seconds for Stripe's webhook to switch the shop on.
+class ActivatingStep extends StatefulWidget {
   const ActivatingStep({super.key});
 
   @override
+  State<ActivatingStep> createState() => _ActivatingStepState();
+}
+
+class _ActivatingStepState extends State<ActivatingStep> {
+  bool _slow = false;
+  late final Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(const Duration(seconds: 45), () => setState(() => _slow = true));
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => SetupScaffold(
-    title: 'Payment confirmed',
-    subtitle: 'Setting up your account. This takes a few seconds.',
-    child: const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator())),
+    title: context.l10n.paymentReceived,
+    subtitle: context.l10n.switchingOn,
+    child: Column(
+      children: [
+        const Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()),
+        if (_slow) ...[
+          Text(context.l10n.takingLonger, style: context.text.bodyMedium, textAlign: TextAlign.center),
+          const SizedBox(height: 16),
+          OutlinedButton(onPressed: () => context.go('/business'), child: Text(context.l10n.backToPayment)),
+        ],
+      ],
+    ),
   );
 }

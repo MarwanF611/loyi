@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 
 import '../models.dart';
 import '../services/auth_service.dart';
+import '../services/language.dart';
 import '../services/repo.dart';
 import '../theme.dart';
 import '../widgets/loyalty_card_view.dart';
+import '../widgets/loyi_icons.dart';
 import '../widgets/save_cards_prompt.dart';
 import '../widgets/ui.dart';
 import 'card_data.dart';
@@ -30,11 +32,13 @@ class _MyCardsPageState extends State<MyCardsPage> {
     appBar: FrostedAppBar(
       title: const LoyiWordmark(size: 26),
       actions: [
+        const LanguageMenu(),
+        const SizedBox(width: 4),
         const _BusinessButton(),
         const SizedBox(width: 8),
         RoundIconButton(
-          icon: Icons.person_outline_rounded,
-          tooltip: 'Account & privacy',
+          icon: LoyiIcons.userRound,
+          tooltip: context.l10n.accountAndPrivacy,
           onPressed: () => context.push('/account'),
         ),
         const SizedBox(width: 12),
@@ -110,7 +114,7 @@ class _CardListState extends State<_CardList> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Your cards', style: context.text.headlineLarge),
+                  Text(context.l10n.yourCards, style: context.text.headlineLarge),
                   const SizedBox(height: 10),
                   if (cards.isNotEmpty)
                     Wrap(
@@ -118,14 +122,14 @@ class _CardListState extends State<_CardList> {
                       runSpacing: 8,
                       children: [
                         Pill(
-                          label: cards.length == 1 ? '1 card' : '${cards.length} cards',
-                          icon: Icons.style_rounded,
+                          label: context.l10n.cardsCount(cards.length),
+                          icon: LoyiIcons.walletCards,
                           background: p.surface,
                         ),
                         if (ready > 0)
                           Pill(
-                            label: ready == 1 ? '1 reward ready' : '$ready rewards ready',
-                            icon: Icons.redeem_rounded,
+                            label: context.l10n.rewardsReady(ready),
+                            icon: LoyiIcons.gift,
                             background: p.sun,
                             foreground: LoyiPalette.light.ink,
                           ),
@@ -164,8 +168,8 @@ class _CardListState extends State<_CardList> {
                   Center(
                     child: TextButton.icon(
                       onPressed: () => context.go('/business'),
-                      icon: const Icon(Icons.storefront_outlined, size: 20),
-                      label: const Text('I have a business'),
+                      icon: const Icon(LoyiIcons.store, size: 20),
+                      label: Text(context.l10n.iHaveABusiness),
                     ),
                   ),
                 ],
@@ -215,19 +219,15 @@ class _EmptyState extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(color: p.surface, shape: BoxShape.circle, boxShadow: p.panelShadow),
-                  child: Icon(Icons.nfc_rounded, color: p.ink, size: 28),
+                  child: Icon(LoyiIcons.nfc, color: p.ink, size: 28),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          Text('No cards yet', style: context.text.headlineSmall),
+          Text(context.l10n.noCardsYet, style: context.text.headlineSmall),
           const SizedBox(height: 6),
-          Text(
-            'Hold your phone near a Loyi tag in a shop to get your first loyalty card.',
-            style: context.text.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
+          Text(context.l10n.noCardsYetSub, style: context.text.bodyMedium, textAlign: TextAlign.center),
         ],
       ),
     );
@@ -251,8 +251,8 @@ class _BusinessButton extends StatelessWidget {
         textStyle: context.text.labelLarge,
       ),
       onPressed: () => context.go('/business/login'),
-      icon: const Icon(Icons.storefront_outlined, size: 20),
-      label: const Text('I have a business'),
+      icon: const Icon(LoyiIcons.store, size: 20),
+      label: Text(context.l10n.iHaveABusiness),
     );
   }
 }

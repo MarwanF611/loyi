@@ -1,11 +1,16 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'business/account_page.dart';
+import 'business/cards_page.dart';
+import 'business/clients_page.dart';
 import 'business/dashboard_page.dart';
+import 'business/insights_page.dart';
 import 'business/login_page.dart';
 import 'business/program_page.dart';
 import 'business/settings_page.dart';
+import 'business/shell.dart';
 import 'business/subscribe_page.dart';
 import 'client/account_pages.dart';
 import 'client/card_page.dart';
@@ -23,6 +28,7 @@ class _AuthRefresh extends ChangeNotifier {
 }
 
 GoRouter buildRouter() => GoRouter(
+  navigatorKey: _root,
   // Web is mostly reached through tag URLs; native builds are the business app.
   initialLocation: kIsWeb ? null : '/business',
   refreshListenable: _AuthRefresh(),
@@ -54,20 +60,44 @@ GoRouter buildRouter() => GoRouter(
     GoRoute(path: '/account', builder: (_, _) => const AccountPage()),
 
     // ── Businesses ─────────────────────────────────────────────────────────
-    GoRoute(path: '/business/login', builder: (_, _) => const BusinessLoginPage()),
     GoRoute(
-      path: '/business',
-      builder: (_, _) => const DashboardPage(),
+      path: '/business/login',
+      builder: (_, s) => BusinessLoginPage(signUp: s.uri.queryParameters['signup'] == '1'),
+    ),
+    ShellRoute(
+      builder: (_, s, child) =>
+          BusinessShell(location: s.uri.path, checkoutDone: s.uri.queryParameters['checkout'] == 'done', child: child),
       routes: [
-        GoRoute(path: 'settings', builder: (_, _) => const BusinessSettingsPage()),
-        GoRoute(path: 'subscribe', builder: (_, _) => const SubscribePage()),
-        GoRoute(path: 'account', builder: (_, _) => const BusinessAccountPage()),
-        GoRoute(path: 'programs/new', builder: (_, _) => const ProgramPage()),
         GoRoute(
-          path: 'programs/:programId',
-          builder: (_, s) => ProgramPage(programId: s.pathParameters['programId']!),
+          path: '/business',
+          pageBuilder: (_, s) => _tab(s, const OverviewPage()),
+          routes: [
+            GoRoute(path: 'clients', pageBuilder: (_, s) => _tab(s, const ClientsPage())),
+            GoRoute(path: 'insights', pageBuilder: (_, s) => _tab(s, const InsightsPage())),
+            GoRoute(path: 'cards', pageBuilder: (_, s) => _tab(s, const CardsPage())),
+            GoRoute(path: 'settings', pageBuilder: (_, s) => _tab(s, const BusinessSettingsPage())),
+            // Full-screen pages, above the tabs (and reachable while the shop isn't paid yet).
+            GoRoute(path: 'subscribe', parentNavigatorKey: _root, builder: (_, _) => const SubscribePage()),
+            GoRoute(path: 'account', parentNavigatorKey: _root, builder: (_, _) => const BusinessAccountPage()),
+            GoRoute(path: 'programs/new', parentNavigatorKey: _root, builder: (_, _) => const ProgramPage()),
+            GoRoute(
+              path: 'programs/:programId',
+              parentNavigatorKey: _root,
+              builder: (_, s) => ProgramPage(programId: s.pathParameters['programId']!),
+            ),
+          ],
         ),
       ],
     ),
   ],
+);
+
+final _root = GlobalKey<NavigatorState>();
+
+/// Tabs swap with a quick fade instead of a slide.
+Page<void> _tab(GoRouterState state, Widget child) => CustomTransitionPage<void>(
+  key: state.pageKey,
+  child: child,
+  transitionDuration: const Duration(milliseconds: 180),
+  transitionsBuilder: (_, animation, _, child) => FadeTransition(opacity: animation, child: child),
 );

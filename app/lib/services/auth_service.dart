@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart';
 
 import '../config.dart';
 import '../models.dart';
+import 'api.dart';
 import 'billing.dart';
+import 'language.dart';
 import 'repo.dart';
 import 'stamping.dart';
 
@@ -46,10 +48,7 @@ class AuthService {
   /// Sign in with Apple; creates the account on first use.
   Future<void> businessSignInWithApple() => _signInWith(_apple());
 
-  Future<void> signOut() async {
-    await billing.signOut();
-    await _auth.signOut();
-  }
+  Future<void> signOut() => _auth.signOut();
 
   /// Email with a link to choose a new password (Spark: 150 emails/day).
   Future<void> sendPasswordReset(String email) => _auth.sendPasswordResetEmail(email: email);
@@ -240,7 +239,15 @@ class AuthService {
         break;
     }
 
-    if (!u.isAnonymous) await repo.deleteBusinessData(u.uid);
+    if (!u.isAnonymous) {
+      // Stop the subscription first: if that fails, nothing is deleted and the shop can retry.
+      try {
+        await billing.cancelForAccountDeletion();
+      } catch (e) {
+        throw LoyiException(l10n.couldNotCancelSubscription);
+      }
+      await repo.deleteBusinessData(u.uid);
+    }
     await repo.deleteClientData(u.uid);
     // Apple requires apps to revoke Sign in with Apple tokens when the account is deleted.
     if (appleCode != null) {
@@ -250,7 +257,6 @@ class AuthService {
         debugPrint('Apple token revoke failed: $e');
       }
     }
-    await billing.signOut();
     try {
       await u.delete();
     } on FirebaseAuthException catch (e) {
