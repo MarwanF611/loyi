@@ -28,14 +28,25 @@ class PlanStatus {
 }
 
 /// Streams the signed-in owner's [PlanStatus] to [builder].
-class PlanBuilder extends StatelessWidget {
+class PlanBuilder extends StatefulWidget {
   const PlanBuilder({super.key, required this.builder});
 
   final Widget Function(BuildContext context, PlanStatus status) builder;
 
   @override
+  State<PlanBuilder> createState() => _PlanBuilderState();
+}
+
+class _PlanBuilderState extends State<PlanBuilder> {
+  // One stream for the widget's lifetime: a new one on every rebuild (e.g. after renaming
+  // the shop) would briefly report "loading" and unmount everything below it.
+  late final Stream<Subscription?> _subscription = repo.subscription(auth.user!.uid);
+
+  Widget builder(BuildContext context, PlanStatus status) => widget.builder(context, status);
+
+  @override
   Widget build(BuildContext context) => StreamBuilder<Subscription?>(
-    stream: repo.subscription(auth.user!.uid),
+    stream: _subscription,
     builder: (context, snap) {
       if (snap.connectionState == ConnectionState.waiting) return builder(context, const PlanStatus(PlanState.loading));
       final sub = snap.data;

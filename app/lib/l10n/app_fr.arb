@@ -307,7 +307,7 @@
   "hidePassword": "Masquer le mot de passe",
   "showPassword": "Afficher le mot de passe",
   "forgotPassword": "Mot de passe oublié ?",
-  "agreeToTerms": "En créant un compte, vous acceptez les conditions d'utilisation et la politique de confidentialité.",
+  "agreeToTerms": "En créant un compte, vous acceptez les conditions d'utilisation, y compris l'accord de traitement des données, ainsi que la politique de confidentialité.",
   "collectingStamps": "Vous collectez des tampons ? Vers vos cartes",
   "heroTitle": "Des cartes de fidélité\nque vos clients gardent.",
   "heroSub": "Un contact sur un tag NFC. Aucune app à installer. Votre logo, vos couleurs, vos récompenses.",
@@ -498,5 +498,11 @@
   "alreadyStamped": "Déjà tamponné",
   "nextStampIn": "Prochain tampon possible dans {wait}.",
   "waitHoursMinutes": "{hours} h {minutes} min",
-  "waitMinutes": "{minutes} min"
+  "waitMinutes": "{minutes} min",
+  "shopMessagesTitle": "Messages des commerces",
+  "shopMessagesSub": "Les commerces peuvent afficher un court message sur votre carte, par exemple quand une récompense vous attend. Votre téléphone les choisit à partir de votre propre carte ; les commerces ne voient jamais qui les lit.",
+  "showShopMessages": "Afficher les messages des commerces",
+  "turnOffShopMessages": "Désactiver les messages des commerces",
+  "shopMessagesTurnedOff": "Les messages des commerces sont désactivés. Vous pouvez les réactiver dans Compte et confidentialité.",
+  "undo": "Annuler"
 }

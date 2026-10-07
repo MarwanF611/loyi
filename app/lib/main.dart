@@ -13,6 +13,7 @@ import 'l10n/app_localizations.dart';
 import 'router.dart';
 import 'services/appearance.dart';
 import 'services/language.dart';
+import 'services/shop_messages_setting.dart';
 import 'theme.dart';
 
 Future<void> main() async {
@@ -31,7 +32,7 @@ Future<void> main() async {
   // Wait for the persisted session so the first screen knows who is signed in.
   await FirebaseAuth.instance.authStateChanges().first;
 
-  await Future.wait([appearance.load(), language.load()]);
+  await Future.wait([appearance.load(), language.load(), shopMessagesSetting.load()]);
   runApp(const LoyiApp());
 }
 

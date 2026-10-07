@@ -844,7 +844,7 @@
   "@showPassword": {},
   "forgotPassword": "Forgot password?",
   "@forgotPassword": {},
-  "agreeToTerms": "By creating an account you agree to the terms of use and privacy policy.",
+  "agreeToTerms": "By creating an account you agree to the terms of use, including the data processing agreement, and the privacy policy.",
   "@agreeToTerms": {},
   "collectingStamps": "Collecting stamps? Go to your cards",
   "@collectingStamps": {},
@@ -1389,5 +1389,17 @@
         "type": "int"
       }
     }
-  }
+  },
+  "shopMessagesTitle": "Messages from shops",
+  "@shopMessagesTitle": {},
+  "shopMessagesSub": "Shops can show a short message on your card, for example when a reward is waiting. Your phone picks them from your own card; shops never see who reads them.",
+  "@shopMessagesSub": {},
+  "showShopMessages": "Show messages from shops",
+  "@showShopMessages": {},
+  "turnOffShopMessages": "Turn off messages from shops",
+  "@turnOffShopMessages": {},
+  "shopMessagesTurnedOff": "Messages from shops are off. You can turn them on again under Account & privacy.",
+  "@shopMessagesTurnedOff": {},
+  "undo": "Undo",
+  "@undo": {}
 }

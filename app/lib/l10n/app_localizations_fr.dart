@@ -1115,7 +1115,7 @@ class L10nFr extends L10n {
 
   @override
   String get agreeToTerms =>
-      'En créant un compte, vous acceptez les conditions d\'utilisation et la politique de confidentialité.';
+      'En créant un compte, vous acceptez les conditions d\'utilisation, y compris l\'accord de traitement des données, ainsi que la politique de confidentialité.';
 
   @override
   String get collectingStamps => 'Vous collectez des tampons ? Vers vos cartes';
@@ -1834,4 +1834,24 @@ class L10nFr extends L10n {
   String waitMinutes(int minutes) {
     return '$minutes min';
   }
+
+  @override
+  String get shopMessagesTitle => 'Messages des commerces';
+
+  @override
+  String get shopMessagesSub =>
+      'Les commerces peuvent afficher un court message sur votre carte, par exemple quand une récompense vous attend. Votre téléphone les choisit à partir de votre propre carte ; les commerces ne voient jamais qui les lit.';
+
+  @override
+  String get showShopMessages => 'Afficher les messages des commerces';
+
+  @override
+  String get turnOffShopMessages => 'Désactiver les messages des commerces';
+
+  @override
+  String get shopMessagesTurnedOff =>
+      'Les messages des commerces sont désactivés. Vous pouvez les réactiver dans Compte et confidentialité.';
+
+  @override
+  String get undo => 'Annuler';
 }

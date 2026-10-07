@@ -9,6 +9,7 @@ import '../services/api.dart';
 import '../services/auth_service.dart';
 import '../services/language.dart';
 import '../services/repo.dart';
+import '../services/shop_messages_setting.dart';
 import '../theme.dart';
 import '../widgets/confetti.dart';
 import '../widgets/loyalty_card_view.dart';
@@ -38,7 +39,7 @@ class _CardPageState extends State<CardPage> {
   Widget build(BuildContext context) => Scaffold(
     extendBodyBehindAppBar: true,
     appBar: FrostedAppBar(
-      leadingWidth: 150,
+      leadingWidth: 200,
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
         child: TextButton.icon(
@@ -322,6 +323,7 @@ class _ShopMessages extends StatefulWidget {
 
 class _ShopMessagesState extends State<_ShopMessages> {
   static const _key = 'hiddenMessages';
+  // Only loaded while the client wants messages from shops (see ShopMessagesSetting).
   late final Stream<List<ShopMessage>> _messages = repo.activeMessages(widget.business.id);
   Set<String> _hidden = {};
 
@@ -345,8 +347,24 @@ class _ShopMessagesState extends State<_ShopMessages> {
     }
   }
 
+  void _turnOff() {
+    shopMessagesSetting.set(false);
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.shopMessagesTurnedOff),
+        action: SnackBarAction(label: context.l10n.undo, onPressed: () => shopMessagesSetting.set(true)),
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) => StreamBuilder<List<ShopMessage>>(
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+    valueListenable: shopMessagesSetting,
+    builder: (context, show, _) => show ? _list(context) : const SizedBox(width: double.infinity),
+  );
+
+  Widget _list(BuildContext context) => StreamBuilder<List<ShopMessage>>(
     stream: _messages,
     builder: (context, snap) {
       final now = DateTime.now();
@@ -366,6 +384,7 @@ class _ShopMessagesState extends State<_ShopMessages> {
                   title: shown.first.title,
                   body: shown.first.body,
                   onDismiss: () => _hide(shown.first),
+                  onTurnOff: _turnOff,
                 ),
               ),
       );

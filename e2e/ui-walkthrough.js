@@ -76,6 +76,7 @@ async function see(page, text, timeout = 15000) {
     await sleep(300);
     if (++tries > 4) await scroll(); // give it a moment before assuming it's off-screen
   }
+  if (process.env.SHOTS) await page.screenshot({ path: `${process.env.SHOTS}/fail-see-${text.replace(/\W/g, "")}.png` });
   throw new Error(`Expected to see "${text}". Screen:\n${(await screenText(page)).slice(0, 1500)}`);
 }
 
@@ -161,6 +162,9 @@ async function fill(page, label, value) {
 
 /** In-app navigation (a full reload would drop the emulator session). */
 async function go(page, path) {
+  // Several "devices" share one headless browser; a tab left in the background renders slowly
+  // and can miss short-lived messages (snack bars), so bring the one we use to the front.
+  await page.bringToFront();
   await page.evaluate((p) => {
     history.pushState({}, "", p);
     dispatchEvent(new PopStateEvent("popstate"));
@@ -306,6 +310,7 @@ try {
   await tap(phone2, "Testbakker");
   await see(phone2, "Double stamps");
 
+
   step("pause the card; taps are refused");
   await go(biz, "/business/cards");
   await tap(biz, "Testkaart");
@@ -343,6 +348,14 @@ try {
   await fill(biz, "Email", ownerEmail);
   await tap(biz, "Forgot password?");
   await see(biz, "a link to reset the password is on its way");
+
+  step("a client turns off messages from shops; the message disappears");
+  await go(phone2, "/account");
+  await tap(phone2, "Show messages from shops", { role: "switch" });
+  await go(phone2, "/cards");
+  await tap(phone2, "Testbakker");
+  await see(phone2, "more to go");
+  assert.ok(!(await screenText(phone2)).includes("Double stamps"), "message hidden after opting out");
 
   console.log("\n✔ UI walkthrough passed");
 } catch (e) {

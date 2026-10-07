@@ -10,6 +10,7 @@ import '../services/auth_service.dart';
 import '../services/data_export.dart';
 import '../services/language.dart';
 import '../services/save_file/save_file.dart';
+import '../services/shop_messages_setting.dart';
 import '../theme.dart';
 import '../widgets/account_widgets.dart';
 import '../widgets/loyi_icons.dart';
@@ -77,6 +78,24 @@ class AccountPrivacySections extends StatelessWidget {
         _Section(title: l.appearance, children: const [AppearancePicker(), SizedBox(height: 8)]),
         const SizedBox(height: 16),
         _Section(title: l.language, children: const [LanguagePicker(), SizedBox(height: 8)]),
+        if (!business) ...[
+          const SizedBox(height: 16),
+          _Section(
+            title: l.shopMessagesTitle,
+            children: [
+              Text(l.shopMessagesSub, style: context.text.bodyMedium),
+              ValueListenableBuilder<bool>(
+                valueListenable: shopMessagesSetting,
+                builder: (context, show, _) => SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l.showShopMessages, style: context.text.titleSmall),
+                  value: show,
+                  onChanged: shopMessagesSetting.set,
+                ),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 16),
         _Section(
           title: l.yourData,

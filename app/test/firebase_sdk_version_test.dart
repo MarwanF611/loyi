@@ -27,4 +27,13 @@ void main() {
       reason: 'Update `const v` in web/firebase_sdk.js after upgrading the Firebase packages.',
     );
   });
+
+  test('that SDK version is vendored, without references to Google\'s CDN', () {
+    final version = RegExp(r'const v = "([^"]+)"').firstMatch(File('web/firebase_sdk.js').readAsStringSync())!.group(1);
+    for (final name in ['app', 'auth', 'firestore-pipelines', 'app-check']) {
+      final file = File('web/firebase/$version/firebase-$name.js');
+      expect(file.existsSync(), isTrue, reason: 'Run ./scripts/vendor-firebase-sdk.sh $version');
+      expect(file.readAsStringSync(), isNot(contains('www.gstatic.com/firebasejs')), reason: file.path);
+    }
+  });
 }

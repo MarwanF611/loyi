@@ -277,15 +277,21 @@ class Repo {
     return [for (final d in s.docs) ActivityItem.fromDoc(d, isRedemption: false)];
   }
 
-  /// How long the business keeps its stamp and reward logs (GDPR storage limitation).
-  static const logRetention = Duration(days: 730);
+  /// How long Loyi keeps a shop's stamp and reward logs, and cards nobody used
+  /// (GDPR storage limitation; stated in the privacy policy).
+  static const retention = Duration(days: 730);
 
-  /// Deletes stamp and reward log entries older than [logRetention]. Loyi has no
-  /// server on the free plan, so the owner's app does this when it opens.
-  Future<void> pruneOldLogs(String ownerUid, String businessId) async {
-    final cutoff = Timestamp.fromDate(DateTime.now().subtract(logRetention));
-    for (final c in ['stampEvents', 'redemptions']) {
-      final page = await _owned(c, ownerUid, businessId).where('createdAt', isLessThan: cutoff).limit(400).get();
+  /// Deletes stamp and reward log entries older than [retention], and client cards
+  /// that haven't been used for that long. Loyi has no server on the free plan, so
+  /// the owner's app does this when it opens (a few hundred documents per run).
+  Future<void> applyRetention(String ownerUid, String businessId) async {
+    final cutoff = Timestamp.fromDate(DateTime.now().subtract(retention));
+    for (final (collection, field) in [
+      ('stampEvents', 'createdAt'),
+      ('redemptions', 'createdAt'),
+      ('cards', 'updatedAt'),
+    ]) {
+      final page = await _owned(collection, ownerUid, businessId).where(field, isLessThan: cutoff).limit(400).get();
       if (page.docs.isEmpty) continue;
       final batch = _db.batch();
       for (final d in page.docs) {

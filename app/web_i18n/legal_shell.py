@@ -12,9 +12,9 @@ PREFIX = {'nl': '', 'fr': '/fr', 'en': '/en'}
 HOME = {'nl': '/', 'fr': '/fr/', 'en': '/en/'}
 NAMES = {'nl': 'Nederlands', 'fr': 'Français', 'en': 'English'}
 LINKS = {
-    'nl': {'privacy': 'Privacybeleid', 'terms': 'Gebruiksvoorwaarden', 'delete-account': 'Je account verwijderen', 'language': 'Taal'},
-    'fr': {'privacy': 'Politique de confidentialité', 'terms': "Conditions d'utilisation", 'delete-account': 'Supprimer votre compte', 'language': 'Langue'},
-    'en': {'privacy': 'Privacy policy', 'terms': 'Terms of use', 'delete-account': 'Delete your account', 'language': 'Language'},
+    'nl': {'privacy': 'Privacybeleid', 'terms': 'Gebruiksvoorwaarden', 'dpa': 'Verwerkersovereenkomst', 'delete-account': 'Je account verwijderen', 'language': 'Taal'},
+    'fr': {'privacy': 'Politique de confidentialité', 'terms': "Conditions d'utilisation", 'dpa': 'Accord de traitement des données', 'delete-account': 'Supprimer votre compte', 'language': 'Langue'},
+    'en': {'privacy': 'Privacy policy', 'terms': 'Terms of use', 'dpa': 'Data processing agreement', 'delete-account': 'Delete your account', 'language': 'Language'},
 }
 
 
@@ -30,7 +30,7 @@ def write(page, lang, title, description, body):
         for l in PREFIX
     )
     footer = ''.join(
-        f'<a href="{p}/{other}">{LINKS[lang][other]}</a>' for other in ('privacy', 'terms', 'delete-account') if other != page
+        f'<a href="{p}/{other}">{LINKS[lang][other]}</a>' for other in ('privacy', 'terms', 'dpa', 'delete-account') if other != page
     ) + f'<a href="{HOME[lang]}">Loyi</a>'
     html = f'''<!DOCTYPE html>
 <html lang="{lang}">

@@ -8,12 +8,22 @@ import 'loyi_icons.dart';
 
 /// A shop's follow-up message as clients see it on their card.
 class MessageCard extends StatelessWidget {
-  const MessageCard({super.key, required this.business, required this.title, required this.body, this.onDismiss});
+  const MessageCard({
+    super.key,
+    required this.business,
+    required this.title,
+    required this.body,
+    this.onDismiss,
+    this.onTurnOff,
+  });
 
   final Business business;
   final String title;
   final String body;
   final VoidCallback? onDismiss;
+
+  /// Shows a "Turn off messages from shops" link (clients can object to all of them).
+  final VoidCallback? onTurnOff;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +62,18 @@ class MessageCard extends StatelessWidget {
                 Text(title.isEmpty ? context.l10n.messageTitlePlaceholder : title, style: context.text.titleMedium),
                 const SizedBox(height: 2),
                 Text(body.isEmpty ? context.l10n.messageBodyPlaceholder : body, style: context.text.bodyMedium),
+                if (onTurnOff != null)
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 36),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      foregroundColor: p.inkMuted,
+                      textStyle: context.text.labelMedium,
+                    ),
+                    onPressed: onTurnOff,
+                    child: Text(context.l10n.turnOffShopMessages),
+                  ),
               ],
             ),
           ),

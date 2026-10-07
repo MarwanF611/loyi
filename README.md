@@ -73,7 +73,14 @@ live listener on the shop's cards (`app/lib/business/shell.dart`):
 "reward waiting", ...). Clients see it on their card in Loyi; their own device decides whether they're in
 the group (`audiencesFor` in `app/lib/models.dart`), so the shop never learns who saw it. No email, no
 push, no links (enforced by `firestore.rules`), at most two months, and clients can hide a message.
-Stamp and reward logs older than two years are deleted by the owner's app when it opens (no server on Spark).
+Clients can hide a message or turn off all messages from shops (Account & privacy); then they aren't even loaded.
+Stamp and reward logs and cards unused for two years are deleted by the owner's app when it opens (no server on Spark).
+
+**Privacy file.** `docs/GDPR.md` holds the record of processing, security measures, the breach procedure, the
+interest assessment for messages, the store privacy answers and the owner's launch checklist. The website and web app
+load nothing from third parties: the Firebase SDK, Flutter's engine and its fallback fonts are self-hosted
+(`scripts/vendor-firebase-sdk.sh`, `scripts/vendor-fallback-fonts.sh`, run by `build-web.sh`), and the
+Content-Security-Policy blocks Google's CDNs.
 
 **Account & privacy (GDPR).** Shops (Account & privacy in the sidebar, or the avatar on phones) and clients (avatar on My cards) see what is
 stored, download all of it as JSON (art. 15/20), change their email or password (art. 16), and delete their
@@ -215,7 +222,8 @@ and shared by the website and the app, so a shop that signs up from the French s
   time. The build stops when a sentence has no translation. Screenshots come from `app/web/site/img/<lang>/`
   (`cd marketing && npm run capture:all`).
 - **Legal pages:** edit `app/web_i18n/legal.py` and run `python3 app/web_i18n/legal.py`; it writes
-  `app/web/{privacy,terms,delete-account}.html` (Dutch) and the `fr/` and `en/` versions. The Dutch terms
+  `app/web/{privacy,terms,dpa,delete-account}.html` (Dutch) and the `fr/` and `en/` versions. `dpa` is the data
+  processing agreement shops accept with the terms. The Dutch terms
   prevail if the versions differ.
 
 ## Marketing visuals

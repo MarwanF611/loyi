@@ -221,8 +221,8 @@ class _ShellFrameState extends State<_ShellFrame> {
     _subs
       ..add(repo.programsForBusiness(widget.business.id).listen((p) => setState(() => _programs = p), onError: (_) {}))
       ..add(repo.cardsForBusiness(_uid, widget.business.id).listen((c) => setState(() => _cards = c), onError: (_) {}));
-    // Storage limitation: drop log entries older than the retention period.
-    unawaited(repo.pruneOldLogs(_uid, widget.business.id).catchError((Object _) {}));
+    // Storage limitation: drop old log entries and cards nobody used for the retention period.
+    unawaited(repo.applyRetention(_uid, widget.business.id).catchError((Object _) {}));
   }
 
   @override

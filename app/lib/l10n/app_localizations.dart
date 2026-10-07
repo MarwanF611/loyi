@@ -1944,7 +1944,7 @@ abstract class L10n {
   /// No description provided for @agreeToTerms.
   ///
   /// In en, this message translates to:
-  /// **'By creating an account you agree to the terms of use and privacy policy.'**
+  /// **'By creating an account you agree to the terms of use, including the data processing agreement, and the privacy policy.'**
   String get agreeToTerms;
 
   /// No description provided for @collectingStamps.
@@ -3092,6 +3092,42 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'{minutes} min'**
   String waitMinutes(int minutes);
+
+  /// No description provided for @shopMessagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages from shops'**
+  String get shopMessagesTitle;
+
+  /// No description provided for @shopMessagesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Shops can show a short message on your card, for example when a reward is waiting. Your phone picks them from your own card; shops never see who reads them.'**
+  String get shopMessagesSub;
+
+  /// No description provided for @showShopMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Show messages from shops'**
+  String get showShopMessages;
+
+  /// No description provided for @turnOffShopMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off messages from shops'**
+  String get turnOffShopMessages;
+
+  /// No description provided for @shopMessagesTurnedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages from shops are off. You can turn them on again under Account & privacy.'**
+  String get shopMessagesTurnedOff;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

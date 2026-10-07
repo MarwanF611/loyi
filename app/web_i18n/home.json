@@ -702,5 +702,9 @@
   "English": {
     "nl": "English",
     "fr": "English"
+  },
+  "Data processing agreement": {
+    "nl": "Verwerkersovereenkomst",
+    "fr": "Accord de traitement des données"
   }
 }

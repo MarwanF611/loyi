@@ -1105,7 +1105,7 @@ class L10nEn extends L10n {
 
   @override
   String get agreeToTerms =>
-      'By creating an account you agree to the terms of use and privacy policy.';
+      'By creating an account you agree to the terms of use, including the data processing agreement, and the privacy policy.';
 
   @override
   String get collectingStamps => 'Collecting stamps? Go to your cards';
@@ -1815,4 +1815,24 @@ class L10nEn extends L10n {
   String waitMinutes(int minutes) {
     return '$minutes min';
   }
+
+  @override
+  String get shopMessagesTitle => 'Messages from shops';
+
+  @override
+  String get shopMessagesSub =>
+      'Shops can show a short message on your card, for example when a reward is waiting. Your phone picks them from your own card; shops never see who reads them.';
+
+  @override
+  String get showShopMessages => 'Show messages from shops';
+
+  @override
+  String get turnOffShopMessages => 'Turn off messages from shops';
+
+  @override
+  String get shopMessagesTurnedOff =>
+      'Messages from shops are off. You can turn them on again under Account & privacy.';
+
+  @override
+  String get undo => 'Undo';
 }

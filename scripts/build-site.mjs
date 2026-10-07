@@ -15,7 +15,7 @@ const out = process.argv[2] ?? join(root, "build", "web");
 const SITE = "https://loyi-b530b.web.app";
 const LANGS = { nl: "/", fr: "/fr/", en: "/en/" };
 const OG_LOCALE = { nl: "nl_BE", fr: "fr_BE", en: "en_GB" };
-const LEGAL = ["/privacy", "/terms", "/delete-account"];
+const LEGAL = ["/privacy", "/terms", "/dpa", "/delete-account"];
 
 const source = readFileSync(join(root, "web", "home.html"), "utf8");
 const dict = JSON.parse(readFileSync(join(root, "web_i18n", "home.json"), "utf8"));
@@ -50,7 +50,7 @@ function render(lang) {
     .replace(/<html lang="[^"]*">/, `<html lang="${lang}">`)
     // Home and legal links stay in this language; the language switch keeps its own links.
     .replace(/href="\/"(?![^>]*data-lang)/g, `href="${prefix}"`)
-    .replace(/href="(\/(?:privacy|terms|delete-account))"/g, (m, path) => `href="${lang === "nl" ? path : `/${lang}${path}`}"`)
+    .replace(/href="(\/(?:privacy|terms|dpa|delete-account))"/g, (m, path) => `href="${lang === "nl" ? path : `/${lang}${path}`}"`)
     // Screenshots in this language when they exist (site/img/<lang>/).
     .replace(/\/site\/img\/([\w-]+\.jpg)/g, (m, file) =>
       existsSync(join(root, "web", "site", "img", lang, file)) ? `/site/img/${lang}/${file}` : m,

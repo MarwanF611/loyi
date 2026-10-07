@@ -21,8 +21,10 @@ PRIVACY = {
   <p>Loyi is run by <strong>[company name or your full name]</strong>, <strong>[street, postcode, city]</strong>,
     Belgium, <strong>[company number (KBO/BCE), if you have one]</strong>. Contact:
     <a href="mailto:support@loyi.be">support@loyi.be</a>.</p>
-  <p>For the loyalty programme of a shop (its cards, rewards and which clients collect stamps), the shop and Loyi
-    each use the data for their own part: Loyi to run the service, the shop to run its programme.</p>
+  <p>Loyi is the controller for your Loyi account and for running the service (keeping your cards, preventing
+    fraud). For the loyalty programme of a shop (its cards, the stamps and rewards of its clients and its follow-up
+    messages) the shop is the controller and Loyi processes that data on the shop's behalf, under the
+    <a href="{{p}}/dpa">data processing agreement</a> every shop accepts.</p>
 
   <h2>Clients (people collecting stamps)</h2>
   <div class="card">
@@ -34,8 +36,9 @@ PRIVACY = {
         email.</li>
       <li><strong>Messages from shops:</strong> a shop can write a short message for a group of its card holders, such
         as "reward waiting" or "not seen in a month". Your own phone checks whether a message is meant for you, using
-        your card. Neither the shop nor Loyi learns who saw it. Messages are shown only inside Loyi (no email, no push)
-        and you can hide them.</li>
+        your card. Neither the shop nor Loyi learns who saw it. Messages are shown only inside Loyi (no email, no push).
+        You can hide one message, or turn off all messages from shops under Account &amp; privacy → Messages from
+        shops.</li>
       <li><strong>If you save your cards to an account:</strong> your email address, or the email and name Apple or
         Google share with us when you use "Continue with Apple / Google". Apple can hide your real email.</li>
     </ul>
@@ -49,6 +52,8 @@ PRIVACY = {
       <li>Activity: stamps given and rewards used by your clients (with anonymous client IDs). Your dashboard,
         client list and insights are counted from this; each client appears as a code that only works in your shop.</li>
       <li>Follow-up messages you write for your card holders. They must not contain personal data or links.</li>
+      <li>You can download your client list (anonymous codes, dates and counts) as a CSV file. What you do with that
+        file is your own responsibility as controller.</li>
       <li>Subscription: whether it is active, when it renews and how you pay. Payments are handled by Stripe;
         we never see your card or bank details.</li>
     </ul>
@@ -59,6 +64,9 @@ PRIVACY = {
     <li>To provide Loyi: keep your cards and stamps, run a shop's programme and dashboard (contract, GDPR art.
       6(1)(b)).</li>
     <li>To keep Loyi safe: prevent fake stamps, abuse and fraud (legitimate interest, art. 6(1)(f)).</li>
+    <li>To show a shop's follow-up messages on its clients' cards: the shop's legitimate interest in keeping in touch
+      with its clients (art. 6(1)(f)). This is direct marketing, so you can object at any time by turning off messages
+      from shops; Loyi then doesn't even load them (art. 21(2)).</li>
     <li>To handle subscriptions and invoices, and meet legal obligations such as accounting (art. 6(1)(b) and (c)).</li>
   </ul>
   <p>We don't sell data, don't show ads and don't track you across other apps or websites. There are no
@@ -77,10 +85,14 @@ PRIVACY = {
   <p>Transfers outside the EU are covered by the EU–US Data Privacy Framework or the European Commission's
     standard contractual clauses.</p>
 
-  <h2>Browser storage</h2>
-  <p>The website stores your anonymous ID, your sign-in session and your choice of language and appearance in your
-    browser (local storage), because Loyi can't work without it. It is not used for tracking, so no cookie banner is
-    needed.</p>
+  <h2>Browser storage and technical data</h2>
+  <p>The website stores your anonymous ID, your sign-in session and your choices (language, appearance, messages from
+    shops) in your browser (local storage), because Loyi can't work without it. It is not used for tracking, so no
+    cookie banner is needed.</p>
+  <p>Everything the website and app need, including code and fonts, comes from Loyi's own hosting: we don't load
+    Google Fonts or other outside content. Our hosting provider (Google Firebase) handles your IP address and browser
+    details to deliver the pages and protect them from abuse, in short-lived technical logs. If you choose "Continue
+    with Google" or "Continue with Apple", that provider's sign-in page opens.</p>
 
   <h2>How long we keep data</h2>
   <ul>
@@ -88,6 +100,7 @@ PRIVACY = {
     <li>When a shop deletes its account, its cards, tags and all its clients' stamps for that shop are deleted.</li>
     <li>Stamp and reward history of a shop (under anonymous IDs): deleted automatically after 2 years, or earlier when
       the shop deletes its account.</li>
+    <li>A card that hasn't been used for 2 years is deleted automatically, with its stamps and unused rewards.</li>
     <li>Invoices and subscription records: as long as Belgian accounting law requires (up to 7 years).</li>
     <li>You can download a copy of your data at any time under Account &amp; privacy → Download my data.</li>
   </ul>
@@ -120,9 +133,10 @@ PRIVACY = {
   <p>Loyi wordt uitgebaat door <strong>[bedrijfsnaam of je volledige naam]</strong>,
     <strong>[straat, postcode, gemeente]</strong>, België, <strong>[ondernemingsnummer (KBO), als je er een
     hebt]</strong>. Contact: <a href="mailto:support@loyi.be">support@loyi.be</a>.</p>
-  <p>Voor het spaarprogramma van een zaak (haar kaarten, beloningen en welke klanten stempels sparen) gebruiken de
-    zaak en Loyi de gegevens elk voor hun eigen deel: Loyi om de dienst te leveren, de zaak om haar programma te
-    runnen.</p>
+  <p>Loyi is verwerkingsverantwoordelijke voor je Loyi-account en voor het leveren van de dienst (je kaarten bewaren,
+    fraude voorkomen). Voor het spaarprogramma van een zaak (haar kaarten, de stempels en beloningen van haar klanten
+    en haar opvolgberichten) is de zaak verwerkingsverantwoordelijke en verwerkt Loyi die gegevens in haar opdracht,
+    volgens de <a href="{{p}}/dpa">verwerkersovereenkomst</a> die elke zaak aanvaardt.</p>
 
   <h2>Klanten (wie stempels spaart)</h2>
   <div class="card">
@@ -135,7 +149,8 @@ PRIVACY = {
       <li><strong>Berichten van zaken:</strong> een zaak kan een kort bericht schrijven voor een groep van haar
         kaarthouders, zoals "beloning klaar" of "al een maand niet gezien". Je eigen telefoon controleert aan de hand
         van je kaart of een bericht voor jou bedoeld is. Noch de zaak noch Loyi weet wie het zag. Berichten verschijnen
-        alleen in Loyi (geen e-mail, geen pushmelding) en je kunt ze verbergen.</li>
+        alleen in Loyi (geen e-mail, geen pushmelding). Je kunt één bericht verbergen, of alle berichten van zaken
+        uitzetten onder Account &amp; privacy → Berichten van zaken.</li>
       <li><strong>Als je je kaarten in een account bewaart:</strong> je e-mailadres, of het e-mailadres en de naam die
         Apple of Google met ons delen als je "Doorgaan met Apple / Google" gebruikt. Apple kan je echte e-mailadres
         verbergen.</li>
@@ -151,6 +166,8 @@ PRIVACY = {
         klantenlijst en inzichten worden hiermee berekend; elke klant verschijnt als een code die alleen in jouw zaak
         werkt.</li>
       <li>Opvolgberichten die je voor je kaarthouders schrijft. Ze mogen geen persoonsgegevens of links bevatten.</li>
+      <li>Je kunt je klantenlijst (anonieme codes, datums en aantallen) downloaden als CSV-bestand. Wat je met dat
+        bestand doet, valt onder je eigen verantwoordelijkheid als verwerkingsverantwoordelijke.</li>
       <li>Abonnement: of het actief is, wanneer het verlengd wordt en hoe je betaalt. Betalingen lopen via Stripe; wij
         zien nooit je kaart- of bankgegevens.</li>
     </ul>
@@ -162,6 +179,9 @@ PRIVACY = {
       (overeenkomst, AVG art. 6(1)(b)).</li>
     <li>Om Loyi veilig te houden: valse stempels, misbruik en fraude voorkomen (gerechtvaardigd belang, art.
       6(1)(f)).</li>
+    <li>Om opvolgberichten van een zaak op de kaarten van haar klanten te tonen: het gerechtvaardigd belang van de
+      zaak om contact te houden met haar klanten (art. 6(1)(f)). Dat is direct marketing, dus je kunt je er altijd
+      tegen verzetten door berichten van zaken uit te zetten; Loyi laadt ze dan zelfs niet meer (art. 21(2)).</li>
     <li>Om abonnementen en facturen af te handelen en wettelijke verplichtingen zoals de boekhouding na te komen
       (art. 6(1)(b) en (c)).</li>
   </ul>
@@ -182,10 +202,14 @@ PRIVACY = {
   <p>Doorgiften buiten de EU vallen onder het EU-VS-kader voor gegevensbescherming (Data Privacy Framework) of de
     modelcontractbepalingen van de Europese Commissie.</p>
 
-  <h2>Opslag in je browser</h2>
-  <p>De website bewaart je anonieme ID, je inlogsessie en je keuze van taal en weergave in je browser (local
-    storage), omdat Loyi zonder niet werkt. Dit wordt niet gebruikt om je te volgen, dus een cookiebanner is niet
-    nodig.</p>
+  <h2>Opslag in je browser en technische gegevens</h2>
+  <p>De website bewaart je anonieme ID, je inlogsessie en je keuzes (taal, weergave, berichten van zaken) in je
+    browser (local storage), omdat Loyi zonder niet werkt. Dit wordt niet gebruikt om je te volgen, dus een
+    cookiebanner is niet nodig.</p>
+  <p>Alles wat de website en de app nodig hebben, ook code en lettertypes, komt van Loyi's eigen hosting: we laden
+    geen Google Fonts of andere externe inhoud. Onze hostingprovider (Google Firebase) verwerkt je IP-adres en
+    browsergegevens in kortlopende technische logs, om de pagina's te leveren en tegen misbruik te beschermen. Kies je
+    "Doorgaan met Google" of "Doorgaan met Apple", dan opent de inlogpagina van die aanbieder.</p>
 
   <h2>Hoe lang we gegevens bewaren</h2>
   <ul>
@@ -194,6 +218,8 @@ PRIVACY = {
       verwijderd.</li>
     <li>Geschiedenis van stempels en beloningen van een zaak (onder anonieme ID's): automatisch verwijderd na 2 jaar,
       of eerder als de zaak haar account verwijdert.</li>
+    <li>Een kaart die 2 jaar niet gebruikt is, wordt automatisch verwijderd, met haar stempels en ongebruikte
+      beloningen.</li>
     <li>Facturen en abonnementsgegevens: zo lang als de Belgische boekhoudwetgeving vereist (tot 7 jaar).</li>
     <li>Je kunt altijd een kopie van je gegevens downloaden via Account &amp; privacy → Mijn gegevens downloaden.</li>
   </ul>
@@ -230,9 +256,10 @@ PRIVACY = {
   <p>Loyi est exploité par <strong>[nom de la société ou votre nom complet]</strong>,
     <strong>[rue, code postal, commune]</strong>, Belgique, <strong>[numéro d'entreprise (BCE), si vous en avez
     un]</strong>. Contact : <a href="mailto:support@loyi.be">support@loyi.be</a>.</p>
-  <p>Pour le programme de fidélité d'un commerce (ses cartes, ses récompenses et les clients qui collectent des
-    tampons), le commerce et Loyi utilisent chacun les données pour leur propre partie : Loyi pour fournir le service,
-    le commerce pour gérer son programme.</p>
+  <p>Loyi est responsable du traitement pour votre compte Loyi et pour la fourniture du service (conserver vos
+    cartes, prévenir la fraude). Pour le programme de fidélité d'un commerce (ses cartes, les tampons et récompenses de
+    ses clients et ses messages de suivi), le commerce est responsable du traitement et Loyi traite ces données pour
+    son compte, selon l'<a href="{{p}}/dpa">accord de traitement des données</a> que chaque commerce accepte.</p>
 
   <h2>Clients (personnes qui collectent des tampons)</h2>
   <div class="card">
@@ -245,7 +272,8 @@ PRIVACY = {
       <li><strong>Messages des commerces :</strong> un commerce peut écrire un court message pour un groupe de ses
         clients, comme « récompense en attente » ou « pas vu depuis un mois ». Votre propre téléphone vérifie, à partir
         de votre carte, si un message vous est destiné. Ni le commerce ni Loyi ne savent qui l'a vu. Les messages
-        n'apparaissent que dans Loyi (ni e-mail, ni notification) et vous pouvez les masquer.</li>
+        n'apparaissent que dans Loyi (ni e-mail, ni notification). Vous pouvez masquer un message, ou désactiver tous
+        les messages des commerces dans Compte et confidentialité → Messages des commerces.</li>
       <li><strong>Si vous enregistrez vos cartes dans un compte :</strong> votre adresse e-mail, ou l'e-mail et le nom
         qu'Apple ou Google nous transmettent quand vous utilisez « Continuer avec Apple / Google ». Apple peut masquer
         votre véritable e-mail.</li>
@@ -263,6 +291,8 @@ PRIVACY = {
         un code qui ne fonctionne que dans votre commerce.</li>
       <li>Les messages de suivi que vous écrivez à vos clients. Ils ne peuvent contenir ni données personnelles ni
         liens.</li>
+      <li>Vous pouvez télécharger votre liste de clients (codes anonymes, dates et nombres) en fichier CSV. Ce que vous
+        faites de ce fichier relève de votre propre responsabilité de responsable du traitement.</li>
       <li>Abonnement : s'il est actif, quand il se renouvelle et comment vous payez. Les paiements passent par Stripe ;
         nous ne voyons jamais vos données de carte ou bancaires.</li>
     </ul>
@@ -274,6 +304,10 @@ PRIVACY = {
       commerce (contrat, RGPD art. 6(1)(b)).</li>
     <li>Pour la sécurité de Loyi : empêcher les faux tampons, les abus et la fraude (intérêt légitime, art.
       6(1)(f)).</li>
+    <li>Pour afficher les messages de suivi d'un commerce sur les cartes de ses clients : l'intérêt légitime du
+      commerce à garder le contact avec ses clients (art. 6(1)(f)). Il s'agit de prospection : vous pouvez vous y
+      opposer à tout moment en désactivant les messages des commerces ; Loyi ne les charge alors même plus
+      (art. 21(2)).</li>
     <li>Pour gérer les abonnements et les factures, et respecter nos obligations légales comme la comptabilité
       (art. 6(1)(b) et (c)).</li>
   </ul>
@@ -295,10 +329,15 @@ PRIVACY = {
   <p>Les transferts hors de l'UE sont couverts par le cadre de protection des données UE–États-Unis (Data Privacy
     Framework) ou par les clauses contractuelles types de la Commission européenne.</p>
 
-  <h2>Stockage dans votre navigateur</h2>
-  <p>Le site enregistre votre identifiant anonyme, votre session de connexion et votre choix de langue et d'apparence
-    dans votre navigateur (stockage local), car Loyi ne peut pas fonctionner sans. Ce n'est pas utilisé pour vous
-    suivre : aucune bannière de cookies n'est donc nécessaire.</p>
+  <h2>Stockage dans votre navigateur et données techniques</h2>
+  <p>Le site enregistre votre identifiant anonyme, votre session de connexion et vos choix (langue, apparence,
+    messages des commerces) dans votre navigateur (stockage local), car Loyi ne peut pas fonctionner sans. Ce n'est pas
+    utilisé pour vous suivre : aucune bannière de cookies n'est donc nécessaire.</p>
+  <p>Tout ce dont le site et l'app ont besoin, y compris le code et les polices, vient de l'hébergement de Loyi : nous
+    ne chargeons ni Google Fonts ni d'autres contenus externes. Notre hébergeur (Google Firebase) traite votre adresse
+    IP et les données de votre navigateur dans des journaux techniques de courte durée, pour fournir les pages et les
+    protéger contre les abus. Si vous choisissez « Continuer avec Google » ou « Continuer avec Apple », la page de
+    connexion de ce fournisseur s'ouvre.</p>
 
   <h2>Durée de conservation</h2>
   <ul>
@@ -307,6 +346,8 @@ PRIVACY = {
       supprimés.</li>
     <li>Historique des tampons et récompenses d'un commerce (sous identifiants anonymes) : supprimé automatiquement
       après 2 ans, ou plus tôt si le commerce supprime son compte.</li>
+    <li>Une carte inutilisée pendant 2 ans est supprimée automatiquement, avec ses tampons et ses récompenses non
+      utilisées.</li>
     <li>Factures et données d'abonnement : aussi longtemps que l'exige la législation comptable belge (jusqu'à
       7 ans).</li>
     <li>Vous pouvez télécharger une copie de vos données à tout moment via Compte et confidentialité → Télécharger mes
@@ -358,6 +399,7 @@ TERMS = {
     <li>Collecting stamps without a real purchase, copying a shop's tag links or otherwise cheating is not allowed.
       Shops and Loyi may remove cards that were obtained that way.</li>
     <li>If a shop stops using Loyi, its cards stop working and are deleted.</li>
+    <li>A card that hasn't been used for 2 years is deleted, with its stamps and unused rewards.</li>
   </ul>
 
   <h2>3. Shops: account and subscription</h2>
@@ -386,6 +428,8 @@ TERMS = {
       unlawful or misleading. Loyi may remove messages that break this.</li>
     <li>You tell your clients that you use Loyi and point them to these terms and our
       <a href="{{p}}/privacy">privacy policy</a>.</li>
+    <li>For your clients' data in your loyalty programme you are the controller and Loyi your processor. The
+      <a href="{{p}}/dpa">data processing agreement</a> is part of these terms.</li>
   </ul>
 
   <h2>5. Availability and liability</h2>
@@ -432,6 +476,7 @@ TERMS = {
     <li>Stempels sparen zonder echte aankoop, de links van tags van een zaak kopiëren of op een andere manier
       sjoemelen is niet toegestaan. Zaken en Loyi mogen kaarten die zo verkregen zijn verwijderen.</li>
     <li>Als een zaak stopt met Loyi, werken haar kaarten niet meer en worden ze verwijderd.</li>
+    <li>Een kaart die 2 jaar niet gebruikt is, wordt verwijderd, met haar stempels en ongebruikte beloningen.</li>
   </ul>
 
   <h2>3. Zaken: account en abonnement</h2>
@@ -463,6 +508,8 @@ TERMS = {
       niets wat onwettig of misleidend is. Loyi mag berichten verwijderen die dat niet respecteren.</li>
     <li>Je laat je klanten weten dat je Loyi gebruikt en verwijst ze naar deze voorwaarden en ons
       <a href="{{p}}/privacy">privacybeleid</a>.</li>
+    <li>Voor de gegevens van je klanten in je spaarprogramma ben jij verwerkingsverantwoordelijke en Loyi je verwerker.
+      De <a href="{{p}}/dpa">verwerkersovereenkomst</a> maakt deel uit van deze voorwaarden.</li>
   </ul>
 
   <h2>5. Beschikbaarheid en aansprakelijkheid</h2>
@@ -513,6 +560,7 @@ TERMS = {
     <li>Il est interdit de collecter des tampons sans achat réel, de copier les liens des tags d'un commerce ou de
       tricher de toute autre manière. Les commerces et Loyi peuvent supprimer les cartes obtenues ainsi.</li>
     <li>Si un commerce arrête d'utiliser Loyi, ses cartes cessent de fonctionner et sont supprimées.</li>
+    <li>Une carte inutilisée pendant 2 ans est supprimée, avec ses tampons et ses récompenses non utilisées.</li>
   </ul>
 
   <h2>3. Commerces : compte et abonnement</h2>
@@ -546,6 +594,9 @@ TERMS = {
       ces règles.</li>
     <li>Vous informez vos clients que vous utilisez Loyi et les renvoyez vers ces conditions et notre
       <a href="{{p}}/privacy">politique de confidentialité</a>.</li>
+    <li>Pour les données de vos clients dans votre programme de fidélité, vous êtes responsable du traitement et Loyi
+      votre sous-traitant. L'<a href="{{p}}/dpa">accord de traitement des données</a> fait partie de ces
+      conditions.</li>
   </ul>
 
   <h2>5. Disponibilité et responsabilité</h2>
@@ -683,8 +734,230 @@ DELETE = {
 '''),
 }
 
+# ── Data processing agreement (GDPR art. 28) ───────────────────────────────────
+# Part of the terms for shops. Loyi is the processor for the client data of a shop's
+# loyalty programme; the shop is the controller.
+
+DPA = {
+'en': ('Data processing agreement', 'The agreement under GDPR article 28 between Loyi and the shops that use it.', f'''
+  <h1>Data processing agreement</h1>
+  <p class="updated">Last updated: {UPDATED['en']}</p>
+
+  <p>This agreement is part of the <a href="{{p}}/terms">terms of use</a> and applies between the shop
+    (“controller”) and Loyi, <strong>[company name or your full name]</strong>, <strong>[street, postcode,
+    city]</strong>, Belgium, <strong>[company number]</strong> (“processor”). It covers the personal data Loyi
+    processes for the shop's loyalty programme, as required by article 28 of the GDPR.</p>
+
+  <h2>1. Subject, duration, nature and purpose</h2>
+  <p>Loyi runs the shop's digital loyalty programme: it stores client cards, records stamps and redeemed rewards,
+    shows the shop's dashboard, client list and insights, and shows the shop's follow-up messages on its clients'
+    cards. The agreement lasts as long as the shop has a Loyi account.</p>
+
+  <h2>2. Data and people concerned</h2>
+  <ul>
+    <li>People: the shop's clients who collect stamps.</li>
+    <li>Data: pseudonymous client IDs, cards, stamps, rewards earned and used, and the date and time of each tap. Loyi
+      does not process names, email addresses or phone numbers of clients for the shop. No special categories of
+      data.</li>
+  </ul>
+
+  <h2>3. Instructions</h2>
+  <p>Loyi processes this data only to provide the service as described in the terms and in the app, and on the shop's
+    documented instructions, which are its settings and actions in Loyi. If Loyi believes an instruction breaks the
+    law, it tells the shop. Loyi does not use the data for its own purposes, except to keep the service secure and to
+    prevent fraud, as explained in the privacy policy.</p>
+
+  <h2>4. Confidentiality and security</h2>
+  <p>Only people who need it to run Loyi have access, and they are bound to confidentiality. Loyi takes appropriate
+    technical and organisational measures (article 32), including: pseudonymous client IDs, encrypted connections,
+    database rules that check every write, access limited to each shop's own data, data stored in the EU (Belgium),
+    and automatic deletion of stamp and reward history after 2 years.</p>
+
+  <h2>5. Sub-processors</h2>
+  <p>The shop gives general permission for these sub-processors:</p>
+  <ul>
+    <li><strong>Google Ireland Ltd</strong> (Firebase): database, hosting and sign-in. Database in Belgium
+      (europe-west1); sign-in data can be processed in the United States under the EU–US Data Privacy Framework or the
+      European Commission's standard contractual clauses.</li>
+  </ul>
+  <p>Loyi informs shops by email at least 30 days before adding or replacing a sub-processor. A shop that objects
+    can end its subscription before the change. Loyi binds each sub-processor to the same data protection obligations.</p>
+
+  <h2>6. Help with clients' rights and obligations</h2>
+  <p>Clients can see, download and delete their own data in Loyi themselves. Where needed, Loyi helps the shop answer
+    requests from clients and meet its obligations on security, data breaches and impact assessments (articles 32 to
+    36), taking into account the nature of the processing.</p>
+
+  <h2>7. Data breaches</h2>
+  <p>Loyi informs the shop without undue delay, and where possible within 48 hours, after becoming aware of a
+    personal data breach affecting its clients' data, with the information the shop needs to notify the Data
+    Protection Authority and, if required, its clients.</p>
+
+  <h2>8. End of the agreement</h2>
+  <p>When the shop deletes its account, Loyi deletes the data of its loyalty programme straight away; the shop can
+    download a copy beforehand under Account &amp; privacy → Download my data. Backups kept by the hosting provider
+    are overwritten within its normal cycle.</p>
+
+  <h2>9. Audits</h2>
+  <p>Loyi gives the shop the information it needs to show compliance with this agreement and allows reasonable
+    audits, announced in writing at least 30 days in advance, at the shop's own cost and at most once a year unless a
+    breach requires it.</p>
+
+  <h2>10. Liability and law</h2>
+  <p>The liability rules and the applicable law of the terms of use apply. If this agreement and the terms differ on
+    data protection, this agreement prevails.</p>
+'''),
+
+'nl': ('Verwerkersovereenkomst', 'De overeenkomst volgens artikel 28 van de AVG tussen Loyi en de zaken die het gebruiken.', f'''
+  <h1>Verwerkersovereenkomst</h1>
+  <p class="updated">Laatst bijgewerkt: {UPDATED['nl']}</p>
+
+  <p>Deze overeenkomst maakt deel uit van de <a href="{{p}}/terms">gebruiksvoorwaarden</a> en geldt tussen de zaak
+    (“verwerkingsverantwoordelijke”) en Loyi, <strong>[bedrijfsnaam of je volledige naam]</strong>,
+    <strong>[straat, postcode, gemeente]</strong>, België, <strong>[ondernemingsnummer]</strong> (“verwerker”). Ze
+    regelt de persoonsgegevens die Loyi verwerkt voor het spaarprogramma van de zaak, zoals artikel 28 van de AVG
+    vereist.</p>
+
+  <h2>1. Onderwerp, duur, aard en doel</h2>
+  <p>Loyi laat het digitale spaarprogramma van de zaak werken: het bewaart de kaarten van klanten, registreert
+    stempels en ingewisselde beloningen, toont het dashboard, de klantenlijst en de inzichten van de zaak, en toont de
+    opvolgberichten van de zaak op de kaarten van haar klanten. De overeenkomst loopt zolang de zaak een Loyi-account
+    heeft.</p>
+
+  <h2>2. Betrokken gegevens en personen</h2>
+  <ul>
+    <li>Personen: de klanten van de zaak die stempels sparen.</li>
+    <li>Gegevens: gepseudonimiseerde klant-ID's, kaarten, stempels, verdiende en gebruikte beloningen, en datum en uur
+      van elke tik. Loyi verwerkt voor de zaak geen namen, e-mailadressen of telefoonnummers van klanten. Geen
+      bijzondere categorieën van gegevens.</li>
+  </ul>
+
+  <h2>3. Instructies</h2>
+  <p>Loyi verwerkt deze gegevens alleen om de dienst te leveren zoals beschreven in de voorwaarden en in de app, en
+    volgens de gedocumenteerde instructies van de zaak, namelijk haar instellingen en handelingen in Loyi. Vindt Loyi
+    dat een instructie de wet schendt, dan laat het dat de zaak weten. Loyi gebruikt de gegevens niet voor eigen
+    doeleinden, behalve om de dienst veilig te houden en fraude te voorkomen, zoals uitgelegd in het
+    privacybeleid.</p>
+
+  <h2>4. Vertrouwelijkheid en beveiliging</h2>
+  <p>Alleen wie het nodig heeft om Loyi te laten werken, heeft toegang, en is tot geheimhouding verplicht. Loyi neemt
+    passende technische en organisatorische maatregelen (artikel 32), onder meer: gepseudonimiseerde klant-ID's,
+    versleutelde verbindingen, databankregels die elke wijziging controleren, toegang beperkt tot de eigen gegevens
+    van elke zaak, opslag in de EU (België) en automatische verwijdering van de geschiedenis van stempels en
+    beloningen na 2 jaar.</p>
+
+  <h2>5. Subverwerkers</h2>
+  <p>De zaak geeft algemene toestemming voor deze subverwerkers:</p>
+  <ul>
+    <li><strong>Google Ireland Ltd</strong> (Firebase): databank, hosting en inloggen. Databank in België
+      (europe-west1); inloggegevens kunnen in de Verenigde Staten worden verwerkt onder het EU-VS-kader voor
+      gegevensbescherming of de modelcontractbepalingen van de Europese Commissie.</li>
+  </ul>
+  <p>Loyi verwittigt zaken minstens 30 dagen voor het een subverwerker toevoegt of vervangt per e-mail. Een zaak die
+    bezwaar heeft, kan haar abonnement voor de wijziging stopzetten. Loyi legt elke subverwerker dezelfde
+    verplichtingen inzake gegevensbescherming op.</p>
+
+  <h2>6. Hulp bij de rechten van klanten en verplichtingen</h2>
+  <p>Klanten kunnen hun eigen gegevens zelf inkijken, downloaden en verwijderen in Loyi. Waar nodig helpt Loyi de zaak
+    om verzoeken van klanten te beantwoorden en haar verplichtingen na te komen inzake beveiliging, datalekken en
+    effectbeoordelingen (artikelen 32 tot 36), rekening houdend met de aard van de verwerking.</p>
+
+  <h2>7. Datalekken</h2>
+  <p>Loyi verwittigt de zaak zonder onredelijke vertraging, en waar mogelijk binnen 48 uur nadat het een datalek met
+    gegevens van haar klanten ontdekt, met de informatie die de zaak nodig heeft om de Gegevensbeschermingsautoriteit
+    en zo nodig haar klanten in te lichten.</p>
+
+  <h2>8. Einde van de overeenkomst</h2>
+  <p>Als de zaak haar account verwijdert, verwijdert Loyi meteen de gegevens van haar spaarprogramma; de zaak kan
+    vooraf een kopie downloaden via Account &amp; privacy → Mijn gegevens downloaden. Back-ups bij de hostingprovider
+    worden binnen hun normale cyclus overschreven.</p>
+
+  <h2>9. Audits</h2>
+  <p>Loyi geeft de zaak de informatie die ze nodig heeft om aan te tonen dat deze overeenkomst wordt nageleefd, en
+    staat redelijke audits toe, minstens 30 dagen vooraf schriftelijk aangekondigd, op kosten van de zaak en hoogstens
+    één keer per jaar, tenzij een datalek het vereist.</p>
+
+  <h2>10. Aansprakelijkheid en recht</h2>
+  <p>De regels over aansprakelijkheid en het toepasselijk recht uit de gebruiksvoorwaarden gelden. Verschillen deze
+    overeenkomst en de voorwaarden over gegevensbescherming, dan heeft deze overeenkomst voorrang.</p>
+'''),
+
+'fr': ("Accord de traitement des données", "L'accord au sens de l'article 28 du RGPD entre Loyi et les commerces qui l'utilisent.", f'''
+  <h1>Accord de traitement des données</h1>
+  <p class="updated">Dernière mise à jour : {UPDATED['fr']}</p>
+
+  <p>Cet accord fait partie des <a href="{{p}}/terms">conditions d'utilisation</a> et s'applique entre le commerce
+    (« responsable du traitement ») et Loyi, <strong>[nom de la société ou votre nom complet]</strong>,
+    <strong>[rue, code postal, commune]</strong>, Belgique, <strong>[numéro d'entreprise]</strong> (« sous-traitant »).
+    Il encadre les données personnelles que Loyi traite pour le programme de fidélité du commerce, comme l'exige
+    l'article 28 du RGPD.</p>
+
+  <h2>1. Objet, durée, nature et finalité</h2>
+  <p>Loyi fait fonctionner le programme de fidélité numérique du commerce : il conserve les cartes des clients,
+    enregistre les tampons et les récompenses utilisées, affiche le tableau de bord, la liste des clients et les
+    statistiques du commerce, et affiche les messages de suivi du commerce sur les cartes de ses clients. L'accord dure
+    aussi longtemps que le commerce a un compte Loyi.</p>
+
+  <h2>2. Données et personnes concernées</h2>
+  <ul>
+    <li>Personnes : les clients du commerce qui collectent des tampons.</li>
+    <li>Données : identifiants clients pseudonymisés, cartes, tampons, récompenses gagnées et utilisées, et date et
+      heure de chaque contact. Loyi ne traite pour le commerce ni noms, ni adresses e-mail, ni numéros de téléphone de
+      clients. Aucune catégorie particulière de données.</li>
+  </ul>
+
+  <h2>3. Instructions</h2>
+  <p>Loyi ne traite ces données que pour fournir le service décrit dans les conditions et dans l'app, et selon les
+    instructions documentées du commerce, à savoir ses réglages et ses actions dans Loyi. Si Loyi estime qu'une
+    instruction enfreint la loi, il en informe le commerce. Loyi n'utilise pas les données à ses propres fins, sauf pour
+    assurer la sécurité du service et prévenir la fraude, comme expliqué dans la politique de confidentialité.</p>
+
+  <h2>4. Confidentialité et sécurité</h2>
+  <p>Seules les personnes qui en ont besoin pour faire fonctionner Loyi y ont accès, et elles sont tenues à la
+    confidentialité. Loyi prend des mesures techniques et organisationnelles appropriées (article 32), notamment :
+    identifiants clients pseudonymisés, connexions chiffrées, règles de base de données qui vérifient chaque écriture,
+    accès limité aux données propres à chaque commerce, stockage dans l'UE (Belgique) et suppression automatique de
+    l'historique des tampons et récompenses après 2 ans.</p>
+
+  <h2>5. Sous-traitants ultérieurs</h2>
+  <p>Le commerce donne une autorisation générale pour ces sous-traitants ultérieurs :</p>
+  <ul>
+    <li><strong>Google Ireland Ltd</strong> (Firebase) : base de données, hébergement et connexion. Base de données en
+      Belgique (europe-west1) ; les données de connexion peuvent être traitées aux États-Unis dans le cadre du Data
+      Privacy Framework UE–États-Unis ou des clauses contractuelles types de la Commission européenne.</li>
+  </ul>
+  <p>Loyi informe les commerces par e-mail au moins 30 jours avant d'ajouter ou de remplacer un sous-traitant
+    ultérieur. Un commerce qui s'y oppose peut résilier son abonnement avant le changement. Loyi impose à chaque
+    sous-traitant ultérieur les mêmes obligations en matière de protection des données.</p>
+
+  <h2>6. Aide pour les droits des clients et les obligations</h2>
+  <p>Les clients peuvent consulter, télécharger et supprimer eux-mêmes leurs données dans Loyi. Si nécessaire, Loyi aide
+    le commerce à répondre aux demandes des clients et à respecter ses obligations en matière de sécurité, de violations
+    de données et d'analyses d'impact (articles 32 à 36), compte tenu de la nature du traitement.</p>
+
+  <h2>7. Violations de données</h2>
+  <p>Loyi informe le commerce dans les meilleurs délais, et si possible dans les 48 heures après en avoir pris
+    connaissance, de toute violation de données concernant ses clients, avec les informations dont le commerce a besoin
+    pour notifier l'Autorité de protection des données et, si nécessaire, ses clients.</p>
+
+  <h2>8. Fin de l'accord</h2>
+  <p>Quand le commerce supprime son compte, Loyi supprime immédiatement les données de son programme de fidélité ; le
+    commerce peut en télécharger une copie au préalable via Compte et confidentialité → Télécharger mes données. Les
+    sauvegardes de l'hébergeur sont écrasées selon leur cycle normal.</p>
+
+  <h2>9. Audits</h2>
+  <p>Loyi fournit au commerce les informations nécessaires pour démontrer le respect de cet accord et permet des audits
+    raisonnables, annoncés par écrit au moins 30 jours à l'avance, aux frais du commerce et au plus une fois par an,
+    sauf si une violation de données l'exige.</p>
+
+  <h2>10. Responsabilité et droit applicable</h2>
+  <p>Les règles de responsabilité et le droit applicable des conditions d'utilisation s'appliquent. En cas de
+    divergence entre cet accord et les conditions en matière de protection des données, cet accord prévaut.</p>
+'''),
+}
+
 if __name__ == '__main__':
-    for page, texts in (('privacy', PRIVACY), ('terms', TERMS), ('delete-account', DELETE)):
+    for page, texts in (('privacy', PRIVACY), ('terms', TERMS), ('delete-account', DELETE), ('dpa', DPA)):
         for lang, (title, description, body) in texts.items():
             write(page, lang, title, description, body)
     print('legal pages written')

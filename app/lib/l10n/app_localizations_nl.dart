@@ -1111,7 +1111,7 @@ class L10nNl extends L10n {
 
   @override
   String get agreeToTerms =>
-      'Door een account te maken ga je akkoord met de gebruiksvoorwaarden en het privacybeleid.';
+      'Door een account te maken ga je akkoord met de gebruiksvoorwaarden, inclusief de verwerkersovereenkomst, en het privacybeleid.';
 
   @override
   String get collectingStamps => 'Spaar je stempels? Ga naar je kaarten';
@@ -1824,4 +1824,24 @@ class L10nNl extends L10n {
   String waitMinutes(int minutes) {
     return '$minutes min';
   }
+
+  @override
+  String get shopMessagesTitle => 'Berichten van zaken';
+
+  @override
+  String get shopMessagesSub =>
+      'Zaken kunnen een kort bericht op je kaart tonen, bijvoorbeeld als er een beloning klaarligt. Je telefoon kiest ze op basis van je eigen kaart; zaken zien nooit wie ze leest.';
+
+  @override
+  String get showShopMessages => 'Berichten van zaken tonen';
+
+  @override
+  String get turnOffShopMessages => 'Berichten van zaken uitzetten';
+
+  @override
+  String get shopMessagesTurnedOff =>
+      'Berichten van zaken staan uit. Je kunt ze weer aanzetten onder Account & privacy.';
+
+  @override
+  String get undo => 'Ongedaan maken';
 }

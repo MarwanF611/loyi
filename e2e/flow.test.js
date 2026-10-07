@@ -448,6 +448,24 @@ test("Loyi rules: full flow and abuse attempts", async (t) => {
     await deleteDoc(ref);
   });
 
+  await t.test("retention: the owner deletes cards unused for 2 years, nobody else can", async () => {
+    const old = `${programRef.id}_retention-${run}`;
+    await admin.doc(`cards/${old}`).set({
+      clientUid: `retention-${run}`, businessId: bizRef.id, ownerUid: owner.uid, programId: programRef.id,
+      stamps: 1, rewardsAvailable: 0, totalStamps: 1, totalRedeemed: 0,
+      createdAt: Timestamp.fromMillis(Date.now() - 800 * DAY), updatedAt: Timestamp.fromMillis(Date.now() - 800 * DAY),
+    });
+    const cutoff = ClientTimestamp.fromMillis(Date.now() - 730 * DAY);
+    await denied(getDocs(query(collection(other.db, "cards"), where("ownerUid", "==", owner.uid), where("updatedAt", "<", cutoff))));
+    const stale = await getDocs(
+      query(collection(biz.db, "cards"), where("ownerUid", "==", owner.uid), where("businessId", "==", bizRef.id),
+        where("updatedAt", "<", cutoff)),
+    );
+    assert.deepEqual(stale.docs.map((d) => d.id), [old]);
+    await deleteDoc(stale.docs[0].ref);
+    assert.equal((await admin.doc(`cards/${old}`).get()).exists, false);
+  });
+
   await t.test("insights: a business reads its own client cards and visits, not another shop's", async () => {
     const cards = await getDocs(
       query(collection(biz.db, "cards"), where("ownerUid", "==", owner.uid), where("businessId", "==", bizRef.id)),

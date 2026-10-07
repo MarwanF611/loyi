@@ -16,7 +16,10 @@ Set<String> _placeholders(String text) => {
 
 void main() {
   final en = _arb('en');
-  final keys = {for (final k in en.keys) if (!k.startsWith('@')) k};
+  final keys = {
+    for (final k in en.keys)
+      if (!k.startsWith('@')) k,
+  };
 
   test('Dutch is the default language', () {
     expect(Language().value.languageCode, 'nl');
@@ -27,7 +30,10 @@ void main() {
   for (final lang in ['nl', 'fr']) {
     test('$lang has every string, with the same placeholders', () {
       final arb = _arb(lang);
-      final theirs = {for (final k in arb.keys) if (!k.startsWith('@')) k};
+      final theirs = {
+        for (final k in arb.keys)
+          if (!k.startsWith('@')) k,
+      };
       expect(keys.difference(theirs), isEmpty, reason: 'missing in $lang');
       expect(theirs.difference(keys), isEmpty, reason: 'only in $lang');
       for (final k in keys) {

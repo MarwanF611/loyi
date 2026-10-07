@@ -8,7 +8,9 @@ cd "$(dirname "$0")/../app"
 
 # A stale plugin registrant (after adding or removing packages) silently drops web plugins.
 rm -rf .dart_tool/flutter_build
-flutter build web --csp "$@"
+# --no-web-resources-cdn: Flutter's engine (CanvasKit) is served from our own hosting, not gstatic.com.
+flutter build web --csp --no-web-resources-cdn "$@"
 mv build/web/index.html build/web/app.html
+../scripts/vendor-fallback-fonts.sh build/web
 # The website's home page in Dutch (/), French (/fr/) and English (/en/).
 node ../scripts/build-site.mjs build/web
