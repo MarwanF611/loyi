@@ -20,7 +20,7 @@ PRIVACY = {
   <h2>Who is responsible</h2>
   <p>Loyi is run by <strong>[company name or your full name]</strong>, <strong>[street, postcode, city]</strong>,
     Belgium, <strong>[company number (KBO/BCE), if you have one]</strong>. Contact:
-    <a href="mailto:support@loyi.be">support@loyi.be</a>.</p>
+    <a href="mailto:marwan.fikri20@gmail.com">marwan.fikri20@gmail.com</a>.</p>
   <p>Loyi is the controller for your Loyi account and for running the service (keeping your cards, preventing
     fraud). For the loyalty programme of a shop (its cards, the stamps and rewards of its clients and its follow-up
     messages) the shop is the controller and Loyi processes that data on the shop's behalf, under the
@@ -109,7 +109,7 @@ PRIVACY = {
   <p>You can see, download, correct and delete your data yourself under <strong>Account &amp; privacy</strong> in
     Loyi: download a copy, change your email or password, or delete your account. You can also ask us to see,
     correct, export or delete your data, or object to or restrict its use. Email
-    <a href="mailto:support@loyi.be">support@loyi.be</a>. You can delete your account yourself at any time; see
+    <a href="mailto:marwan.fikri20@gmail.com">marwan.fikri20@gmail.com</a>. You can delete your account yourself at any time; see
     <a href="{{p}}/delete-account">Delete your account</a>. If you think we handle your data wrongly, you can complain to
     the Belgian Data Protection Authority (<a href="https://www.dataprotectionauthority.be">dataprotectionauthority.be</a>).</p>
 
@@ -132,7 +132,7 @@ PRIVACY = {
   <h2>Wie is verantwoordelijk</h2>
   <p>Loyi wordt uitgebaat door <strong>[bedrijfsnaam of je volledige naam]</strong>,
     <strong>[straat, postcode, gemeente]</strong>, België, <strong>[ondernemingsnummer (KBO), als je er een
-    hebt]</strong>. Contact: <a href="mailto:support@loyi.be">support@loyi.be</a>.</p>
+    hebt]</strong>. Contact: <a href="mailto:marwan.fikri20@gmail.com">marwan.fikri20@gmail.com</a>.</p>
   <p>Loyi is verwerkingsverantwoordelijke voor je Loyi-account en voor het leveren van de dienst (je kaarten bewaren,
     fraude voorkomen). Voor het spaarprogramma van een zaak (haar kaarten, de stempels en beloningen van haar klanten
     en haar opvolgberichten) is de zaak verwerkingsverantwoordelijke en verwerkt Loyi die gegevens in haar opdracht,
@@ -228,7 +228,7 @@ PRIVACY = {
     privacy</strong> in Loyi: een kopie downloaden, je e-mailadres of wachtwoord wijzigen, of je account verwijderen.
     Je kunt ons ook vragen om je gegevens in te kijken, te verbeteren, over te dragen of te verwijderen, of bezwaar
     maken tegen of een beperking vragen van het gebruik ervan. Mail naar
-    <a href="mailto:support@loyi.be">support@loyi.be</a>. Je kunt je account altijd zelf verwijderen; zie
+    <a href="mailto:marwan.fikri20@gmail.com">marwan.fikri20@gmail.com</a>. Je kunt je account altijd zelf verwijderen; zie
     <a href="{{p}}/delete-account">Je account verwijderen</a>. Vind je dat we je gegevens verkeerd behandelen, dan kun je
     klacht indienen bij de Belgische Gegevensbeschermingsautoriteit
     (<a href="https://www.gegevensbeschermingsautoriteit.be">gegevensbeschermingsautoriteit.be</a>).</p>
@@ -254,7 +254,7 @@ PRIVACY = {
   <h2>Qui est responsable</h2>
   <p>Loyi est exploité par <strong>[nom de la société ou votre nom complet]</strong>,
     <strong>[rue, code postal, commune]</strong>, Belgique, <strong>[numéro d'entreprise (BCE), si vous en avez
-    un]</strong>. Contact : <a href="mailto:support@loyi.be">support@loyi.be</a>.</p>
+    un]</strong>. Contact : <a href="mailto:marwan.fikri20@gmail.com">marwan.fikri20@gmail.com</a>.</p>
   <p>Loyi est responsable du traitement pour votre compte Loyi et pour la fourniture du service (conserver vos
     cartes, prévenir la fraude). Pour le programme de fidélité d'un commerce (ses cartes, les tampons et récompenses de
     ses clients et ses messages de suivi), le commerce est responsable du traitement et Loyi traite ces données pour
@@ -357,7 +357,7 @@ PRIVACY = {
     confidentialité</strong> dans Loyi : télécharger une copie, changer votre e-mail ou votre mot de passe, ou supprimer
     votre compte. Vous pouvez aussi nous demander de consulter, corriger, transférer ou supprimer vos données, ou vous
     opposer à leur utilisation ou en demander la limitation. Écrivez à
-    <a href="mailto:support@loyi.be">support@loyi.be</a>. Vous pouvez supprimer votre compte vous-même à tout moment ;
+    <a href="mailto:marwan.fikri20@gmail.com">marwan.fikri20@gmail.com</a>. Vous pouvez supprimer votre compte vous-même à tout moment ;
     voir <a href="{{p}}/delete-account">Supprimer votre compte</a>. Si vous pensez que nous traitons mal vos données,
     vous pouvez porter plainte auprès de l'Autorité de protection des données belge
     (<a href="https://www.autoriteprotectiondonnees.be">autoriteprotectiondonnees.be</a>).</p>
@@ -381,7 +381,7 @@ TERMS = {
 
   <p>These terms apply to Loyi, run by <strong>[company name or your full name]</strong>,
     <strong>[street, postcode, city]</strong>, Belgium (“Loyi”, “we”). By using Loyi you accept them.
-    Contact: <a href="mailto:support@loyi.be">support@loyi.be</a>.</p>
+    Contact: <a href="mailto:marwan.fikri20@gmail.com">marwan.fikri20@gmail.com</a>.</p>
 
   <h2>1. What Loyi does</h2>
   <p>Loyi lets shops run digital stamp cards. Clients tap the shop's NFC tag (or scan its QR code), collect stamps
@@ -458,7 +458,7 @@ TERMS = {
 
   <p>Deze voorwaarden gelden voor Loyi, uitgebaat door <strong>[bedrijfsnaam of je volledige naam]</strong>,
     <strong>[straat, postcode, gemeente]</strong>, België (“Loyi”, “wij”). Wie Loyi gebruikt, aanvaardt ze.
-    Contact: <a href="mailto:support@loyi.be">support@loyi.be</a>.</p>
+    Contact: <a href="mailto:marwan.fikri20@gmail.com">marwan.fikri20@gmail.com</a>.</p>
 
   <h2>1. Wat Loyi doet</h2>
   <p>Met Loyi geven zaken digitale stempelkaarten. Klanten tikken op de NFC-tag van de zaak (of scannen haar QR-code),
@@ -541,7 +541,7 @@ TERMS = {
 
   <p>Ces conditions s'appliquent à Loyi, exploité par <strong>[nom de la société ou votre nom complet]</strong>,
     <strong>[rue, code postal, commune]</strong>, Belgique (« Loyi », « nous »). En utilisant Loyi, vous les acceptez.
-    Contact : <a href="mailto:support@loyi.be">support@loyi.be</a>.</p>
+    Contact : <a href="mailto:marwan.fikri20@gmail.com">marwan.fikri20@gmail.com</a>.</p>
 
   <h2>1. Ce que fait Loyi</h2>
   <p>Loyi permet aux commerces de proposer des cartes de fidélité numériques. Les clients touchent le tag NFC du
@@ -656,7 +656,7 @@ DELETE = {
   </div>
 
   <h2>Can't sign in?</h2>
-  <p>Email <a href="mailto:support@loyi.be?subject=Delete%20my%20Loyi%20account">support@loyi.be</a> from the email
+  <p>Email <a href="mailto:marwan.fikri20@gmail.com?subject=Delete%20my%20Loyi%20account">marwan.fikri20@gmail.com</a> from the email
     address of your account and we delete it within 30 days. Records we must keep by law (invoices) are kept for as
     long as the law requires; everything else is deleted.</p>
 '''),
@@ -691,7 +691,7 @@ DELETE = {
   </div>
 
   <h2>Kun je niet inloggen?</h2>
-  <p>Mail naar <a href="mailto:support@loyi.be?subject=Mijn%20Loyi-account%20verwijderen">support@loyi.be</a> vanaf
+  <p>Mail naar <a href="mailto:marwan.fikri20@gmail.com?subject=Mijn%20Loyi-account%20verwijderen">marwan.fikri20@gmail.com</a> vanaf
     het e-mailadres van je account en we verwijderen het binnen 30 dagen. Gegevens die we wettelijk moeten bewaren
     (facturen) houden we zo lang als de wet vereist; al de rest wordt verwijderd.</p>
 '''),
@@ -726,7 +726,7 @@ DELETE = {
   </div>
 
   <h2>Vous ne pouvez pas vous connecter ?</h2>
-  <p>Écrivez à <a href="mailto:support@loyi.be?subject=Supprimer%20mon%20compte%20Loyi">support@loyi.be</a> depuis
+  <p>Écrivez à <a href="mailto:marwan.fikri20@gmail.com?subject=Supprimer%20mon%20compte%20Loyi">marwan.fikri20@gmail.com</a> depuis
     l'adresse e-mail de votre compte et nous le supprimons dans les 30 jours. Les données que la loi nous oblige à
     conserver (factures) sont gardées aussi longtemps que nécessaire ; tout le reste est supprimé.</p>
 '''),

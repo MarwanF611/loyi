@@ -42,10 +42,12 @@ class L10nFr extends L10n {
   String get wrongPassword => 'Mot de passe incorrect.';
 
   @override
-  String get confirmSameAccount => 'Confirmez avec le compte avec lequel vous êtes connecté.';
+  String get confirmSameAccount =>
+      'Confirmez avec le compte avec lequel vous êtes connecté.';
 
   @override
-  String get tooManyAttempts => 'Trop de tentatives. Réessayez dans quelques minutes.';
+  String get tooManyAttempts =>
+      'Trop de tentatives. Réessayez dans quelques minutes.';
 
   @override
   String get couldNotDeleteAccount => 'Votre compte n\'a pas pu être supprimé.';
@@ -62,7 +64,8 @@ class L10nFr extends L10n {
       'Vos cartes, tampons et récompenses sont définitivement supprimés. Cette action est irréversible.';
 
   @override
-  String get deleteAccountSubscriptionNote => 'Votre abonnement est également résilié : vous ne serez plus débité.';
+  String get deleteAccountSubscriptionNote =>
+      'Votre abonnement est également résilié : vous ne serez plus débité.';
 
   @override
   String get yourPassword => 'Votre mot de passe';
@@ -138,13 +141,16 @@ class L10nFr extends L10n {
   String get noFullCardYet => 'Pas encore de carte complète à échanger.';
 
   @override
-  String get rewardNoLongerAvailable => 'Cette récompense n\'est plus disponible.';
+  String get rewardNoLongerAvailable =>
+      'Cette récompense n\'est plus disponible.';
 
   @override
-  String get noConnection => 'Pas de connexion. Vérifiez votre connexion internet et réessayez.';
+  String get noConnection =>
+      'Pas de connexion. Vérifiez votre connexion internet et réessayez.';
 
   @override
-  String get somethingWentWrong => 'Une erreur s\'est produite. Veuillez réessayer.';
+  String get somethingWentWrong =>
+      'Une erreur s\'est produite. Veuillez réessayer.';
 
   @override
   String get signInFirst => 'Connectez-vous d\'abord.';
@@ -195,13 +201,15 @@ class L10nFr extends L10n {
   String get signInAgain => 'Reconnectez-vous.';
 
   @override
-  String get onlyBusinessCanSubscribe => 'Seuls les comptes professionnels peuvent s\'abonner.';
+  String get onlyBusinessCanSubscribe =>
+      'Seuls les comptes professionnels peuvent s\'abonner.';
 
   @override
   String get alreadySubscribed => 'Vous êtes déjà abonné.';
 
   @override
-  String get noSubscriptionToManage => 'Il n\'y a pas encore d\'abonnement à gérer.';
+  String get noSubscriptionToManage =>
+      'Il n\'y a pas encore d\'abonnement à gérer.';
 
   @override
   String get audienceAll => 'Tout le monde';
@@ -225,7 +233,8 @@ class L10nFr extends L10n {
   String get audienceReward => 'Récompense en attente';
 
   @override
-  String get audienceRewardDesc => 'Ont une récompense qu\'ils n\'ont pas encore utilisée';
+  String get audienceRewardDesc =>
+      'Ont une récompense qu\'ils n\'ont pas encore utilisée';
 
   @override
   String get audienceSlipping => 'En train de décrocher';
@@ -466,7 +475,8 @@ class L10nFr extends L10n {
   String get pitchReward => 'Rappelez-leur qu\'une récompense les attend.';
 
   @override
-  String get pitchNew => 'Souhaitez-leur la bienvenue et expliquez le fonctionnement.';
+  String get pitchNew =>
+      'Souhaitez-leur la bienvenue et expliquez le fonctionnement.';
 
   @override
   String get writeAMessage => 'Écrire un message';
@@ -527,7 +537,8 @@ class L10nFr extends L10n {
   String get findClientHint => 'Chercher un code client, p. ex. K7Q2';
 
   @override
-  String get clientsEmpty => 'Les clients apparaissent ici après leur premier passage.';
+  String get clientsEmpty =>
+      'Les clients apparaissent ici après leur premier passage.';
 
   @override
   String get noClientsMatch => 'Aucun client ne correspond.';
@@ -549,13 +560,23 @@ class L10nFr extends L10n {
 
   @override
   String daysAgo(int days) {
-    String _temp0 = intl.Intl.pluralLogic(days, locale: localeName, other: 'il y a $days jours', one: 'il y a 1 jour');
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'il y a $days jours',
+      one: 'il y a 1 jour',
+    );
     return '$_temp0';
   }
 
   @override
   String clientRowSummary(int count, String when) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count tampons', one: '1 tampon');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tampons',
+      one: '1 tampon',
+    );
     return '$_temp0 · dernière visite $when';
   }
 
@@ -595,7 +616,8 @@ class L10nFr extends L10n {
       'Pourquoi pas de nom ? Les clients utilisent Loyi sans dire aux commerces qui ils sont. Joignez-les plutôt avec un message sur leur carte.';
 
   @override
-  String get noLinksAllowed => 'Les liens ne sont pas autorisés : ils font ressembler les messages à du phishing.';
+  String get noLinksAllowed =>
+      'Les liens ne sont pas autorisés : ils font ressembler les messages à du phishing.';
 
   @override
   String get messageIsLive => 'Le message est en ligne';
@@ -604,7 +626,8 @@ class L10nFr extends L10n {
   String get messageUpdated => 'Message mis à jour';
 
   @override
-  String get couldNotSaveMessage => 'Le message n\'a pas pu être enregistré. Veuillez réessayer.';
+  String get couldNotSaveMessage =>
+      'Le message n\'a pas pu être enregistré. Veuillez réessayer.';
 
   @override
   String get editMessage => 'Modifier le message';
@@ -716,7 +739,8 @@ class L10nFr extends L10n {
   String get insightsTitle => 'Comment vont vos cartes';
 
   @override
-  String get couldNotLoadInsights => 'Vos statistiques n\'ont pas pu être chargées.';
+  String get couldNotLoadInsights =>
+      'Vos statistiques n\'ont pas pu être chargées.';
 
   @override
   String weekTo(Object date) {
@@ -747,7 +771,12 @@ class L10nFr extends L10n {
 
   @override
   String cameBackCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count sont revenus', one: '1 est revenu');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sont revenus',
+      one: '1 est revenu',
+    );
     return '$_temp0';
   }
 
@@ -769,7 +798,8 @@ class L10nFr extends L10n {
   String get stampsPerDay => 'Tampons par jour';
 
   @override
-  String get stampsAppearHere => 'Les tampons apparaissent ici dès que vos clients touchent vos tags.';
+  String get stampsAppearHere =>
+      'Les tampons apparaissent ici dès que vos clients touchent vos tags.';
 
   @override
   String busiestAt(Object day, Object time) {
@@ -778,7 +808,12 @@ class L10nFr extends L10n {
 
   @override
   String stampsCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count tampons', one: '1 tampon');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tampons',
+      one: '1 tampon',
+    );
     return '$_temp0';
   }
 
@@ -795,13 +830,23 @@ class L10nFr extends L10n {
 
   @override
   String rewardsCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count récompenses', one: '1 récompense');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count récompenses',
+      one: '1 récompense',
+    );
     return '$_temp0';
   }
 
   @override
   String clientsCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count clients', one: '1 client');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clients',
+      one: '1 client',
+    );
     return '$_temp0';
   }
 
@@ -836,7 +881,8 @@ class L10nFr extends L10n {
   String get busyTimes => 'Heures d\'affluence';
 
   @override
-  String get busyTimesNote => 'Tampons par jour et par heure, pour savoir quand prévoir un coup de main.';
+  String get busyTimesNote =>
+      'Tampons par jour et par heure, pour savoir quand prévoir un coup de main.';
 
   @override
   String get clientMix => 'Répartition des clients';
@@ -859,7 +905,8 @@ class L10nFr extends L10n {
   String get cameBackAfterFirst => 'Sont revenus après leur première visite';
 
   @override
-  String get cameBackAfterFirstHint => 'Clients inscrits il y a au moins 30 jours';
+  String get cameBackAfterFirstHint =>
+      'Clients inscrits il y a au moins 30 jours';
 
   @override
   String get visitsPerActive => 'Visites par client actif';
@@ -871,7 +918,8 @@ class L10nFr extends L10n {
   String get daysBetweenVisits => 'Jours entre deux visites';
 
   @override
-  String get daysBetweenVisitsHint => 'En moyenne, pour les clients venus plus d\'une fois';
+  String get daysBetweenVisitsHint =>
+      'En moyenne, pour les clients venus plus d\'une fois';
 
   @override
   String get rewardsWaitingToUse => 'Récompenses à utiliser';
@@ -908,7 +956,8 @@ class L10nFr extends L10n {
   String get yourCards => 'Vos cartes';
 
   @override
-  String get yourCardsSub => 'Tampons par carte, récompenses et design. Ouvrez une carte pour gérer ses tags NFC.';
+  String get yourCardsSub =>
+      'Tampons par carte, récompenses et design. Ouvrez une carte pour gérer ses tags NFC.';
 
   @override
   String get newCard => 'Nouvelle carte';
@@ -948,7 +997,8 @@ class L10nFr extends L10n {
   String get logo => 'Logo';
 
   @override
-  String get logoHint => 'Affiché sur toutes vos cartes de fidélité. Un PNG carré avec un fond transparent est idéal.';
+  String get logoHint =>
+      'Affiché sur toutes vos cartes de fidélité. Un PNG carré avec un fond transparent est idéal.';
 
   @override
   String get details => 'Informations';
@@ -957,7 +1007,8 @@ class L10nFr extends L10n {
   String get appearance => 'Apparence';
 
   @override
-  String get appearanceHint => 'Clair par défaut. Appareil suit votre téléphone ou ordinateur.';
+  String get appearanceHint =>
+      'Clair par défaut. Appareil suit votre téléphone ou ordinateur.';
 
   @override
   String get languageHint => 'Le néerlandais est la langue par défaut.';
@@ -966,10 +1017,12 @@ class L10nFr extends L10n {
   String get subscription => 'Abonnement';
 
   @override
-  String get accountSettingsSub => 'E-mail, mot de passe, vos données, suppression du compte';
+  String get accountSettingsSub =>
+      'E-mail, mot de passe, vos données, suppression du compte';
 
   @override
-  String get couldNotUpdateLogo => 'Le logo n\'a pas pu être modifié. Veuillez réessayer.';
+  String get couldNotUpdateLogo =>
+      'Le logo n\'a pas pu être modifié. Veuillez réessayer.';
 
   @override
   String get replaceLogo => 'Remplacer le logo';
@@ -981,13 +1034,15 @@ class L10nFr extends L10n {
   String get remove => 'Retirer';
 
   @override
-  String get passwordTooShort => 'Utilisez au moins 8 caractères pour votre mot de passe.';
+  String get passwordTooShort =>
+      'Utilisez au moins 8 caractères pour votre mot de passe.';
 
   @override
   String get wrongEmailOrPassword => 'E-mail ou mot de passe incorrect.';
 
   @override
-  String get emailInUse => 'Un compte existe déjà avec cet e-mail. Connectez-vous plutôt.';
+  String get emailInUse =>
+      'Un compte existe déjà avec cet e-mail. Connectez-vous plutôt.';
 
   @override
   String get emailHasAccount =>
@@ -997,7 +1052,8 @@ class L10nFr extends L10n {
   String get invalidEmail => 'Indiquez une adresse e-mail valide.';
 
   @override
-  String get signInMethodDisabled => 'Ce mode de connexion n\'est pas encore activé.';
+  String get signInMethodDisabled =>
+      'Ce mode de connexion n\'est pas encore activé.';
 
   @override
   String get couldNotSignIn => 'Connexion impossible.';
@@ -1062,7 +1118,8 @@ class L10nFr extends L10n {
   String get heroTitle => 'Des cartes de fidélité\nque vos clients gardent.';
 
   @override
-  String get heroSub => 'Un contact sur un tag NFC. Aucune app à installer. Votre logo, vos couleurs, vos récompenses.';
+  String get heroSub =>
+      'Un contact sur un tag NFC. Aucune app à installer. Votre logo, vos couleurs, vos récompenses.';
 
   @override
   String get signOut => 'Se déconnecter';
@@ -1076,7 +1133,8 @@ class L10nFr extends L10n {
   String get yourBusiness => 'Votre commerce';
 
   @override
-  String get yourBusinessSub => 'Le nom que vos clients voient sur leur carte de fidélité.';
+  String get yourBusinessSub =>
+      'Le nom que vos clients voient sur leur carte de fidélité.';
 
   @override
   String get yourColours => 'Vos couleurs';
@@ -1112,13 +1170,15 @@ class L10nFr extends L10n {
       'Votre tableau de bord s\'ouvre et vos tags fonctionnent dès que le paiement est confirmé. Résiliable à tout moment.';
 
   @override
-  String get dashboardOpensWhenActive => 'Votre tableau de bord s\'ouvre dès que ce compte a un abonnement actif.';
+  String get dashboardOpensWhenActive =>
+      'Votre tableau de bord s\'ouvre dès que ce compte a un abonnement actif.';
 
   @override
   String get paymentReceived => 'Paiement reçu';
 
   @override
-  String get switchingOn => 'Activation de votre compte. Cela prend quelques secondes.';
+  String get switchingOn =>
+      'Activation de votre compte. Cela prend quelques secondes.';
 
   @override
   String get takingLonger =>
@@ -1131,13 +1191,15 @@ class L10nFr extends L10n {
   String get paymentProblem => 'Problème de paiement';
 
   @override
-  String get paymentProblemSub => 'Mettez à jour votre moyen de paiement pour que vos tags continuent de fonctionner.';
+  String get paymentProblemSub =>
+      'Mettez à jour votre moyen de paiement pour que vos tags continuent de fonctionner.';
 
   @override
   String get loyiForBusiness => 'Loyi pour les commerces';
 
   @override
-  String get planTagline => 'Des cartes de fidélité numériques que vos clients gardent vraiment.';
+  String get planTagline =>
+      'Des cartes de fidélité numériques que vos clients gardent vraiment.';
 
   @override
   String get perkTags => 'Vos tags NFC d\'inscription et de tampon, activés';
@@ -1149,7 +1211,8 @@ class L10nFr extends L10n {
   String get perkBrand => 'Votre logo, vos couleurs et le design de la carte';
 
   @override
-  String get perkDashboard => 'Aperçu en direct, suivi des clients et statistiques';
+  String get perkDashboard =>
+      'Aperçu en direct, suivi des clients et statistiques';
 
   @override
   String get perkNoInstall => 'Rien à installer pour vos clients';
@@ -1184,7 +1247,8 @@ class L10nFr extends L10n {
   String get manageSubscription => 'Gérer l\'abonnement';
 
   @override
-  String get manageSubscriptionSub => 'Changez de moyen de paiement, téléchargez vos factures ou résiliez.';
+  String get manageSubscriptionSub =>
+      'Changez de moyen de paiement, téléchargez vos factures ou résiliez.';
 
   @override
   String get switchingOnTags => 'Paiement reçu. Activation de vos tags…';
@@ -1196,7 +1260,8 @@ class L10nFr extends L10n {
   String get perMonthExclVat => ' / mois HTVA';
 
   @override
-  String get cardOrBancontact => 'Carte ou Bancontact. Résiliable à tout moment.';
+  String get cardOrBancontact =>
+      'Carte ou Bancontact. Résiliable à tout moment.';
 
   @override
   String get subscribe => 'S\'abonner';
@@ -1209,29 +1274,46 @@ class L10nFr extends L10n {
   String get noActiveSubscription => 'Pas d\'abonnement actif';
 
   @override
-  String get noActiveSubscriptionSub => 'Ce compte n\'a pas d\'abonnement Loyi actif.';
+  String get noActiveSubscriptionSub =>
+      'Ce compte n\'a pas d\'abonnement Loyi actif.';
 
   @override
-  String get subscriptionsNotSetUp => 'Les abonnements ne sont pas configurés dans cette version.';
+  String get subscriptionsNotSetUp =>
+      'Les abonnements ne sont pas configurés dans cette version.';
 
   @override
   String get noLimit => 'Aucune limite';
 
   @override
   String minutesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count minutes', one: '1 minute');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes',
+      one: '1 minute',
+    );
     return '$_temp0';
   }
 
   @override
   String hoursCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count heures', one: '1 heure');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count heures',
+      one: '1 heure',
+    );
     return '$_temp0';
   }
 
   @override
   String daysCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count jours', one: '1 jour');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours',
+      one: '1 jour',
+    );
     return '$_temp0';
   }
 
@@ -1242,7 +1324,8 @@ class L10nFr extends L10n {
   String get addOneReward => 'Ajoutez au moins une récompense.';
 
   @override
-  String get cardCreated => 'Carte créée. Ajoutez maintenant vos tags NFC ci-dessous.';
+  String get cardCreated =>
+      'Carte créée. Ajoutez maintenant vos tags NFC ci-dessous.';
 
   @override
   String couldNotSave(Object reason) {
@@ -1265,7 +1348,8 @@ class L10nFr extends L10n {
   String get cardName => 'Nom de la carte';
 
   @override
-  String get cardNameSub => 'Court et clair ; les clients le voient sous le nom de votre commerce.';
+  String get cardNameSub =>
+      'Court et clair ; les clients le voient sous le nom de votre commerce.';
 
   @override
   String get cardNameHint => 'p. ex. Carte café';
@@ -1329,10 +1413,12 @@ class L10nFr extends L10n {
   String get nfcTags => 'Tags NFC';
 
   @override
-  String get nfcTagsSub => 'Chaque tag est un lien. Écrivez-le sur un autocollant NFC.';
+  String get nfcTagsSub =>
+      'Chaque tag est un lien. Écrivez-le sur un autocollant NFC.';
 
   @override
-  String get noTagsYet => 'Pas encore de tags. Créez un tag d\'inscription et un tag tampon pour commencer.';
+  String get noTagsYet =>
+      'Pas encore de tags. Créez un tag d\'inscription et un tag tampon pour commencer.';
 
   @override
   String get addJoinTag => 'Ajouter un tag d\'inscription';
@@ -1344,13 +1430,15 @@ class L10nFr extends L10n {
   String get tagStep1 => 'Tag d\'inscription, bien visible';
 
   @override
-  String get tagStep1Sub => 'À l\'entrée ou sur le comptoir. Le toucher ajoute la carte.';
+  String get tagStep1Sub =>
+      'À l\'entrée ou sur le comptoir. Le toucher ajoute la carte.';
 
   @override
   String get tagStep2 => 'Tag tampon, derrière le comptoir';
 
   @override
-  String get tagStep2Sub => 'Présentez-le après un achat. Chaque contact donne un tampon.';
+  String get tagStep2Sub =>
+      'Présentez-le après un achat. Chaque contact donne un tampon.';
 
   @override
   String get programStickers => 'Programmez les autocollants';
@@ -1374,7 +1462,12 @@ class L10nFr extends L10n {
 
   @override
   String tapsSummary(int count, String when) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count contacts', one: '1 contact');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contacts',
+      one: '1 contact',
+    );
     return '$_temp0 · dernier $when';
   }
 
@@ -1465,7 +1558,8 @@ class L10nFr extends L10n {
   String get downloadMyData => 'Télécharger mes données';
 
   @override
-  String get newPasswordTooShort => 'Utilisez au moins 8 caractères pour votre nouveau mot de passe.';
+  String get newPasswordTooShort =>
+      'Utilisez au moins 8 caractères pour votre nouveau mot de passe.';
 
   @override
   String get emailUsedByOther => 'Un autre compte utilise déjà cet e-mail.';
@@ -1477,7 +1571,8 @@ class L10nFr extends L10n {
   String get thatDidntWork => 'Cela n\'a pas fonctionné. Veuillez réessayer.';
 
   @override
-  String get passwordsDontMatch => 'Les nouveaux mots de passe ne correspondent pas.';
+  String get passwordsDontMatch =>
+      'Les nouveaux mots de passe ne correspondent pas.';
 
   @override
   String get passwordChanged => 'Votre mot de passe a été modifié.';
@@ -1536,13 +1631,23 @@ class L10nFr extends L10n {
 
   @override
   String rewardsBadge(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count récompenses', one: '1 récompense');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count récompenses',
+      one: '1 récompense',
+    );
     return '$_temp0';
   }
 
   @override
   String cardsCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count cartes', one: '1 carte');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cartes',
+      one: '1 carte',
+    );
     return '$_temp0';
   }
 
@@ -1571,22 +1676,27 @@ class L10nFr extends L10n {
   String get cardsSaved => 'Vos cartes sont enregistrées.';
 
   @override
-  String get emailOtherMethod => 'Cet e-mail a déjà un compte avec un autre mode de connexion. Utilisez celui-là.';
+  String get emailOtherMethod =>
+      'Cet e-mail a déjà un compte avec un autre mode de connexion. Utilisez celui-là.';
 
   @override
-  String get emailHasAccountChoose => 'Cet e-mail a déjà un compte. Choisissez « J\'ai un compte ».';
+  String get emailHasAccountChoose =>
+      'Cet e-mail a déjà un compte. Choisissez « J\'ai un compte ».';
 
   @override
-  String get passwordTooShort6 => 'Utilisez au moins 6 caractères pour votre mot de passe.';
+  String get passwordTooShort6 =>
+      'Utilisez au moins 6 caractères pour votre mot de passe.';
 
   @override
-  String get accountAndCardsDeleted => 'Votre compte et vos cartes sont supprimés.';
+  String get accountAndCardsDeleted =>
+      'Votre compte et vos cartes sont supprimés.';
 
   @override
   String get yourCardsAreSaved => 'Vos cartes sont enregistrées';
 
   @override
-  String get yourCardsAreSavedSub => 'Connectez-vous avec ce compte sur n\'importe quel appareil pour voir vos cartes.';
+  String get yourCardsAreSavedSub =>
+      'Connectez-vous avec ce compte sur n\'importe quel appareil pour voir vos cartes.';
 
   @override
   String get keepCardsSafe => 'Gardez vos cartes en sécurité';
@@ -1634,10 +1744,12 @@ class L10nFr extends L10n {
   String get goToMyCards => 'Vers mes cartes';
 
   @override
-  String get savedOnCard => 'Enregistrée sur votre carte. Utilisez-la maintenant ou plus tard.';
+  String get savedOnCard =>
+      'Enregistrée sur votre carte. Utilisez-la maintenant ou plus tard.';
 
   @override
-  String get noRewardsNow => 'Ce commerce n\'a pas de récompense disponible pour le moment.';
+  String get noRewardsNow =>
+      'Ce commerce n\'a pas de récompense disponible pour le moment.';
 
   @override
   String get moreToGo => 'encore à collecter';
@@ -1661,7 +1773,8 @@ class L10nFr extends L10n {
   String get usesOneFullCard => 'Cela utilise une carte complète.';
 
   @override
-  String get onlyAtCounter => 'Faites-le uniquement au comptoir. Le personnel doit voir l\'écran de confirmation.';
+  String get onlyAtCounter =>
+      'Faites-le uniquement au comptoir. Le personnel doit voir l\'écran de confirmation.';
 
   @override
   String get useItNow => 'L\'utiliser maintenant';
@@ -1673,7 +1786,8 @@ class L10nFr extends L10n {
   String get cardFull => 'Carte complète !';
 
   @override
-  String get cardFullSub => 'Vous avez gagné une récompense. Utilisez-la maintenant ou lors d\'une prochaine visite.';
+  String get cardFullSub =>
+      'Vous avez gagné une récompense. Utilisez-la maintenant ou lors d\'une prochaine visite.';
 
   @override
   String get stampAdded => 'Tampon ajouté';
@@ -1685,7 +1799,8 @@ class L10nFr extends L10n {
   String get welcome => 'Bienvenue !';
 
   @override
-  String get welcomeSub => 'Votre carte est prête. Touchez le tag du comptoir après chaque achat.';
+  String get welcomeSub =>
+      'Votre carte est prête. Touchez le tag du comptoir après chaque achat.';
 
   @override
   String get yourCard => 'Votre carte';

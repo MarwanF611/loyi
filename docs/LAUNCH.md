@@ -21,9 +21,9 @@ buttons and no "go pay on our website" text, which is how the app is built.
 
 ## 1. Legal details
 
-Fill in the **[bracketed]** parts of `app/web/privacy.html` and `app/web/terms.html`
-(company or your name, address, KBO/BCE number, court district) and set a
-support address you actually read (`support@loyi.be` is used in both pages and in
+Fill in the **[bracketed]** parts in `app/web_i18n/legal.py` (company or your name, address,
+KBO/BCE number, court district), then run `python3 app/web_i18n/legal.py`. The support address
+is marwan.fikri20@gmail.com until there's a domain (legal pages, home page, and
 `app/config/prod.json` → `SUPPORT_EMAIL`). These are a solid starting point, not
 legal advice: have them checked once.
 

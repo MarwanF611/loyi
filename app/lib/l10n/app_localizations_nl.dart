@@ -42,10 +42,12 @@ class L10nNl extends L10n {
   String get wrongPassword => 'Verkeerd wachtwoord.';
 
   @override
-  String get confirmSameAccount => 'Bevestig met hetzelfde account waarmee je bent ingelogd.';
+  String get confirmSameAccount =>
+      'Bevestig met hetzelfde account waarmee je bent ingelogd.';
 
   @override
-  String get tooManyAttempts => 'Te veel pogingen. Probeer het over een paar minuten opnieuw.';
+  String get tooManyAttempts =>
+      'Te veel pogingen. Probeer het over een paar minuten opnieuw.';
 
   @override
   String get couldNotDeleteAccount => 'Je account kon niet worden verwijderd.';
@@ -62,7 +64,8 @@ class L10nNl extends L10n {
       'Je bewaarde kaarten, stempels en beloningen worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.';
 
   @override
-  String get deleteAccountSubscriptionNote => 'Je abonnement wordt ook stopgezet, dus je betaalt niets meer.';
+  String get deleteAccountSubscriptionNote =>
+      'Je abonnement wordt ook stopgezet, dus je betaalt niets meer.';
 
   @override
   String get yourPassword => 'Je wachtwoord';
@@ -138,10 +141,12 @@ class L10nNl extends L10n {
   String get noFullCardYet => 'Nog geen volle kaart om in te wisselen.';
 
   @override
-  String get rewardNoLongerAvailable => 'Deze beloning is niet meer beschikbaar.';
+  String get rewardNoLongerAvailable =>
+      'Deze beloning is niet meer beschikbaar.';
 
   @override
-  String get noConnection => 'Geen verbinding. Controleer je internet en probeer opnieuw.';
+  String get noConnection =>
+      'Geen verbinding. Controleer je internet en probeer opnieuw.';
 
   @override
   String get somethingWentWrong => 'Er ging iets mis. Probeer het opnieuw.';
@@ -161,7 +166,8 @@ class L10nNl extends L10n {
   }
 
   @override
-  String get exportBusinessNote => 'Klanten staan er alleen in als anonieme ID\'s. Je logo zit er niet in.';
+  String get exportBusinessNote =>
+      'Klanten staan er alleen in als anonieme ID\'s. Je logo zit er niet in.';
 
   @override
   String get accountAndPrivacy => 'Account & privacy';
@@ -187,19 +193,22 @@ class L10nNl extends L10n {
   String get noPermission => 'Je hebt geen toestemming om dat te doen.';
 
   @override
-  String get shopNotActive => 'De Loyi-kaarten van deze zaak zijn nu niet actief. Je stempels blijven bewaard.';
+  String get shopNotActive =>
+      'De Loyi-kaarten van deze zaak zijn nu niet actief. Je stempels blijven bewaard.';
 
   @override
   String get signInAgain => 'Log opnieuw in.';
 
   @override
-  String get onlyBusinessCanSubscribe => 'Alleen zakelijke accounts kunnen een abonnement nemen.';
+  String get onlyBusinessCanSubscribe =>
+      'Alleen zakelijke accounts kunnen een abonnement nemen.';
 
   @override
   String get alreadySubscribed => 'Je hebt al een abonnement.';
 
   @override
-  String get noSubscriptionToManage => 'Er is nog geen abonnement om te beheren.';
+  String get noSubscriptionToManage =>
+      'Er is nog geen abonnement om te beheren.';
 
   @override
   String get audienceAll => 'Iedereen';
@@ -223,7 +232,8 @@ class L10nNl extends L10n {
   String get audienceReward => 'Beloning klaar';
 
   @override
-  String get audienceRewardDesc => 'Hebben een beloning die ze nog niet gebruikten';
+  String get audienceRewardDesc =>
+      'Hebben een beloning die ze nog niet gebruikten';
 
   @override
   String get audienceSlipping => 'Dreigen af te haken';
@@ -387,7 +397,8 @@ class L10nNl extends L10n {
   String get whoToReachOut => 'Wie je kunt opvolgen';
 
   @override
-  String get whoToReachOutSub => 'De groepen werken zichzelf bij. Je bericht verschijnt op hun kaart in Loyi.';
+  String get whoToReachOutSub =>
+      'De groepen werken zichzelf bij. Je bericht verschijnt op hun kaart in Loyi.';
 
   @override
   String get addYourLogo => 'Voeg je logo toe';
@@ -485,7 +496,8 @@ class L10nNl extends L10n {
   }
 
   @override
-  String get activityEmpty => 'Stempels en ingewisselde beloningen verschijnen hier zodra klanten je tags aantikken.';
+  String get activityEmpty =>
+      'Stempels en ingewisselde beloningen verschijnen hier zodra klanten je tags aantikken.';
 
   @override
   String activityReward(Object title) {
@@ -545,13 +557,23 @@ class L10nNl extends L10n {
 
   @override
   String daysAgo(int days) {
-    String _temp0 = intl.Intl.pluralLogic(days, locale: localeName, other: '$days dagen geleden', one: '1 dag geleden');
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days dagen geleden',
+      one: '1 dag geleden',
+    );
     return '$_temp0';
   }
 
   @override
   String clientRowSummary(int count, String when) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count stempels', one: '1 stempel');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stempels',
+      one: '1 stempel',
+    );
     return '$_temp0 · laatste bezoek $when';
   }
 
@@ -591,7 +613,8 @@ class L10nNl extends L10n {
       'Waarom geen naam? Klanten gebruiken Loyi zonder te zeggen wie ze zijn. Bereik ze in plaats daarvan met een bericht op hun kaart.';
 
   @override
-  String get noLinksAllowed => 'Links zijn niet toegestaan: daardoor lijken berichten op phishing.';
+  String get noLinksAllowed =>
+      'Links zijn niet toegestaan: daardoor lijken berichten op phishing.';
 
   @override
   String get messageIsLive => 'Bericht staat online';
@@ -600,7 +623,8 @@ class L10nNl extends L10n {
   String get messageUpdated => 'Bericht bijgewerkt';
 
   @override
-  String get couldNotSaveMessage => 'Het bericht kon niet worden opgeslagen. Probeer opnieuw.';
+  String get couldNotSaveMessage =>
+      'Het bericht kon niet worden opgeslagen. Probeer opnieuw.';
 
   @override
   String get editMessage => 'Bericht bewerken';
@@ -621,7 +645,8 @@ class L10nNl extends L10n {
   String get messageTitleHint => 'We missen je!';
 
   @override
-  String get messageBodyHint => 'Toon deze kaart deze week aan de toog voor een gratis koffie bij je volgende broodje.';
+  String get messageBodyHint =>
+      'Toon deze kaart deze week aan de toog voor een gratis koffie bij je volgende broodje.';
 
   @override
   String get addShortTitle => 'Geef een korte titel.';
@@ -742,7 +767,12 @@ class L10nNl extends L10n {
 
   @override
   String cameBackCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count kwamen terug', one: '1 kwam terug');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kwamen terug',
+      one: '1 kwam terug',
+    );
     return '$_temp0';
   }
 
@@ -764,7 +794,8 @@ class L10nNl extends L10n {
   String get stampsPerDay => 'Stempels per dag';
 
   @override
-  String get stampsAppearHere => 'Stempels verschijnen hier zodra klanten je tags aantikken.';
+  String get stampsAppearHere =>
+      'Stempels verschijnen hier zodra klanten je tags aantikken.';
 
   @override
   String busiestAt(Object day, Object time) {
@@ -773,7 +804,12 @@ class L10nNl extends L10n {
 
   @override
   String stampsCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count stempels', one: '1 stempel');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stempels',
+      one: '1 stempel',
+    );
     return '$_temp0';
   }
 
@@ -790,13 +826,23 @@ class L10nNl extends L10n {
 
   @override
   String rewardsCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count beloningen', one: '1 beloning');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count beloningen',
+      one: '1 beloning',
+    );
     return '$_temp0';
   }
 
   @override
   String clientsCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count klanten', one: '1 klant');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count klanten',
+      one: '1 klant',
+    );
     return '$_temp0';
   }
 
@@ -831,7 +877,8 @@ class L10nNl extends L10n {
   String get busyTimes => 'Drukke momenten';
 
   @override
-  String get busyTimesNote => 'Stempels per weekdag en uur, zodat je weet wanneer je extra hulp nodig hebt.';
+  String get busyTimesNote =>
+      'Stempels per weekdag en uur, zodat je weet wanneer je extra hulp nodig hebt.';
 
   @override
   String get clientMix => 'Klantenmix';
@@ -854,7 +901,8 @@ class L10nNl extends L10n {
   String get cameBackAfterFirst => 'Kwamen terug na hun eerste bezoek';
 
   @override
-  String get cameBackAfterFirstHint => 'Klanten die minstens 30 dagen geleden begonnen';
+  String get cameBackAfterFirstHint =>
+      'Klanten die minstens 30 dagen geleden begonnen';
 
   @override
   String get visitsPerActive => 'Bezoeken per actieve klant';
@@ -866,7 +914,8 @@ class L10nNl extends L10n {
   String get daysBetweenVisits => 'Dagen tussen bezoeken';
 
   @override
-  String get daysBetweenVisitsHint => 'Gemiddeld, voor klanten die meer dan eens kwamen';
+  String get daysBetweenVisitsHint =>
+      'Gemiddeld, voor klanten die meer dan eens kwamen';
 
   @override
   String get rewardsWaitingToUse => 'Beloningen die nog gebruikt kunnen worden';
@@ -903,7 +952,8 @@ class L10nNl extends L10n {
   String get yourCards => 'Je kaarten';
 
   @override
-  String get yourCardsSub => 'Stempels per kaart, beloningen en ontwerp. Open een kaart om haar NFC-tags te beheren.';
+  String get yourCardsSub =>
+      'Stempels per kaart, beloningen en ontwerp. Open een kaart om haar NFC-tags te beheren.';
 
   @override
   String get newCard => 'Nieuwe kaart';
@@ -919,14 +969,20 @@ class L10nNl extends L10n {
   String get createFirstCard => 'Maak je eerste klantenkaart';
 
   @override
-  String get createFirstCardSub => 'Kies hoeveel stempels een kaart vullen, je beloningen en je kleuren.';
+  String get createFirstCardSub =>
+      'Kies hoeveel stempels een kaart vullen, je beloningen en je kleuren.';
 
   @override
   String get paused => 'Gepauzeerd';
 
   @override
   String programTileSummary(int rewards, int stamps) {
-    String _temp0 = intl.Intl.pluralLogic(rewards, locale: localeName, other: '$rewards beloningen', one: '1 beloning');
+    String _temp0 = intl.Intl.pluralLogic(
+      rewards,
+      locale: localeName,
+      other: '$rewards beloningen',
+      one: '1 beloning',
+    );
     return '$stamps stempels · $_temp0';
   }
 
@@ -947,7 +1003,8 @@ class L10nNl extends L10n {
   String get appearance => 'Weergave';
 
   @override
-  String get appearanceHint => 'Licht is standaard. Toestel volgt je telefoon of computer.';
+  String get appearanceHint =>
+      'Licht is standaard. Toestel volgt je telefoon of computer.';
 
   @override
   String get languageHint => 'Nederlands is standaard.';
@@ -956,10 +1013,12 @@ class L10nNl extends L10n {
   String get subscription => 'Abonnement';
 
   @override
-  String get accountSettingsSub => 'E-mail, wachtwoord, je gegevens, account verwijderen';
+  String get accountSettingsSub =>
+      'E-mail, wachtwoord, je gegevens, account verwijderen';
 
   @override
-  String get couldNotUpdateLogo => 'Het logo kon niet worden aangepast. Probeer opnieuw.';
+  String get couldNotUpdateLogo =>
+      'Het logo kon niet worden aangepast. Probeer opnieuw.';
 
   @override
   String get replaceLogo => 'Logo vervangen';
@@ -971,22 +1030,26 @@ class L10nNl extends L10n {
   String get remove => 'Verwijderen';
 
   @override
-  String get passwordTooShort => 'Gebruik minstens 8 tekens voor je wachtwoord.';
+  String get passwordTooShort =>
+      'Gebruik minstens 8 tekens voor je wachtwoord.';
 
   @override
   String get wrongEmailOrPassword => 'Verkeerd e-mailadres of wachtwoord.';
 
   @override
-  String get emailInUse => 'Er bestaat al een account met dit e-mailadres. Log in.';
+  String get emailInUse =>
+      'Er bestaat al een account met dit e-mailadres. Log in.';
 
   @override
-  String get emailHasAccount => 'Dit e-mailadres heeft al een Loyi-account. Log in met je e-mailadres en wachtwoord.';
+  String get emailHasAccount =>
+      'Dit e-mailadres heeft al een Loyi-account. Log in met je e-mailadres en wachtwoord.';
 
   @override
   String get invalidEmail => 'Vul een geldig e-mailadres in.';
 
   @override
-  String get signInMethodDisabled => 'Deze manier van inloggen is nog niet ingeschakeld.';
+  String get signInMethodDisabled =>
+      'Deze manier van inloggen is nog niet ingeschakeld.';
 
   @override
   String get couldNotSignIn => 'Inloggen lukte niet.';
@@ -1006,7 +1069,8 @@ class L10nNl extends L10n {
   String get welcomeBack => 'Welkom terug';
 
   @override
-  String get signUpSteps => 'Drie stappen: je account, je kleuren, je abonnement. Daarna staat je dashboard klaar.';
+  String get signUpSteps =>
+      'Drie stappen: je account, je kleuren, je abonnement. Daarna staat je dashboard klaar.';
 
   @override
   String get signInSub => 'Log in om je klantenkaarten te beheren.';
@@ -1050,7 +1114,8 @@ class L10nNl extends L10n {
   String get heroTitle => 'Stempelkaarten die je\nklanten echt bijhouden.';
 
   @override
-  String get heroSub => 'Eén tik op een NFC-tag. Geen app te installeren. Jouw logo, jouw kleuren, jouw beloningen.';
+  String get heroSub =>
+      'Eén tik op een NFC-tag. Geen app te installeren. Jouw logo, jouw kleuren, jouw beloningen.';
 
   @override
   String get signOut => 'Uitloggen';
@@ -1064,7 +1129,8 @@ class L10nNl extends L10n {
   String get yourBusiness => 'Je zaak';
 
   @override
-  String get yourBusinessSub => 'De naam die je klanten op hun klantenkaart zien.';
+  String get yourBusinessSub =>
+      'De naam die je klanten op hun klantenkaart zien.';
 
   @override
   String get yourColours => 'Je kleuren';
@@ -1100,13 +1166,15 @@ class L10nNl extends L10n {
       'Je dashboard gaat open en je tags werken zodra de betaling bevestigd is. Altijd opzegbaar.';
 
   @override
-  String get dashboardOpensWhenActive => 'Je dashboard gaat open zodra dit account een actief abonnement heeft.';
+  String get dashboardOpensWhenActive =>
+      'Je dashboard gaat open zodra dit account een actief abonnement heeft.';
 
   @override
   String get paymentReceived => 'Betaling ontvangen';
 
   @override
-  String get switchingOn => 'We zetten je account aan. Dit duurt enkele seconden.';
+  String get switchingOn =>
+      'We zetten je account aan. Dit duurt enkele seconden.';
 
   @override
   String get takingLonger =>
@@ -1119,13 +1187,15 @@ class L10nNl extends L10n {
   String get paymentProblem => 'Probleem met betaling';
 
   @override
-  String get paymentProblemSub => 'Werk je betaalmethode bij zodat je tags blijven werken.';
+  String get paymentProblemSub =>
+      'Werk je betaalmethode bij zodat je tags blijven werken.';
 
   @override
   String get loyiForBusiness => 'Loyi voor zaken';
 
   @override
-  String get planTagline => 'Digitale stempelkaarten die je klanten echt bijhouden.';
+  String get planTagline =>
+      'Digitale stempelkaarten die je klanten echt bijhouden.';
 
   @override
   String get perkTags => 'Je NFC-tags om aan te melden en te stempelen, actief';
@@ -1172,7 +1242,8 @@ class L10nNl extends L10n {
   String get manageSubscription => 'Abonnement beheren';
 
   @override
-  String get manageSubscriptionSub => 'Wijzig je betaalmethode, download facturen of zeg op.';
+  String get manageSubscriptionSub =>
+      'Wijzig je betaalmethode, download facturen of zeg op.';
 
   @override
   String get switchingOnTags => 'Betaling ontvangen. We zetten je tags aan…';
@@ -1197,29 +1268,46 @@ class L10nNl extends L10n {
   String get noActiveSubscription => 'Geen actief abonnement';
 
   @override
-  String get noActiveSubscriptionSub => 'Dit account heeft geen actief Loyi-abonnement.';
+  String get noActiveSubscriptionSub =>
+      'Dit account heeft geen actief Loyi-abonnement.';
 
   @override
-  String get subscriptionsNotSetUp => 'Abonnementen zijn niet ingesteld in deze versie.';
+  String get subscriptionsNotSetUp =>
+      'Abonnementen zijn niet ingesteld in deze versie.';
 
   @override
   String get noLimit => 'Geen limiet';
 
   @override
   String minutesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count minuten', one: '1 minuut');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minuten',
+      one: '1 minuut',
+    );
     return '$_temp0';
   }
 
   @override
   String hoursCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count uur', one: '1 uur');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count uur',
+      one: '1 uur',
+    );
     return '$_temp0';
   }
 
   @override
   String daysCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count dagen', one: '1 dag');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dagen',
+      one: '1 dag',
+    );
     return '$_temp0';
   }
 
@@ -1253,7 +1341,8 @@ class L10nNl extends L10n {
   String get cardName => 'Naam van de kaart';
 
   @override
-  String get cardNameSub => 'Kort en duidelijk; klanten zien het onder de naam van je zaak.';
+  String get cardNameSub =>
+      'Kort en duidelijk; klanten zien het onder de naam van je zaak.';
 
   @override
   String get cardNameHint => 'bv. Koffiekaart';
@@ -1304,7 +1393,8 @@ class L10nNl extends L10n {
   String get cardIsLive => 'Kaart is actief';
 
   @override
-  String get cardIsLiveSub => 'Als de kaart gepauzeerd is, worden tikken geweigerd, maar klanten houden hun stempels.';
+  String get cardIsLiveSub =>
+      'Als de kaart gepauzeerd is, worden tikken geweigerd, maar klanten houden hun stempels.';
 
   @override
   String get createCard => 'Kaart maken';
@@ -1316,10 +1406,12 @@ class L10nNl extends L10n {
   String get nfcTags => 'NFC-tags';
 
   @override
-  String get nfcTagsSub => 'Elke tag is een link. Schrijf hem op een NFC-sticker.';
+  String get nfcTagsSub =>
+      'Elke tag is een link. Schrijf hem op een NFC-sticker.';
 
   @override
-  String get noTagsYet => 'Nog geen tags. Maak één aanmeldtag en één stempeltag om te beginnen.';
+  String get noTagsYet =>
+      'Nog geen tags. Maak één aanmeldtag en één stempeltag om te beginnen.';
 
   @override
   String get addJoinTag => 'Aanmeldtag toevoegen';
@@ -1331,13 +1423,15 @@ class L10nNl extends L10n {
   String get tagStep1 => 'Aanmeldtag, waar klanten hem zien';
 
   @override
-  String get tagStep1Sub => 'Aan de deur of op de toog. Wie erop tikt, krijgt de kaart.';
+  String get tagStep1Sub =>
+      'Aan de deur of op de toog. Wie erop tikt, krijgt de kaart.';
 
   @override
   String get tagStep2 => 'Stempeltag, achter de toog';
 
   @override
-  String get tagStep2Sub => 'Hou hem voor na een aankoop. Elke tik geeft één stempel.';
+  String get tagStep2Sub =>
+      'Hou hem voor na een aankoop. Elke tik geeft één stempel.';
 
   @override
   String get programStickers => 'Programmeer de stickers';
@@ -1361,7 +1455,12 @@ class L10nNl extends L10n {
 
   @override
   String tapsSummary(int count, String when) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count tikken', one: '1 tik');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tikken',
+      one: '1 tik',
+    );
     return '$_temp0 · laatste $when';
   }
 
@@ -1452,10 +1551,12 @@ class L10nNl extends L10n {
   String get downloadMyData => 'Mijn gegevens downloaden';
 
   @override
-  String get newPasswordTooShort => 'Gebruik minstens 8 tekens voor je nieuwe wachtwoord.';
+  String get newPasswordTooShort =>
+      'Gebruik minstens 8 tekens voor je nieuwe wachtwoord.';
 
   @override
-  String get emailUsedByOther => 'Een ander account gebruikt dit e-mailadres al.';
+  String get emailUsedByOther =>
+      'Een ander account gebruikt dit e-mailadres al.';
 
   @override
   String get signInAgainRetry => 'Log opnieuw in en probeer nog eens.';
@@ -1523,13 +1624,23 @@ class L10nNl extends L10n {
 
   @override
   String rewardsBadge(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count beloningen', one: '1 beloning');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count beloningen',
+      one: '1 beloning',
+    );
     return '$_temp0';
   }
 
   @override
   String cardsCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count kaarten', one: '1 kaart');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kaarten',
+      one: '1 kaart',
+    );
     return '$_temp0';
   }
 
@@ -1551,19 +1662,23 @@ class L10nNl extends L10n {
   String get noCardsYet => 'Nog geen kaarten';
 
   @override
-  String get noCardsYetSub => 'Hou je telefoon bij een Loyi-tag in een winkel om je eerste klantenkaart te krijgen.';
+  String get noCardsYetSub =>
+      'Hou je telefoon bij een Loyi-tag in een winkel om je eerste klantenkaart te krijgen.';
 
   @override
   String get cardsSaved => 'Je kaarten zijn bewaard.';
 
   @override
-  String get emailOtherMethod => 'Dit e-mailadres heeft al een account met een andere inlogmethode. Gebruik die.';
+  String get emailOtherMethod =>
+      'Dit e-mailadres heeft al een account met een andere inlogmethode. Gebruik die.';
 
   @override
-  String get emailHasAccountChoose => 'Dit e-mailadres heeft al een account. Kies \"Ik heb een account\".';
+  String get emailHasAccountChoose =>
+      'Dit e-mailadres heeft al een account. Kies \"Ik heb een account\".';
 
   @override
-  String get passwordTooShort6 => 'Gebruik minstens 6 tekens voor je wachtwoord.';
+  String get passwordTooShort6 =>
+      'Gebruik minstens 6 tekens voor je wachtwoord.';
 
   @override
   String get accountAndCardsDeleted => 'Je account en kaarten zijn verwijderd.';
@@ -1572,7 +1687,8 @@ class L10nNl extends L10n {
   String get yourCardsAreSaved => 'Je kaarten zijn bewaard';
 
   @override
-  String get yourCardsAreSavedSub => 'Log met dit account in op eender welk toestel om je kaarten te zien.';
+  String get yourCardsAreSavedSub =>
+      'Log met dit account in op eender welk toestel om je kaarten te zien.';
 
   @override
   String get keepCardsSafe => 'Bewaar je kaarten veilig';
@@ -1647,7 +1763,8 @@ class L10nNl extends L10n {
   String get usesOneFullCard => 'Dit gebruikt één volle kaart.';
 
   @override
-  String get onlyAtCounter => 'Doe dit alleen aan de toog. Het personeel moet het bevestigingsscherm zien.';
+  String get onlyAtCounter =>
+      'Doe dit alleen aan de toog. Het personeel moet het bevestigingsscherm zien.';
 
   @override
   String get useItNow => 'Nu gebruiken';
@@ -1659,7 +1776,8 @@ class L10nNl extends L10n {
   String get cardFull => 'Kaart vol!';
 
   @override
-  String get cardFullSub => 'Je verdiende een beloning. Gebruik ze nu of bij een volgend bezoek.';
+  String get cardFullSub =>
+      'Je verdiende een beloning. Gebruik ze nu of bij een volgend bezoek.';
 
   @override
   String get stampAdded => 'Stempel erbij';
@@ -1671,7 +1789,8 @@ class L10nNl extends L10n {
   String get welcome => 'Welkom!';
 
   @override
-  String get welcomeSub => 'Je kaart is klaar. Tik na elke aankoop op de tag aan de toog.';
+  String get welcomeSub =>
+      'Je kaart is klaar. Tik na elke aankoop op de tag aan de toog.';
 
   @override
   String get yourCard => 'Je kaart';

@@ -20,12 +20,13 @@ These need you; nothing in the code can do them.
   - Stripe: the DPA is part of the Stripe Services Agreement; nothing to sign.
 - [ ] **Store privacy forms** (section 6 below has the answers).
 - [ ] **Read and keep this file up to date** (sections 2–5), and store a copy with your business records.
-- [ ] **Support mailbox** support@loyi.be must exist and be read: it's where people send privacy requests (answer within
-  one month).
+- [ ] **Support mailbox**: the texts and the app use marwan.fikri20@gmail.com for now (no domain yet). Read it: it's
+  where people send privacy requests (answer within one month). After buying loyi.be, switch to support@loyi.be
+  (`app/web_i18n/legal.py`, `app/web/home.html`, `app/web_i18n/home.json`, `app/config/prod.json`, `app/lib/config.dart`).
 
 ## 2. Record of processing activities (art. 30)
 
-Controller: Loyi, [company name, address, company number], support@loyi.be. No DPO is required (no large-scale
+Controller: Loyi, [company name, address, company number], marwan.fikri20@gmail.com. No DPO is required (no large-scale
 monitoring or special categories), but name one contact person: [you].
 
 | Processing | Purpose | People | Data | Legal basis | Retention | Recipients |

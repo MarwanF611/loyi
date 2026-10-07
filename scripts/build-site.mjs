@@ -39,8 +39,9 @@ function render(lang) {
     used.add(norm(text));
     return `>${translate(text, lang, "text")}<`;
   });
-  html = html.replace(/\b(alt|aria-label|content|title)="([^"]*)"/g, (m, attr, value) => {
-    if (!hasWords(value) || /^(\/|https?:|#|width=|website)/.test(value)) return m;
+  // Search Console's ownership token (Google Auth Platform branding) stays as it is.
+  html = html.replace(/<meta name="google-site-verification"[^>]*>|\b(alt|aria-label|content|title)="([^"]*)"/g, (m, attr, value) => {
+    if (!attr || !hasWords(value) || /^(\/|https?:|#|width=|website)/.test(value)) return m;
     used.add(norm(value));
     return `${attr}="${translate(value, lang, attr)}"`;
   });
