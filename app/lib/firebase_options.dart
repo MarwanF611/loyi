@@ -59,6 +59,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '245035248880',
     projectId: 'loyi-b530b',
     storageBucket: 'loyi-b530b.firebasestorage.app',
+    androidClientId: '245035248880-d4nklkeichq3j8ntda7ithtr73gpnt14.apps.googleusercontent.com',
   );
 
   // Added from ios/Runner/GoogleService-Info.plist (flutterfire's iOS step needs
@@ -69,6 +70,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '245035248880',
     projectId: 'loyi-b530b',
     storageBucket: 'loyi-b530b.firebasestorage.app',
+    // Google sign-in opens a browser sheet and returns through REVERSED_CLIENT_ID (Info.plist URL types).
+    iosClientId: '245035248880-adfauv8p1toof9lk4770jli8o7ekcjq9.apps.googleusercontent.com',
     iosBundleId: 'be.loyi.loyi',
   );
 }

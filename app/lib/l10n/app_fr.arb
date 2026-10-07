@@ -308,6 +308,7 @@
   "showPassword": "Afficher le mot de passe",
   "forgotPassword": "Mot de passe oublié ?",
   "agreeToTerms": "En créant un compte, vous acceptez les conditions d'utilisation, y compris l'accord de traitement des données, ainsi que la politique de confidentialité.",
+  "continueAgreesToTerms": "En continuant, vous acceptez les conditions d'utilisation, y compris l'accord de traitement des données, ainsi que la politique de confidentialité.",
   "collectingStamps": "Vous collectez des tampons ? Vers vos cartes",
   "heroTitle": "Des cartes de fidélité\nque vos clients gardent.",
   "heroSub": "Un contact sur un tag NFC. Aucune app à installer. Votre logo, vos couleurs, vos récompenses.",

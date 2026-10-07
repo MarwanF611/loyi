@@ -1947,6 +1947,12 @@ abstract class L10n {
   /// **'By creating an account you agree to the terms of use, including the data processing agreement, and the privacy policy.'**
   String get agreeToTerms;
 
+  /// No description provided for @continueAgreesToTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing you agree to the terms of use, including the data processing agreement, and the privacy policy.'**
+  String get continueAgreesToTerms;
+
   /// No description provided for @collectingStamps.
   ///
   /// In en, this message translates to:

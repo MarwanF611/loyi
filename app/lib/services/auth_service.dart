@@ -16,7 +16,7 @@ enum ReauthMethod { none, password, apple, google }
 
 /// Clients start as anonymous users (no sign-up at the counter) and can later
 /// save their cards with Google, Apple or email + password. Businesses sign in
-/// with email + password or Apple, then pick their brand colours and subscribe.
+/// with email + password, Google or Apple, then pick their brand colours and subscribe.
 ///
 /// No email links: on the free Spark plan Firebase sends only 5 per day.
 class AuthService {
@@ -45,6 +45,10 @@ class AuthService {
     }
   }
 
+  /// Sign in with Google; creates the account on first use (the dashboard then
+  /// asks for the shop's name).
+  Future<void> businessSignInWithGoogle() => _signInWith(_google());
+
   /// Sign in with Apple; creates the account on first use.
   Future<void> businessSignInWithApple() => _signInWith(_apple());
 
@@ -58,7 +62,7 @@ class AuthService {
   /// Links this device's anonymous account to Google (same user id, nothing to
   /// move). If that Google account already has Loyi cards, signs into it and
   /// merges this device's cards.
-  Future<void> saveWithGoogle() => _saveWith(GoogleAuthProvider());
+  Future<void> saveWithGoogle() => _saveWith(_google());
 
   /// Same as [saveWithGoogle], with Apple.
   Future<void> saveWithApple() => _saveWith(_apple());
@@ -66,6 +70,10 @@ class AuthService {
   AppleAuthProvider _apple() => AppleAuthProvider()
     ..addScope('email')
     ..addScope('name');
+
+  /// Google asks which account to use every time, so a shop on a shared
+  /// computer doesn't land in someone else's Google account by accident.
+  GoogleAuthProvider _google() => GoogleAuthProvider()..setCustomParameters({'prompt': 'select_account'});
 
   Future<UserCredential> _signInWith(AuthProvider provider) =>
       kIsWeb ? _auth.signInWithPopup(provider) : _auth.signInWithProvider(provider);

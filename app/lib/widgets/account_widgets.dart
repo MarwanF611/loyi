@@ -36,6 +36,54 @@ class AppleSignInButton extends StatelessWidget {
   }
 }
 
+/// "Continue with Google": white button with Google's multicolour "G".
+class GoogleSignInButton extends StatelessWidget {
+  const GoogleSignInButton({super.key, required this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton.icon(
+    onPressed: onPressed,
+    icon: const _GoogleMark(),
+    label: Text(context.l10n.continueWithGoogle),
+  );
+}
+
+/// Google's multicolour "G", drawn so no image asset is needed.
+class _GoogleMark extends StatelessWidget {
+  const _GoogleMark();
+
+  @override
+  Widget build(BuildContext context) => const SizedBox(width: 20, height: 20, child: CustomPaint(painter: _GPainter()));
+}
+
+class _GPainter extends CustomPainter {
+  const _GPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = size.width / 2;
+    final rect = Rect.fromCircle(center: Offset(r, r), radius: r * 0.78);
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = r * 0.42;
+    const deg = 3.14159265 / 180;
+    for (final (start, sweep, color) in const [
+      (-40.0, -95.0, Color(0xFFEA4335)),
+      (-135.0, -90.0, Color(0xFFFBBC05)),
+      (135.0, -95.0, Color(0xFF34A853)),
+      (40.0, -80.0, Color(0xFF4285F4)),
+    ]) {
+      canvas.drawArc(rect, start * deg, sweep * deg, false, stroke..color = color);
+    }
+    canvas.drawRect(Rect.fromLTWH(r, r - r * 0.21, r * 0.98, r * 0.42), Paint()..color = const Color(0xFF4285F4));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 /// Sign in with Apple errors arrive as raw AuthenticationServices errors:
 /// 1001 is the user cancelling, 1000 usually means no Apple Account on the device.
 /// Returns null when [e] isn't one of those, '' for a cancel (show nothing).

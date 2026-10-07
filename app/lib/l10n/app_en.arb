@@ -846,6 +846,8 @@
   "@forgotPassword": {},
   "agreeToTerms": "By creating an account you agree to the terms of use, including the data processing agreement, and the privacy policy.",
   "@agreeToTerms": {},
+  "continueAgreesToTerms": "By continuing you agree to the terms of use, including the data processing agreement, and the privacy policy.",
+  "@continueAgreesToTerms": {},
   "collectingStamps": "Collecting stamps? Go to your cards",
   "@collectingStamps": {},
   "heroTitle": "Stamp cards your\nclients actually keep.",

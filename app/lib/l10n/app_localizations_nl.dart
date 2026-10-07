@@ -1114,6 +1114,10 @@ class L10nNl extends L10n {
       'Door een account te maken ga je akkoord met de gebruiksvoorwaarden, inclusief de verwerkersovereenkomst, en het privacybeleid.';
 
   @override
+  String get continueAgreesToTerms =>
+      'Door verder te gaan ga je akkoord met de gebruiksvoorwaarden, inclusief de verwerkersovereenkomst, en het privacybeleid.';
+
+  @override
   String get collectingStamps => 'Spaar je stempels? Ga naar je kaarten';
 
   @override

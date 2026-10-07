@@ -10,6 +10,7 @@ import '../services/auth_service.dart';
 import '../services/language.dart';
 import '../services/repo.dart';
 import '../theme.dart';
+import '../widgets/account_widgets.dart';
 import '../widgets/color_picker.dart';
 import '../widgets/loyalty_card_view.dart';
 import '../widgets/loyi_icons.dart';
@@ -152,6 +153,10 @@ class _NameStepState extends State<NameStep> {
           ),
           const SizedBox(height: 16),
           FilledButton(onPressed: _busy ? null : _save, child: Text(context.l10n.continueAction)),
+          // Google and Apple accounts start here without seeing the sign-up form.
+          const SizedBox(height: 16),
+          Text(context.l10n.continueAgreesToTerms, style: context.text.bodySmall, textAlign: TextAlign.center),
+          const LegalLinks(),
         ],
       ),
     ),

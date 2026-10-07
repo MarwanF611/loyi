@@ -142,11 +142,7 @@ class _AccountPageState extends State<AccountPage> {
                     context.l10n.keepCardsSafe,
                     context.l10n.keepCardsSafeSub,
                   ),
-                  OutlinedButton.icon(
-                    onPressed: _busy ? null : () => _run(auth.saveWithGoogle),
-                    icon: const _GoogleMark(),
-                    label: Text(context.l10n.continueWithGoogle),
-                  ),
+                  GoogleSignInButton(onPressed: _busy ? null : () => _run(auth.saveWithGoogle)),
                   const SizedBox(height: 12),
                   AppleSignInButton(onPressed: _busy ? null : () => _run(auth.saveWithApple)),
                   Padding(
@@ -235,38 +231,4 @@ class _AccountPageState extends State<AccountPage> {
       ),
     );
   }
-}
-
-/// Google's multicolour "G", drawn so no image asset is needed.
-class _GoogleMark extends StatelessWidget {
-  const _GoogleMark();
-
-  @override
-  Widget build(BuildContext context) => const SizedBox(width: 20, height: 20, child: CustomPaint(painter: _GPainter()));
-}
-
-class _GPainter extends CustomPainter {
-  const _GPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final r = size.width / 2;
-    final rect = Rect.fromCircle(center: Offset(r, r), radius: r * 0.78);
-    final stroke = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = r * 0.42;
-    const deg = 3.14159265 / 180;
-    for (final (start, sweep, color) in const [
-      (-40.0, -95.0, Color(0xFFEA4335)),
-      (-135.0, -90.0, Color(0xFFFBBC05)),
-      (135.0, -95.0, Color(0xFF34A853)),
-      (40.0, -80.0, Color(0xFF4285F4)),
-    ]) {
-      canvas.drawArc(rect, start * deg, sweep * deg, false, stroke..color = color);
-    }
-    canvas.drawRect(Rect.fromLTWH(r, r - r * 0.21, r * 0.98, r * 0.42), Paint()..color = const Color(0xFF4285F4));
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

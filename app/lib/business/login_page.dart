@@ -83,7 +83,7 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
                 'invalid-email' => l10n.invalidEmail,
                 'operation-not-allowed' => l10n.signInMethodDisabled,
                 'too-many-requests' => l10n.tooManyAttempts,
-                // Closing the Apple sheet or popup isn't an error.
+                // Closing the Apple/Google sheet or popup isn't an error.
                 'canceled' || 'web-context-canceled' || 'popup-closed-by-user' || 'cancelled-popup-request' => null,
                 _ => e.message ?? l10n.couldNotSignIn,
               },
@@ -128,6 +128,8 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
           const SizedBox(height: 6),
           Text(_signUp ? l.signUpSteps : l.signInSub, style: context.text.bodyMedium),
           const SizedBox(height: 28),
+          GoogleSignInButton(onPressed: _busy ? null : () => _run(auth.businessSignInWithGoogle)),
+          const SizedBox(height: 12),
           AppleSignInButton(onPressed: _busy ? null : () => _run(auth.businessSignInWithApple)),
           const SizedBox(height: 20),
           LabeledDivider(l.orWithEmail),

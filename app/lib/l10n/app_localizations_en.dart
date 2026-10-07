@@ -1108,6 +1108,10 @@ class L10nEn extends L10n {
       'By creating an account you agree to the terms of use, including the data processing agreement, and the privacy policy.';
 
   @override
+  String get continueAgreesToTerms =>
+      'By continuing you agree to the terms of use, including the data processing agreement, and the privacy policy.';
+
+  @override
   String get collectingStamps => 'Collecting stamps? Go to your cards';
 
   @override

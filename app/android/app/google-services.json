@@ -12,7 +12,20 @@
           "package_name": "be.loyi.loyi"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "245035248880-d4nklkeichq3j8ntda7ithtr73gpnt14.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "be.loyi.loyi",
+            "certificate_hash": "b94dea1175e107ea6fa9ce9a18e174f689911794"
+          }
+        },
+        {
+          "client_id": "245035248880-uk48d7ivqej6qqn4du84ts14skh8edd3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD9qyqwnGzew5pnE2f2A9tlINZ9MbO6LLw"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "245035248880-uk48d7ivqej6qqn4du84ts14skh8edd3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "245035248880-adfauv8p1toof9lk4770jli8o7ekcjq9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "be.loyi.loyi"
+              }
+            }
+          ]
         }
       }
     }

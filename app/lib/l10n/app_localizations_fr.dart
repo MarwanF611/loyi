@@ -1118,6 +1118,10 @@ class L10nFr extends L10n {
       'En créant un compte, vous acceptez les conditions d\'utilisation, y compris l\'accord de traitement des données, ainsi que la politique de confidentialité.';
 
   @override
+  String get continueAgreesToTerms =>
+      'En continuant, vous acceptez les conditions d\'utilisation, y compris l\'accord de traitement des données, ainsi que la politique de confidentialité.';
+
+  @override
   String get collectingStamps => 'Vous collectez des tampons ? Vers vos cartes';
 
   @override
