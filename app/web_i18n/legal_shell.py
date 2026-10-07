@@ -4,6 +4,7 @@ Run `python3 app/web_i18n/legal.py` after editing a text; it writes app/web/<pag
 (Dutch, the default), app/web/fr/<page>.html and app/web/en/<page>.html.
 """
 import os
+import re
 
 WEB = os.path.join(os.path.dirname(__file__), '..', 'web')
 SITE = 'https://loyi-b530b.web.app'
@@ -61,6 +62,9 @@ def write(page, lang, title, description, body):
 </body>
 </html>
 '''
+    if lang == 'fr':
+        # French typography: a no-break space before ? ! : ; » and after «, so a sign never wraps alone.
+        html = re.sub(r' ([?!:;»])', '\u00a0\\1', html).replace('« ', '«\u00a0')
     folder = WEB if lang == 'nl' else os.path.join(WEB, lang)
     os.makedirs(folder, exist_ok=True)
     with open(os.path.join(folder, f'{page}.html'), 'w') as f:

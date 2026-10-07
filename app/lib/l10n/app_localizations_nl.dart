@@ -230,7 +230,7 @@ class L10nNl extends L10n {
   String get audienceNew => 'Nieuwe klanten';
 
   @override
-  String get audienceNewDesc => 'De laatste 14 dagen begonnen';
+  String get audienceNewDesc => 'Begonnen in de laatste 14 dagen';
 
   @override
   String get audienceAlmost => 'Bijna zover';
@@ -404,7 +404,7 @@ class L10nNl extends L10n {
   String get followUp => 'Opvolging';
 
   @override
-  String get whoToReachOut => 'Wie je kunt aanspreken';
+  String get whoToReachOut => 'Wie je kunt opvolgen';
 
   @override
   String get whoToReachOutSub =>
@@ -460,7 +460,7 @@ class L10nNl extends L10n {
   String get kpiActive => 'Actief';
 
   @override
-  String get kpiActiveNote => 'kwamen in de laatste 30 dagen';
+  String get kpiActiveNote => 'kwamen langs in de laatste 30 dagen';
 
   @override
   String get kpiRewardsWaiting => 'Beloningen klaar';
@@ -493,7 +493,7 @@ class L10nNl extends L10n {
   String get message => 'Bericht';
 
   @override
-  String get justNow => 'Net nu';
+  String get justNow => 'Zonet';
 
   @override
   String minutesAgo(int minutes) {
@@ -526,7 +526,7 @@ class L10nNl extends L10n {
 
   @override
   String clientsSubtitle(int count) {
-    return '$count met een kaart · anoniem van bij het begin';
+    return '$count met een kaart · altijd anoniem';
   }
 
   @override
@@ -567,7 +567,13 @@ class L10nNl extends L10n {
 
   @override
   String daysAgo(int days) {
-    return '$days dagen geleden';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days dagen geleden',
+      one: '1 dag geleden',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -659,7 +665,7 @@ class L10nNl extends L10n {
   String get writeYourMessage => 'Schrijf je bericht.';
 
   @override
-  String get showItFor => 'Toon het';
+  String get showItFor => 'Hoe lang tonen';
 
   @override
   String get oneWeek => '1 week';
@@ -706,7 +712,13 @@ class L10nNl extends L10n {
 
   @override
   String messageReachUntil(int count, String date) {
-    return 'bereikt nu $count · tot $date';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'bereikt nu $count klanten',
+      one: 'bereikt nu 1 klant',
+    );
+    return '$_temp0 · tot $date';
   }
 
   @override
@@ -765,7 +777,13 @@ class L10nNl extends L10n {
 
   @override
   String cameBackCount(int count) {
-    return '$count kwamen terug';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kwamen terug',
+      one: '1 kwam terug',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -779,7 +797,7 @@ class L10nNl extends L10n {
 
   @override
   String stillWaitingCount(int count) {
-    return '$count nog klaar';
+    return '$count nog niet gebruikt';
   }
 
   @override
@@ -917,7 +935,7 @@ class L10nNl extends L10n {
 
   @override
   String programInsightNote(int clients, int rewards, int stamps) {
-    return '$clients klanten · $stamps stempels en $rewards beloningen in deze periode. Staven: klanten per aantal verzamelde stempels.';
+    return '$clients klanten · $stamps stempels en $rewards beloningen in deze periode. Balken: klanten per aantal verzamelde stempels.';
   }
 
   @override
@@ -955,7 +973,7 @@ class L10nNl extends L10n {
 
   @override
   String get howTagsWorkBody =>
-      'Met een aanmeldtag aan de ingang nemen klanten de kaart. De stempeltag aan de toog geeft één stempel per tik, met de wachttijd die jij kiest. Je kunt een tag altijd pauzeren.';
+      'Via de aanmeldtag aan de ingang krijgen klanten de kaart. De stempeltag aan de toog geeft één stempel per tik, met de wachttijd die jij kiest. Je kunt een tag altijd pauzeren.';
 
   @override
   String get createFirstCard => 'Maak je eerste klantenkaart';
@@ -1096,7 +1114,7 @@ class L10nNl extends L10n {
       'Door een account te maken ga je akkoord met de gebruiksvoorwaarden en het privacybeleid.';
 
   @override
-  String get collectingStamps => 'Verzamel je stempels? Naar je kaarten';
+  String get collectingStamps => 'Spaar je stempels? Ga naar je kaarten';
 
   @override
   String get heroTitle => 'Stempelkaarten die je\nklanten echt bijhouden.';
@@ -1151,11 +1169,11 @@ class L10nNl extends L10n {
 
   @override
   String get dashboardOpensWhenPaid =>
-      'Je dashboard opent en je tags werken zodra de betaling bevestigd is. Altijd opzegbaar.';
+      'Je dashboard gaat open en je tags werken zodra de betaling bevestigd is. Altijd opzegbaar.';
 
   @override
   String get dashboardOpensWhenActive =>
-      'Je dashboard opent zodra dit account een actief abonnement heeft.';
+      'Je dashboard gaat open zodra dit account een actief abonnement heeft.';
 
   @override
   String get paymentReceived => 'Betaling ontvangen';
@@ -1166,7 +1184,7 @@ class L10nNl extends L10n {
 
   @override
   String get takingLonger =>
-      'Dit duurt langer dan normaal. Je dashboard opent vanzelf zodra de betaling bevestigd is. Verliet je de betaalpagina zonder te betalen? Ga dan terug naar de betaalstap.';
+      'Dit duurt langer dan normaal. Je dashboard gaat vanzelf open zodra de betaling bevestigd is. Verliet je de betaalpagina zonder te betalen? Ga dan terug naar de betaalstap.';
 
   @override
   String get backToPayment => 'Terug naar betalen';
@@ -1186,7 +1204,7 @@ class L10nNl extends L10n {
       'Digitale stempelkaarten die je klanten echt bijhouden.';
 
   @override
-  String get perkTags => 'Je NFC-aanmeld- en stempeltags, aan';
+  String get perkTags => 'Je NFC-tags om aan te melden en te stempelen, actief';
 
   @override
   String get perkUnlimited => 'Onbeperkt klantenkaarten en beloningen';
@@ -1375,14 +1393,14 @@ class L10nNl extends L10n {
 
   @override
   String get timeBetweenStampsSub =>
-      'De minimale wachttijd voor dezelfde klant opnieuw een stempel krijgt. Voorkomt dubbele tikken.';
+      'De minimale wachttijd voordat dezelfde klant weer een stempel kan krijgen. Voorkomt dubbele tikken.';
 
   @override
   String get cardIsLive => 'Kaart is actief';
 
   @override
   String get cardIsLiveSub =>
-      'Gepauzeerd worden tikken geweigerd, maar klanten houden hun stempels.';
+      'Als de kaart gepauzeerd is, worden tikken geweigerd, maar klanten houden hun stempels.';
 
   @override
   String get createCard => 'Kaart maken';
@@ -1498,7 +1516,7 @@ class L10nNl extends L10n {
   String get yourAccount => 'Je account';
 
   @override
-  String get signInMethod => 'Inloggen';
+  String get signInMethod => 'Inlogmethode';
 
   @override
   String get memberSince => 'Lid sinds';
@@ -1604,7 +1622,13 @@ class L10nNl extends L10n {
 
   @override
   String rewardsReadySuffix(int count) {
-    return ', $count beloningen klaar';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: ', $count beloningen klaar',
+      one: ', 1 beloning klaar',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1788,7 +1812,7 @@ class L10nNl extends L10n {
 
   @override
   String nextStampIn(Object wait) {
-    return 'Je volgende stempel kan over $wait.';
+    return 'Je kunt over $wait weer een stempel krijgen.';
   }
 
   @override

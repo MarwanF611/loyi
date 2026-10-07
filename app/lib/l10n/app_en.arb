@@ -408,7 +408,7 @@
   "@today": {},
   "yesterday": "yesterday",
   "@yesterday": {},
-  "daysAgo": "{days} days ago",
+  "daysAgo": "{days, plural, =1{1 day ago} other{{days} days ago}}",
   "@daysAgo": {
     "placeholders": {
       "days": {
@@ -520,7 +520,7 @@
       "date": {}
     }
   },
-  "messageReachUntil": "reaches {count} now · until {date}",
+  "messageReachUntil": "{count, plural, =1{reaches 1 client now} other{reaches {count} clients now}} · until {date}",
   "@messageReachUntil": {
     "placeholders": {
       "count": {
@@ -577,7 +577,7 @@
   "@noEarlierData": {},
   "kpiActiveClients": "Active clients",
   "@kpiActiveClients": {},
-  "cameBackCount": "{count} came back",
+  "cameBackCount": "{count, plural, =1{1 came back} other{{count} came back}}",
   "@cameBackCount": {
     "placeholders": {
       "count": {
@@ -1239,7 +1239,7 @@
       }
     }
   },
-  "rewardsReadySuffix": ", {count} rewards ready",
+  "rewardsReadySuffix": "{count, plural, =1{, 1 reward ready} other{, {count} rewards ready}}",
   "@rewardsReadySuffix": {
     "placeholders": {
       "count": {

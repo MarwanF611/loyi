@@ -565,7 +565,13 @@ class L10nEn extends L10n {
 
   @override
   String daysAgo(int days) {
-    return '$days days ago';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days ago',
+      one: '1 day ago',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -704,7 +710,13 @@ class L10nEn extends L10n {
 
   @override
   String messageReachUntil(int count, String date) {
-    return 'reaches $count now · until $date';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'reaches $count clients now',
+      one: 'reaches 1 client now',
+    );
+    return '$_temp0 · until $date';
   }
 
   @override
@@ -763,7 +775,13 @@ class L10nEn extends L10n {
 
   @override
   String cameBackCount(int count) {
-    return '$count came back';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count came back',
+      one: '1 came back',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1595,7 +1613,13 @@ class L10nEn extends L10n {
 
   @override
   String rewardsReadySuffix(int count) {
-    return ', $count rewards ready';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: ', $count rewards ready',
+      one: ', 1 reward ready',
+    );
+    return '$_temp0';
   }
 
   @override

@@ -60,7 +60,7 @@ class L10nFr extends L10n {
   String get couldNotDeleteAccount => 'Votre compte n\'a pas pu être supprimé.';
 
   @override
-  String get deleteAccountQuestion => 'Supprimer le compte ?';
+  String get deleteAccountQuestion => 'Supprimer le compte ?';
 
   @override
   String get deleteAccountBusinessBody =>
@@ -72,7 +72,7 @@ class L10nFr extends L10n {
 
   @override
   String get deleteAccountSubscriptionNote =>
-      'Votre abonnement est également résilié : vous ne serez plus débité.';
+      'Votre abonnement est également résilié : vous ne serez plus débité.';
 
   @override
   String get yourPassword => 'Votre mot de passe';
@@ -173,7 +173,7 @@ class L10nFr extends L10n {
 
   @override
   String exportAbout(Object url) {
-    return 'Vos données dans Loyi. Ce qu\'elles signifient et vos droits : $url';
+    return 'Vos données dans Loyi. Ce qu\'elles signifient et vos droits : $url';
   }
 
   @override
@@ -243,7 +243,8 @@ class L10nFr extends L10n {
   String get audienceReward => 'Récompense en attente';
 
   @override
-  String get audienceRewardDesc => 'Ont une récompense pas encore utilisée';
+  String get audienceRewardDesc =>
+      'Ont une récompense qu\'ils n\'ont pas encore utilisée';
 
   @override
   String get audienceSlipping => 'En train de décrocher';
@@ -445,7 +446,7 @@ class L10nFr extends L10n {
 
   @override
   String stampsLast7Days(Object values) {
-    return 'Tampons par jour, 7 derniers jours : $values';
+    return 'Tampons par jour, 7 derniers jours : $values';
   }
 
   @override
@@ -512,7 +513,7 @@ class L10nFr extends L10n {
 
   @override
   String activityReward(Object title) {
-    return 'Récompense : $title';
+    return 'Récompense : $title';
   }
 
   @override
@@ -527,7 +528,7 @@ class L10nFr extends L10n {
 
   @override
   String clientsSubtitle(int count) {
-    return '$count avec une carte · anonymes par principe';
+    return '$count avec une carte · toujours anonymes';
   }
 
   @override
@@ -559,7 +560,7 @@ class L10nFr extends L10n {
 
   @override
   String get clientsPrivacyNote =>
-      'Les clients sont anonymes : chacun a un code qui ne fonctionne que dans votre commerce. Loyi ne partage jamais de noms, d\'e-mails ni de numéros de téléphone, et les visites de plus de 2 ans sont supprimées automatiquement.';
+      'Les clients sont anonymes : chacun a un code qui ne fonctionne que dans votre commerce. Loyi ne partage jamais de noms, d\'e-mails ni de numéros de téléphone, et les visites de plus de 2 ans sont supprimées automatiquement.';
 
   @override
   String get today => 'aujourd\'hui';
@@ -569,7 +570,13 @@ class L10nFr extends L10n {
 
   @override
   String daysAgo(int days) {
-    return 'il y a $days jours';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'il y a $days jours',
+      one: 'il y a 1 jour',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -616,11 +623,11 @@ class L10nFr extends L10n {
 
   @override
   String get whyNoName =>
-      'Pourquoi pas de nom ? Les clients utilisent Loyi sans dire qui ils sont aux commerces. Touchez-les plutôt avec un message sur leur carte.';
+      'Pourquoi pas de nom ? Les clients utilisent Loyi sans dire aux commerces qui ils sont. Joignez-les plutôt avec un message sur leur carte.';
 
   @override
   String get noLinksAllowed =>
-      'Les liens ne sont pas autorisés : ils font ressembler les messages à du phishing.';
+      'Les liens ne sont pas autorisés : ils font ressembler les messages à du phishing.';
 
   @override
   String get messageIsLive => 'Le message est en ligne';
@@ -648,7 +655,7 @@ class L10nFr extends L10n {
   String get title => 'Titre';
 
   @override
-  String get messageTitleHint => 'Vous nous manquez !';
+  String get messageTitleHint => 'Vous nous manquez !';
 
   @override
   String get messageBodyHint =>
@@ -677,13 +684,13 @@ class L10nFr extends L10n {
 
   @override
   String get messagePrivacyNote =>
-      'Visible uniquement dans Loyi, jamais par e-mail ni notification. Le téléphone de chaque client décide si le message lui est destiné : vous ne voyez jamais qui l\'a lu.';
+      'Visible uniquement dans Loyi, jamais par e-mail ni notification. Le téléphone de chaque client décide si le message lui est destiné : vous ne voyez jamais qui l\'a lu.';
 
   @override
   String get publishMessage => 'Publier le message';
 
   @override
-  String get deleteMessageQuestion => 'Supprimer ce message ?';
+  String get deleteMessageQuestion => 'Supprimer ce message ?';
 
   @override
   String get deleteMessageBody => 'Les clients ne le verront plus.';
@@ -708,7 +715,13 @@ class L10nFr extends L10n {
 
   @override
   String messageReachUntil(int count, String date) {
-    return 'touche $count clients · jusqu\'au $date';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'touche $count clients',
+      one: 'touche 1 client',
+    );
+    return '$_temp0 · jusqu\'au $date';
   }
 
   @override
@@ -754,7 +767,7 @@ class L10nFr extends L10n {
 
   @override
   String busyShop(Object count) {
-    return 'Commerce animé ! Cette période compte plus de $count tampons : les graphiques n\'en montrent que le début. Choisissez une période plus courte pour des chiffres exacts.';
+    return 'Commerce animé ! Cette période compte plus de $count tampons : les graphiques n\'en montrent que le début. Choisissez une période plus courte pour des chiffres exacts.';
   }
 
   @override
@@ -768,7 +781,13 @@ class L10nFr extends L10n {
 
   @override
   String cameBackCount(int count) {
-    return '$count sont revenus';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sont revenus',
+      one: '1 est revenu',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -794,7 +813,7 @@ class L10nFr extends L10n {
 
   @override
   String busiestAt(Object day, Object time) {
-    return 'Plus forte affluence : $day vers $time';
+    return 'Plus forte affluence : $day vers $time';
   }
 
   @override
@@ -860,12 +879,12 @@ class L10nFr extends L10n {
 
   @override
   String newClientsSemantic(Object values) {
-    return 'Nouveaux clients : $values';
+    return 'Nouveaux clients : $values';
   }
 
   @override
   String rewardsUsedSemantic(Object values) {
-    return 'Récompenses utilisées : $values';
+    return 'Récompenses utilisées : $values';
   }
 
   @override
@@ -920,7 +939,7 @@ class L10nFr extends L10n {
 
   @override
   String programInsightNote(int clients, int rewards, int stamps) {
-    return '$clients clients · $stamps tampons et $rewards récompenses sur la période. Barres : clients par nombre de tampons.';
+    return '$clients clients · $stamps tampons et $rewards récompenses sur la période. Barres : clients par nombre de tampons.';
   }
 
   @override
@@ -930,12 +949,12 @@ class L10nFr extends L10n {
 
   @override
   String programDistributionSemantic(Object card, Object values) {
-    return 'Clients par nombre de tampons sur $card : $values';
+    return 'Clients par nombre de tampons sur $card : $values';
   }
 
   @override
   String get insightsPrivacyNote =>
-      'Les statistiques sont des chiffres, pas des personnes : Loyi ne sait jamais qui sont vos clients. L\'historique des tampons et récompenses de plus de 2 ans est supprimé automatiquement.';
+      'Les statistiques sont des chiffres, pas des personnes : Loyi ne sait jamais qui sont vos clients. L\'historique des tampons et récompenses de plus de 2 ans est supprimé automatiquement.';
 
   @override
   String get seeClients => 'Voir les clients';
@@ -1061,11 +1080,11 @@ class L10nFr extends L10n {
   String get startWithLoyi => 'Commencer avec Loyi';
 
   @override
-  String get welcomeBack => 'Bon retour';
+  String get welcomeBack => 'Content de vous revoir';
 
   @override
   String get signUpSteps =>
-      'Trois étapes : votre compte, vos couleurs, votre abonnement. Ensuite, votre tableau de bord est prêt.';
+      'Trois étapes : votre compte, vos couleurs, votre abonnement. Ensuite, votre tableau de bord est prêt.';
 
   @override
   String get signInSub => 'Connectez-vous pour gérer vos cartes de fidélité.';
@@ -1092,14 +1111,14 @@ class L10nFr extends L10n {
   String get showPassword => 'Afficher le mot de passe';
 
   @override
-  String get forgotPassword => 'Mot de passe oublié ?';
+  String get forgotPassword => 'Mot de passe oublié ?';
 
   @override
   String get agreeToTerms =>
       'En créant un compte, vous acceptez les conditions d\'utilisation et la politique de confidentialité.';
 
   @override
-  String get collectingStamps => 'Vous collectez des tampons ? Vers vos cartes';
+  String get collectingStamps => 'Vous collectez des tampons ? Vers vos cartes';
 
   @override
   String get heroTitle => 'Des cartes de fidélité\nque vos clients gardent.';
@@ -1128,7 +1147,7 @@ class L10nFr extends L10n {
 
   @override
   String yourColoursSub(int max) {
-    return 'Choisissez-en jusqu\'à $max : la carte, son dégradé et les tampons. Vous pourrez affiner chaque carte plus tard.';
+    return 'Choisissez-en jusqu\'à $max : la carte, son dégradé et les tampons. Vous pourrez affiner chaque carte plus tard.';
   }
 
   @override
@@ -1255,7 +1274,7 @@ class L10nFr extends L10n {
 
   @override
   String get stripeNote =>
-      'Vous payez en toute sécurité avec Stripe. L\'abonnement se renouvelle chaque mois jusqu\'à résiliation ; résiliez à tout moment via Abonnement → Gérer l\'abonnement. Vous recevez une facture pour chaque paiement.';
+      'Vous payez en toute sécurité avec Stripe. L\'abonnement se renouvelle chaque mois jusqu\'à résiliation ; résiliez à tout moment via Abonnement → Gérer l\'abonnement. Vous recevez une facture pour chaque paiement.';
 
   @override
   String get noActiveSubscription => 'Pas d\'abonnement actif';
@@ -1336,7 +1355,7 @@ class L10nFr extends L10n {
 
   @override
   String get cardNameSub =>
-      'Court et clair ; les clients le voient sous le nom de votre commerce.';
+      'Court et clair ; les clients le voient sous le nom de votre commerce.';
 
   @override
   String get cardNameHint => 'p. ex. Carte café';
@@ -1349,7 +1368,7 @@ class L10nFr extends L10n {
 
   @override
   String get stampsForFullCardSub =>
-      '6 à 10 tampons semblent atteignables pour la plupart des clients ; au-delà, cela paraît vite lointain.';
+      '6 à 10 tampons semblent atteignables pour la plupart des clients ; au-delà, cela paraît vite lointain.';
 
   @override
   String get fewerStamps => 'Moins de tampons';
@@ -1388,7 +1407,7 @@ class L10nFr extends L10n {
 
   @override
   String get cardIsLiveSub =>
-      'En pause, les contacts sont refusés mais les clients gardent leurs tampons.';
+      'Quand la carte est en pause, les contacts sont refusés, mais les clients gardent leurs tampons.';
 
   @override
   String get createCard => 'Créer la carte';
@@ -1489,7 +1508,7 @@ class L10nFr extends L10n {
   String get newStampTag => 'Nouveau tag tampon';
 
   @override
-  String get whereIsTag => 'Où se trouve ce tag ?';
+  String get whereIsTag => 'Où se trouve ce tag ?';
 
   @override
   String get methodEmailPassword => 'E-mail et mot de passe';
@@ -1504,7 +1523,7 @@ class L10nFr extends L10n {
   String get yourAccount => 'Votre compte';
 
   @override
-  String get signInMethod => 'Connexion';
+  String get signInMethod => 'Mode de connexion';
 
   @override
   String get memberSince => 'Membre depuis';
@@ -1520,7 +1539,7 @@ class L10nFr extends L10n {
 
   @override
   String noLoyiPassword(Object provider) {
-    return 'Vous vous connectez avec $provider : il n\'y a donc pas de mot de passe Loyi. Gérez votre e-mail et votre sécurité dans votre compte $provider.';
+    return 'Vous vous connectez avec $provider : il n\'y a donc pas de mot de passe Loyi. Gérez votre e-mail et votre sécurité dans votre compte $provider.';
   }
 
   @override
@@ -1605,12 +1624,18 @@ class L10nFr extends L10n {
 
   @override
   String cardSemantic(String business, String card, int stamps, int total) {
-    return '$business, $card : $stamps tampons sur $total';
+    return '$business, $card : $stamps tampons sur $total';
   }
 
   @override
   String rewardsReadySuffix(int count) {
-    return ', $count récompenses prêtes';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: ', $count récompenses prêtes',
+      one: ', 1 récompense prête',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1687,7 +1712,7 @@ class L10nFr extends L10n {
 
   @override
   String get keepCardsSafeSub =>
-      'Vos tampons sont enregistrés dans ce navigateur. Enregistrez-les dans un compte et ils vous suivent sur n\'importe quel téléphone. Vous avez déjà un compte ? Les cartes de cet appareil y sont ajoutées.';
+      'Vos tampons sont enregistrés dans ce navigateur. Enregistrez-les dans un compte et ils vous suivent sur n\'importe quel téléphone. Vous avez déjà un compte ? Les cartes de cet appareil y sont ajoutées.';
 
   @override
   String get continueWithGoogle => 'Continuer avec Google';
@@ -1767,7 +1792,7 @@ class L10nFr extends L10n {
   String get notYet => 'Pas encore';
 
   @override
-  String get cardFull => 'Carte complète !';
+  String get cardFull => 'Carte complète !';
 
   @override
   String get cardFullSub =>
@@ -1777,10 +1802,10 @@ class L10nFr extends L10n {
   String get stampAdded => 'Tampon ajouté';
 
   @override
-  String get thanksForVisit => 'Merci de votre visite !';
+  String get thanksForVisit => 'Merci de votre visite !';
 
   @override
-  String get welcome => 'Bienvenue !';
+  String get welcome => 'Bienvenue !';
 
   @override
   String get welcomeSub =>
@@ -1797,7 +1822,7 @@ class L10nFr extends L10n {
 
   @override
   String nextStampIn(Object wait) {
-    return 'Votre prochain tampon est possible dans $wait.';
+    return 'Prochain tampon possible dans $wait.';
   }
 
   @override

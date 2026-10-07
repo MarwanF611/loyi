@@ -1110,7 +1110,7 @@ abstract class L10n {
   /// No description provided for @daysAgo.
   ///
   /// In en, this message translates to:
-  /// **'{days} days ago'**
+  /// **'{days, plural, =1{1 day ago} other{{days} days ago}}'**
   String daysAgo(int days);
 
   /// No description provided for @clientRowSummary.
@@ -1344,7 +1344,7 @@ abstract class L10n {
   /// No description provided for @messageReachUntil.
   ///
   /// In en, this message translates to:
-  /// **'reaches {count} now · until {date}'**
+  /// **'{count, plural, =1{reaches 1 client now} other{reaches {count} clients now}} · until {date}'**
   String messageReachUntil(int count, String date);
 
   /// No description provided for @messageOptions.
@@ -1446,7 +1446,7 @@ abstract class L10n {
   /// No description provided for @cameBackCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} came back'**
+  /// **'{count, plural, =1{1 came back} other{{count} came back}}'**
   String cameBackCount(int count);
 
   /// No description provided for @kpiNewClients.
@@ -2784,7 +2784,7 @@ abstract class L10n {
   /// No description provided for @rewardsReadySuffix.
   ///
   /// In en, this message translates to:
-  /// **', {count} rewards ready'**
+  /// **'{count, plural, =1{, 1 reward ready} other{, {count} rewards ready}}'**
   String rewardsReadySuffix(int count);
 
   /// No description provided for @rewardsBadge.
