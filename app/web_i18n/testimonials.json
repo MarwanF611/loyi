@@ -1,0 +1,5 @@
+{
+  "_help": "Real quotes from shops that use Loyi, shown on the home page between the pilot offer and the FAQ. The section stays hidden while the list is empty. Only add quotes the shop agreed to publish. photo is optional: a square image in app/web/site/img/quotes/.",
+  "_example": { "quote": "Our regulars love it.", "name": "An Peeters", "shop": "Bakkerij Peeters", "city": "Gent", "photo": "/site/img/quotes/peeters.jpg" },
+  "quotes": []
+}

@@ -1826,4 +1826,125 @@ class L10nEn extends L10n {
 
   @override
   String get undo => 'Undo';
+
+  @override
+  String get kitLinkUsed => 'This link was already used. Tap the tag again.';
+
+  @override
+  String get notALoyiTag => 'This isn\'t a Loyi tag.';
+
+  @override
+  String get kitAlreadyLinked => 'This tag is already linked to a card.';
+
+  @override
+  String get kitTapAgain => 'Tap the tag again, then link it.';
+
+  @override
+  String get kitUnavailable =>
+      'Secure tags aren\'t available yet. Try again later.';
+
+  @override
+  String get kitNewTagTitle => 'New Loyi tag';
+
+  @override
+  String get kitNewTagShop =>
+      'Choose the card and what this tag does. You can switch it off later under Cards.';
+
+  @override
+  String get kitNewTagClient =>
+      'This tag isn\'t linked to a shop yet. Ask at the counter, or try again later.';
+
+  @override
+  String get kitShopSignIn =>
+      'Is this your shop\'s tag? Sign in on this phone, then tap the tag again.';
+
+  @override
+  String get kitCard => 'Card';
+
+  @override
+  String get kitNoCards =>
+      'Create a loyalty card first, then tap the tag again.';
+
+  @override
+  String get kitLink => 'Link tag';
+
+  @override
+  String get kitLinked => 'Tag linked';
+
+  @override
+  String get kitLinkedSub =>
+      'Clients can tap it now. Every tap makes a new one-time code, so a saved link doesn\'t work twice.';
+
+  @override
+  String get kitOpenCard => 'Open the card';
+
+  @override
+  String get tagTypeJoin => 'Join';
+
+  @override
+  String get tagTypeStamp => 'Stamp';
+
+  @override
+  String get secureTag => 'Loyi security tag';
+
+  @override
+  String get secureTagSub =>
+      'A new one-time code at every tap: a saved or shared link doesn\'t work.';
+
+  @override
+  String get kitHowTo => 'Starter kit tags';
+
+  @override
+  String get kitHowToSub =>
+      'Sign in on your phone, hold it to a kit tag and choose this card. Nothing to program.';
+
+  @override
+  String get ownStickers => 'Your own stickers';
+
+  @override
+  String get ownStickersSub =>
+      'Any NTAG213/215 sticker works with the links below, but a stamp link written on a plain sticker can be saved and reused after the waiting time. Use a kit tag for stamps.';
+
+  @override
+  String trialBadge(int days) {
+    return 'First $days days free';
+  }
+
+  @override
+  String get startTrial => 'Start free trial';
+
+  @override
+  String trialNote(int days, String price) {
+    return 'You pay nothing today. After $days days your subscription starts at $price a month, unless you cancel before then. We also post you two secure Loyi tags; Stripe asks for the address.';
+  }
+
+  @override
+  String trialUntil(String date, String price) {
+    return 'Free trial until $date. Then $price a month, unless you cancel.';
+  }
+
+  @override
+  String get demoTitle => 'Try a Loyi card';
+
+  @override
+  String get demoSub =>
+      'This is what your clients see after tapping your tag. Here a button stands in for the tag.';
+
+  @override
+  String get demoStamp => 'Tap the stamp tag';
+
+  @override
+  String demoStamped(int left) {
+    return 'Stamp added. $left to go.';
+  }
+
+  @override
+  String get demoFull =>
+      'Card full! The reward is waiting on the client\'s card.';
+
+  @override
+  String get demoAgain => 'Start over';
+
+  @override
+  String get demoForShops => 'Want this for your shop?';
 }

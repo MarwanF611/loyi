@@ -1,6 +1,7 @@
 # Loyi's billing server: Stripe Checkout, customer portal and webhook → Firestore.
 # Cloudflare's free tier (100k requests/day) is far more than Loyi needs.
-# Setup: docs/STRIPE.md. Secrets: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, FIREBASE_SERVICE_ACCOUNT.
+# Setup: docs/STRIPE.md and docs/KIT.md. Secrets: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
+# FIREBASE_SERVICE_ACCOUNT, SDM_META_KEY, SDM_FILE_KEY.
 name = "loyi-billing"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
@@ -12,3 +13,7 @@ STRIPE_PRICE_ID = "price_1UNAU5GX9uMphTPmmjOQsanm"
 # Where shops come back to after paying, and which sites may call this server.
 APP_URL = "https://loyi-b530b.web.app"
 ALLOWED_ORIGINS = "https://loyi-b530b.web.app,https://loyi-b530b.firebaseapp.com"
+# Free days before the first payment (one trial per shop).
+TRIAL_DAYS = "14"
+# Checkout asks for a shipping address in these countries for the starter kit (two secure tags).
+SHIPPING_COUNTRIES = "BE,NL,LU,FR,DE"

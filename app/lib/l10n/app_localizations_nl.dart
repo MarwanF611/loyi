@@ -1835,4 +1835,125 @@ class L10nNl extends L10n {
 
   @override
   String get undo => 'Ongedaan maken';
+
+  @override
+  String get kitLinkUsed => 'Deze link is al gebruikt. Tik opnieuw op de tag.';
+
+  @override
+  String get notALoyiTag => 'Dit is geen Loyi-tag.';
+
+  @override
+  String get kitAlreadyLinked => 'Deze tag is al aan een kaart gekoppeld.';
+
+  @override
+  String get kitTapAgain => 'Tik opnieuw op de tag en koppel hem dan.';
+
+  @override
+  String get kitUnavailable =>
+      'Beveiligde tags zijn nog niet beschikbaar. Probeer het later opnieuw.';
+
+  @override
+  String get kitNewTagTitle => 'Nieuwe Loyi-tag';
+
+  @override
+  String get kitNewTagShop =>
+      'Kies de kaart en wat deze tag doet. Je kunt hem later uitzetten onder Kaarten.';
+
+  @override
+  String get kitNewTagClient =>
+      'Deze tag is nog niet aan een zaak gekoppeld. Vraag het aan de toog, of probeer het later opnieuw.';
+
+  @override
+  String get kitShopSignIn =>
+      'Is dit de tag van jouw zaak? Log in op deze telefoon en tik dan opnieuw op de tag.';
+
+  @override
+  String get kitCard => 'Kaart';
+
+  @override
+  String get kitNoCards =>
+      'Maak eerst een klantenkaart en tik dan opnieuw op de tag.';
+
+  @override
+  String get kitLink => 'Tag koppelen';
+
+  @override
+  String get kitLinked => 'Tag gekoppeld';
+
+  @override
+  String get kitLinkedSub =>
+      'Klanten kunnen er nu op tikken. Elke tik maakt een nieuwe eenmalige code, dus een opgeslagen link werkt geen tweede keer.';
+
+  @override
+  String get kitOpenCard => 'Kaart openen';
+
+  @override
+  String get tagTypeJoin => 'Aanmelden';
+
+  @override
+  String get tagTypeStamp => 'Stempel';
+
+  @override
+  String get secureTag => 'Loyi-veiligheidstag';
+
+  @override
+  String get secureTagSub =>
+      'Bij elke tik een nieuwe eenmalige code: een opgeslagen of gedeelde link werkt niet.';
+
+  @override
+  String get kitHowTo => 'Tags uit je starterkit';
+
+  @override
+  String get kitHowToSub =>
+      'Log in op je telefoon, hou hem tegen een kit-tag en kies deze kaart. Niets te programmeren.';
+
+  @override
+  String get ownStickers => 'Je eigen stickers';
+
+  @override
+  String get ownStickersSub =>
+      'Elke NTAG213/215-sticker werkt met de links hieronder, maar een stempellink op een gewone sticker kan worden opgeslagen en na de wachttijd opnieuw gebruikt. Gebruik een kit-tag om te stempelen.';
+
+  @override
+  String trialBadge(int days) {
+    return 'Eerste $days dagen gratis';
+  }
+
+  @override
+  String get startTrial => 'Gratis proefperiode starten';
+
+  @override
+  String trialNote(int days, String price) {
+    return 'Vandaag betaal je niets. Na $days dagen start je abonnement aan $price per maand, tenzij je eerder opzegt. We sturen je ook twee beveiligde Loyi-tags op; Stripe vraagt het adres.';
+  }
+
+  @override
+  String trialUntil(String date, String price) {
+    return 'Gratis proefperiode tot $date. Daarna $price per maand, tenzij je opzegt.';
+  }
+
+  @override
+  String get demoTitle => 'Probeer een Loyi-kaart';
+
+  @override
+  String get demoSub =>
+      'Zo zien je klanten hun kaart na een tik op je tag. Hier vervangt een knop de tag.';
+
+  @override
+  String get demoStamp => 'Tik op de stempeltag';
+
+  @override
+  String demoStamped(int left) {
+    return 'Stempel erbij. Nog $left.';
+  }
+
+  @override
+  String get demoFull =>
+      'Kaart vol! De beloning staat klaar op de kaart van de klant.';
+
+  @override
+  String get demoAgain => 'Opnieuw beginnen';
+
+  @override
+  String get demoForShops => 'Wil je dit voor je zaak?';
 }

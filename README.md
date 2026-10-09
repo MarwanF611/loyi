@@ -91,12 +91,13 @@ account and data (art. 17). `/delete-account` explains the same for Google Play.
 - `businesses/{id}`: name, `colors` (1–3 brand colours; `color` is the first), `logoVersion`, ownerUid (one business per owner in the MVP)
 - `logos/{businessId}`: the logo image itself (max 200 KB, 256 px), public
 - `programs/{id}`: a loyalty card: `stampsRequired`, `rewards[]` (each can be switched on or off), `stampCooldownMinutes`, `active`, and `design` (card colour, optional second colour, style `solid | gradient | pattern`, stamp colour, stamp icon). Designs are limited to colours, an icon and the logo, so the same design can later become an Apple/Google Wallet pass
-- `tags/{id}`: `type: join | stamp`, linked to one program. The tag's URL is `/t/<id>`
+- `tags/{id}`: `type: join | stamp`, linked to one program. The tag's URL is `/t/<id>`. `secure: true` for starter kit tags (created only by the billing server), whose URL is `/k?e=…&c=…`
+- `kitTags/{UID}`, `stampTickets/{UID}_{counter}`: the server's record per secure tag and the one-time ticket a stamp from it spends (docs/KIT.md)
 - `cards/{programId_clientUid}`: a client's progress: `stamps`, `rewardsAvailable` (banked full cards)
 - `stampEvents/{cardId}_{n}`, `redemptions/{cardId}_r{n}`: the log behind the business dashboard, deleted after 2 years
 - `messages/{id}`: a shop's follow-up message: `title`, `body`, `audience`, optional `programId`, `active`, `endsAt`; public like programs
 - `transfers/{anonUid}`: hand-off used when merging a device's cards into an account
-- `subscriptions/{ownerUid}`: `expiresAt`, `store`, `willRenew`, `billingIssue`, `source` (`stripe` or `grant`). Written only by the billing server or `grant-access.js`
+- `subscriptions/{ownerUid}`: `expiresAt`, `store`, `willRenew`, `billingIssue`, `trial`, `source` (`stripe` or `grant`). Written only by the billing server or `grant-access.js`
 - `billing/{ownerUid}`: Stripe customer and subscription ids; only the billing server reads or writes it
 
 **Clients** start as anonymous Firebase users (nothing to sign up for at the
@@ -188,6 +189,8 @@ Status (free Spark plan, no billing):
   key's fingerprints too** (`firebase apps:android:sha:create <appId> <sha>`, the Play key is under Play
   Console → Setup → App signing), then download `google-services.json` again
   (`firebase apps:sdkconfig ANDROID <appId>`)
+- [x] Secure tags (starter kit, NTAG 424 DNA): code, rules and tests are in; switch them on with docs/KIT.md
+  (keys, programming, sending)
 - [x] Hosting: live at **https://loyi-b530b.web.app**. Deploy updates with `./scripts/deploy-web.sh` (builds production, deploys, then restores the local emulator build)
 - [ ] Custom domain (loyi.be) in Hosting and Auth's authorised domains; build with `--dart-define=PUBLIC_BASE_URL=https://loyi.be`
 
@@ -239,7 +242,11 @@ from the running app with demo data (`npm run all`). See `marketing/README.md`.
 
 ## Programming NFC tags
 
-Use NTAG213/215 stickers. In the dashboard, open a card, add a join tag and a
+New shops get two **secure tags** (NTAG 424 DNA) in the post: they link them by tapping them with a signed-in
+phone, and every tap writes a one-time link the server checks, so a saved stamp link can't be reused. How to make
+and send them: docs/KIT.md.
+
+Shops can also use their own NTAG213/215 stickers. In the dashboard, open a card, add a join tag and a
 stamp tag, copy the link, and write it as a **URL record** with an app like
 *NFC Tools*. Join tags can also be shown as a QR code. Stamp tags deliberately
 have no QR, because a visible code could be photographed and reused.
@@ -247,7 +254,5 @@ have no QR, because a visible code could be photographed and reused.
 ## Roadmap after the MVP
 
 - **Apple Wallet and Google Wallet passes.** Needs an Apple Developer account (Pass Type ID certificate), a Google Wallet issuer account, and a server to sign passes (Blaze plan or another host).
-- **Tamper-proof stamp tags.** NTAG 424 DNA with SUN/SDM generates a unique signed URL on every tap, so a copied link can't be replayed from home. Verifying the signature needs a server.
-- Dutch and French translations (`flutter gen-l10n`).
 - Several locations or staff accounts per business, and a staff redeem-confirm screen.
 - One Loyi account holding the cards from every shop (the long-term vision). The `cards` model already supports this.

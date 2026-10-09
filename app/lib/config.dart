@@ -29,6 +29,9 @@ const billingApiUrl = String.fromEnvironment('BILLING_API_URL');
 /// Shown next to the Subscribe button; Stripe's checkout shows the exact amount incl. VAT.
 const subscriptionPrice = String.fromEnvironment('SUBSCRIPTION_PRICE', defaultValue: '€19');
 
+/// Free days before the first payment; the billing server's TRIAL_DAYS decides, this is for the texts.
+const trialDays = int.fromEnvironment('TRIAL_DAYS', defaultValue: 14);
+
 /// reCAPTCHA v3 site key for Firebase App Check on the web. Empty → App Check off on web.
 const appCheckWebKey = String.fromEnvironment('APP_CHECK_WEB_KEY');
 

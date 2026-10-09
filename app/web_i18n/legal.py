@@ -4,7 +4,7 @@ Keep the three languages saying the same thing; the Dutch text is the reference
 for Belgian users. [Placeholders] still need the owner's details before launch."""
 from legal_shell import write
 
-UPDATED = {'nl': '7 oktober 2026', 'fr': '7 octobre 2026', 'en': '7 October 2026'}
+UPDATED = {'nl': '9 oktober 2026', 'fr': '9 octobre 2026', 'en': '9 October 2026'}
 
 # ── Privacy policy ─────────────────────────────────────────────────────────────
 
@@ -54,8 +54,9 @@ PRIVACY = {
       <li>Follow-up messages you write for your card holders. They must not contain personal data or links.</li>
       <li>You can download your client list (anonymous codes, dates and counts) as a CSV file. What you do with that
         file is your own responsibility as controller.</li>
-      <li>Subscription: whether it is active, when it renews and how you pay. Payments are handled by Stripe;
-        we never see your card or bank details.</li>
+      <li>Subscription: whether it is active or in its free trial, when it renews and how you pay. Payments are
+        handled by Stripe; we never see your card or bank details. Stripe also asks for the address where we post your
+        starter kit (two secure tags); we use it only for that.</li>
     </ul>
   </div>
 
@@ -80,7 +81,8 @@ PRIVACY = {
     <li><strong>Stripe</strong> (Ireland / United States): takes payments for subscriptions bought on the
       website.</li>
     <li><strong>Google</strong>: Google sign-in.</li>
-    <li><strong>Cloudflare</strong>: runs the small service that switches a shop's tags on after payment.</li>
+    <li><strong>Cloudflare</strong>: runs our small server, which switches a shop's tags on after payment and checks
+      each tap on a secure Loyi tag (the tag's one-time code and your anonymous ID, nothing else).</li>
   </ul>
   <p>Transfers outside the EU are covered by the EU–US Data Privacy Framework or the European Commission's
     standard contractual clauses.</p>
@@ -167,8 +169,9 @@ PRIVACY = {
       <li>Opvolgberichten die je voor je kaarthouders schrijft. Ze mogen geen persoonsgegevens of links bevatten.</li>
       <li>Je kunt je klantenlijst (anonieme codes, datums en aantallen) downloaden als CSV-bestand. Wat je met dat
         bestand doet, valt onder je eigen verantwoordelijkheid als verwerkingsverantwoordelijke.</li>
-      <li>Abonnement: of het actief is, wanneer het verlengd wordt en hoe je betaalt. Betalingen lopen via Stripe; wij
-        zien nooit je kaart- of bankgegevens.</li>
+      <li>Abonnement: of het actief is of in de gratis proefperiode zit, wanneer het verlengd wordt en hoe je betaalt.
+        Betalingen lopen via Stripe; wij zien nooit je kaart- of bankgegevens. Stripe vraagt ook het adres waar we je
+        starterkit (twee beveiligde tags) naartoe sturen; we gebruiken het alleen daarvoor.</li>
     </ul>
   </div>
 
@@ -196,7 +199,8 @@ PRIVACY = {
     <li><strong>Stripe</strong> (Ierland / Verenigde Staten): neemt de betalingen af voor abonnementen die op de
       website worden genomen.</li>
     <li><strong>Google</strong>: inloggen met Google.</li>
-    <li><strong>Cloudflare</strong>: draait de kleine dienst die de tags van een zaak na betaling aanzet.</li>
+    <li><strong>Cloudflare</strong>: draait onze kleine server, die de tags van een zaak na betaling aanzet en elke tik
+      op een beveiligde Loyi-tag controleert (de eenmalige code van de tag en je anonieme ID, verder niets).</li>
   </ul>
   <p>Doorgiften buiten de EU vallen onder het EU-VS-kader voor gegevensbescherming (Data Privacy Framework) of de
     modelcontractbepalingen van de Europese Commissie.</p>
@@ -291,8 +295,10 @@ PRIVACY = {
         liens.</li>
       <li>Vous pouvez télécharger votre liste de clients (codes anonymes, dates et nombres) en fichier CSV. Ce que vous
         faites de ce fichier relève de votre propre responsabilité de responsable du traitement.</li>
-      <li>Abonnement : s'il est actif, quand il se renouvelle et comment vous payez. Les paiements passent par Stripe ;
-        nous ne voyons jamais vos données de carte ou bancaires.</li>
+      <li>Abonnement : s'il est actif ou en période d'essai gratuite, quand il se renouvelle et comment vous payez.
+        Les paiements passent par Stripe ; nous ne voyons jamais vos données de carte ou bancaires. Stripe vous demande
+        aussi l'adresse à laquelle nous envoyons votre kit de démarrage (deux tags sécurisés) ; nous ne l'utilisons que
+        pour cela.</li>
     </ul>
   </div>
 
@@ -321,8 +327,9 @@ PRIVACY = {
     <li><strong>Stripe</strong> (Irlande / États-Unis) : encaisse les paiements des abonnements souscrits sur le
       site.</li>
     <li><strong>Google</strong> : connexion avec Google.</li>
-    <li><strong>Cloudflare</strong> : fait tourner le petit service qui active les tags d'un commerce après
-      paiement.</li>
+    <li><strong>Cloudflare</strong> : fait tourner notre petit serveur, qui active les tags d'un commerce après
+      paiement et vérifie chaque contact avec un tag Loyi sécurisé (le code à usage unique du tag et votre identifiant
+      anonyme, rien d'autre).</li>
   </ul>
   <p>Les transferts hors de l'UE sont couverts par le cadre de protection des données UE–États-Unis (Data Privacy
     Framework) ou par les clauses contractuelles types de la Commission européenne.</p>
@@ -406,6 +413,10 @@ TERMS = {
     <li>The subscription costs <strong>€19 per month excluding VAT</strong>. You subscribe on the Loyi website and
       pay through our payment provider Stripe, by card or Bancontact. You receive an invoice for every payment. The
       Loyi apps don't sell subscriptions.</li>
+    <li><strong>The first 14 days are free</strong> (one free trial per shop). Stripe asks for your payment method at
+      the start; the first payment is taken when the trial ends, unless you cancel before then.</li>
+    <li>With your subscription we post you a starter kit with two secure Loyi tags. They're yours to keep, also if you
+      cancel during the trial, and only work with Loyi.</li>
     <li><strong>It renews automatically every month</strong> until you cancel. You cancel at any time on the website
       under Settings → Subscription → Manage subscription. Deleting your Loyi account also cancels your
       subscription.</li>
@@ -484,6 +495,11 @@ TERMS = {
     <li>Het abonnement kost <strong>€19 per maand exclusief btw</strong>. Je neemt het op de website van Loyi en betaalt
       via onze betaalprovider Stripe, met kaart of Bancontact. Je krijgt een factuur voor elke betaling. De apps van
       Loyi verkopen geen abonnementen.</li>
+    <li><strong>De eerste 14 dagen zijn gratis</strong> (één gratis proefperiode per zaak). Stripe vraagt je
+      betaalmiddel bij de start; de eerste betaling gebeurt op het einde van de proefperiode, tenzij je voordien
+      opzegt.</li>
+    <li>Bij je abonnement sturen we je een starterkit met twee beveiligde Loyi-tags op. Je mag ze houden, ook als je
+      tijdens de proefperiode opzegt, en ze werken alleen met Loyi.</li>
     <li><strong>Het wordt elke maand automatisch verlengd</strong> tot je opzegt. Je zegt op wanneer je wilt via de
       website onder Instellingen → Abonnement → Abonnement beheren. Als je je Loyi-account verwijdert, wordt je
       abonnement ook stopgezet.</li>
@@ -568,6 +584,10 @@ TERMS = {
     <li>L'abonnement coûte <strong>19 € par mois hors TVA</strong>. Vous vous abonnez sur le site de Loyi et payez via
       notre prestataire de paiement Stripe, par carte ou Bancontact. Vous recevez une facture pour chaque paiement. Les
       apps Loyi ne vendent pas d'abonnement.</li>
+    <li><strong>Les 14 premiers jours sont gratuits</strong> (un seul essai gratuit par commerce). Stripe vous demande
+      un moyen de paiement au départ ; le premier paiement a lieu à la fin de l'essai, sauf si vous résiliez avant.</li>
+    <li>Avec votre abonnement, nous vous envoyons un kit de démarrage avec deux tags Loyi sécurisés. Vous pouvez les
+      garder, même si vous résiliez pendant l'essai, et ils ne fonctionnent qu'avec Loyi.</li>
     <li><strong>Il se renouvelle automatiquement chaque mois</strong> jusqu'à sa résiliation. Vous résiliez à tout
       moment sur le site via Réglages → Abonnement → Gérer l'abonnement. La suppression de votre compte Loyi résilie
       aussi votre abonnement.</li>
@@ -777,6 +797,9 @@ DPA = {
     <li><strong>Google Ireland Ltd</strong> (Firebase): database, hosting and sign-in. Database in Belgium
       (europe-west1); sign-in data can be processed in the United States under the EU–US Data Privacy Framework or the
       European Commission's standard contractual clauses.</li>
+    <li><strong>Cloudflare, Inc.</strong>: Loyi's small server, which checks taps on secure Loyi tags (the tag's one-time
+      code and the client's anonymous ID). It runs on Cloudflare's network, under Cloudflare's data processing addendum
+      with the European Commission's standard contractual clauses.</li>
   </ul>
   <p>Loyi informs shops by email at least 30 days before adding or replacing a sub-processor. A shop that objects
     can end its subscription before the change. Loyi binds each sub-processor to the same data protection obligations.</p>
@@ -850,6 +873,9 @@ DPA = {
     <li><strong>Google Ireland Ltd</strong> (Firebase): databank, hosting en inloggen. Databank in België
       (europe-west1); inloggegevens kunnen in de Verenigde Staten worden verwerkt onder het EU-VS-kader voor
       gegevensbescherming of de modelcontractbepalingen van de Europese Commissie.</li>
+    <li><strong>Cloudflare, Inc.</strong>: de kleine server van Loyi, die tikken op beveiligde Loyi-tags controleert (de
+      eenmalige code van de tag en de anonieme ID van de klant). Hij draait op het netwerk van Cloudflare, onder de
+      verwerkersovereenkomst van Cloudflare met de modelcontractbepalingen van de Europese Commissie.</li>
   </ul>
   <p>Loyi verwittigt zaken minstens 30 dagen voor het een subverwerker toevoegt of vervangt per e-mail. Een zaak die
     bezwaar heeft, kan haar abonnement voor de wijziging stopzetten. Loyi legt elke subverwerker dezelfde
@@ -923,6 +949,10 @@ DPA = {
     <li><strong>Google Ireland Ltd</strong> (Firebase) : base de données, hébergement et connexion. Base de données en
       Belgique (europe-west1) ; les données de connexion peuvent être traitées aux États-Unis dans le cadre du Data
       Privacy Framework UE–États-Unis ou des clauses contractuelles types de la Commission européenne.</li>
+    <li><strong>Cloudflare, Inc.</strong> : le petit serveur de Loyi, qui vérifie les contacts avec les tags Loyi
+      sécurisés (le code à usage unique du tag et l'identifiant anonyme du client). Il tourne sur le réseau de
+      Cloudflare, dans le cadre de l'avenant de traitement des données de Cloudflare avec les clauses contractuelles
+      types de la Commission européenne.</li>
   </ul>
   <p>Loyi informe les commerces par e-mail au moins 30 jours avant d'ajouter ou de remplacer un sous-traitant
     ultérieur. Un commerce qui s'y oppose peut résilier son abonnement avant le changement. Loyi impose à chaque

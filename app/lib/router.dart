@@ -14,6 +14,8 @@ import 'business/shell.dart';
 import 'business/subscribe_page.dart';
 import 'client/account_pages.dart';
 import 'client/card_page.dart';
+import 'client/demo_page.dart';
+import 'client/kit_tap_page.dart';
 import 'client/my_cards_page.dart';
 import 'client/redeemed_page.dart';
 import 'client/tap_page.dart';
@@ -47,6 +49,13 @@ GoRouter buildRouter() => GoRouter(
       path: '/t/:tagId',
       builder: (_, s) => TapPage(tagId: s.pathParameters['tagId']!),
     ),
+    // Secure tags (starter kit) write a new one-time link at every tap.
+    GoRoute(
+      path: '/k',
+      builder: (_, s) => KitTapPage(e: s.uri.queryParameters['e'] ?? '', c: s.uri.queryParameters['c'] ?? ''),
+    ),
+    // Try-it card for the website: no account, nothing saved.
+    GoRoute(path: '/demo', builder: (_, _) => const DemoPage()),
     GoRoute(path: '/cards', builder: (_, _) => const MyCardsPage()),
     GoRoute(
       path: '/c/:cardId',

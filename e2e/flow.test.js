@@ -237,11 +237,69 @@ test("Loyi rules: full flow and abuse attempts", async (t) => {
     await updateDoc(doc(biz.db, "tags", stampTag.id), { active: true });
   });
 
+  await t.test("secure tags: a stamp needs a fresh server ticket for this client and tag", async () => {
+    // The billing Worker creates secure tags and tickets with its service account.
+    const secure = admin.collection("tags").doc(`secure-${run}`);
+    await secure.set({
+      businessId: bizRef.id,
+      ownerUid: owner.uid,
+      programId: programRef.id,
+      type: "stamp",
+      label: "Kit",
+      active: true,
+      tapCount: 0,
+      secure: true,
+      createdAt: Timestamp.now(),
+    });
+    const ticket = (id, clientUid, { tagId = secure.id, minutes = 5 } = {}) =>
+      admin.doc(`stampTickets/${id}`).set({ tagId, clientUid, expiresAt: Timestamp.fromMillis(Date.now() + minutes * 60_000) });
+    const before = (await getDoc(aliceCard)).data().totalStamps;
+
+    // Without a ticket (e.g. the tag's id typed into /t/…), with someone else's, or an expired one: refused.
+    await denied(tap(alice.db, alice.uid(), secure.id));
+    await ticket(`t1-${run}`, bob.uid());
+    await denied(tap(alice.db, alice.uid(), secure.id, { ticketId: `t1-${run}` }));
+    await ticket(`t2-${run}`, alice.uid(), { minutes: -1 });
+    await denied(tap(alice.db, alice.uid(), secure.id, { ticketId: `t2-${run}` }));
+    await ticket(`t3-${run}`, alice.uid(), { tagId: stampTag.id });
+    await denied(tap(alice.db, alice.uid(), secure.id, { ticketId: `t3-${run}` }));
+    // Keeping the ticket (not spending it) is refused too.
+    await ticket(`t4-${run}`, alice.uid());
+    await denied(
+      updateDoc(aliceCard, {
+        stamps: (before + 1) % 5,
+        totalStamps: before + 1,
+        lastStampAt: serverTimestamp(),
+        lastTagId: secure.id,
+        lastTicketId: `t4-${run}`,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+
+    // A genuine ticket stamps once and is gone afterwards.
+    assert.equal((await tap(alice.db, alice.uid(), secure.id, { ticketId: `t4-${run}` })).outcome, "stamped");
+    assert.equal((await getDoc(aliceCard)).data().totalStamps, before + 1);
+    assert.equal((await admin.doc(`stampTickets/t4-${run}`).get()).exists, false);
+    await denied(tap(alice.db, alice.uid(), secure.id, { ticketId: `t4-${run}` }));
+
+    // Clients read only their own tickets and can't make or change them; nobody touches kitTags.
+    await ticket(`t5-${run}`, alice.uid());
+    await denied(getDoc(doc(bob.db, "stampTickets", `t5-${run}`)));
+    assert.equal((await getDoc(doc(alice.db, "stampTickets", `t5-${run}`))).get("clientUid"), alice.uid());
+    await denied(setDoc(doc(alice.db, "stampTickets", `t6-${run}`), { tagId: secure.id, clientUid: alice.uid() }));
+    await denied(deleteDoc(doc(alice.db, "stampTickets", `t5-${run}`)));
+    await denied(getDoc(doc(alice.db, "kitTags", "04AABBCCDDEEFF")));
+    // Shops can't make a tag secure (or create one) themselves; plain tags keep working.
+    await denied(updateDoc(doc(biz.db, "tags", stampTag.id), { secure: true }));
+    await denied(addDoc(collection(biz.db, "tags"), { businessId: bizRef.id, ownerUid: owner.uid, programId: programRef.id, type: "stamp", label: "x", active: true, tapCount: 0, secure: true, createdAt: serverTimestamp() }));
+    assert.equal((await tap(alice.db, alice.uid(), stampTag.id)).outcome, "stamped");
+  });
+
   await t.test("business insights", async () => {
     const owned = (db, c) =>
       query(collection(db, c), where("ownerUid", "==", owner.uid), where("businessId", "==", bizRef.id));
     assert.equal((await getCountFromServer(owned(biz.db, "cards"))).data().count, 2);
-    assert.equal((await getCountFromServer(owned(biz.db, "stampEvents"))).data().count, 6); // Alice 5 + Bob 1
+    assert.equal((await getCountFromServer(owned(biz.db, "stampEvents"))).data().count, 8); // Alice 5 + Bob 1 + secure-tag test 2
     const redemptions = await getDocs(owned(biz.db, "redemptions"));
     assert.deepEqual(redemptions.docs.map((d) => d.get("rewardTitle")), ["Gratis koffie"]);
     await denied(getDocs(owned(alice.db, "stampEvents"))); // clients can't read the business log

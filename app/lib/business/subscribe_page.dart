@@ -225,6 +225,8 @@ class PlanSectionState extends State<PlanSection> {
               Text(
                 sub.expiresAt.year >= 9999
                     ? l.tagsLive
+                    : sub.trial && sub.willRenew
+                    ? l.trialUntil(_date(sub.expiresAt), subscriptionPrice)
                     : sub.store == null
                     ? l.tagsLiveUntil(_date(sub.expiresAt))
                     : sub.billingIssue
@@ -260,15 +262,21 @@ class PlanSectionState extends State<PlanSection> {
       case PlanState.none || PlanState.expired:
         if (!kIsWeb) return const _NotActive();
         if (!billing.available) return const _Unavailable();
-        return _Offer(busy: _busy, onSubscribe: () => _run(billing.startCheckout));
+        // One trial per shop: the billing server leaves it out for a shop that subscribed before.
+        return _Offer(
+          busy: _busy,
+          trial: status.state == PlanState.none,
+          onSubscribe: () => _run(billing.startCheckout),
+        );
     }
   }
 }
 
 class _Offer extends StatelessWidget {
-  const _Offer({required this.busy, required this.onSubscribe});
+  const _Offer({required this.busy, required this.trial, required this.onSubscribe});
 
   final bool busy;
+  final bool trial;
   final VoidCallback onSubscribe;
 
   @override
@@ -277,6 +285,18 @@ class _Offer extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (trial) ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Pill(
+              label: context.l10n.trialBadge(trialDays),
+              icon: LoyiIcons.gift,
+              background: context.loyi.mintSoft,
+              foreground: context.loyi.mint,
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         Text(context.l10n.monthly, style: context.text.titleMedium),
         const SizedBox(height: 4),
         Text.rich(
@@ -294,9 +314,17 @@ class _Offer extends StatelessWidget {
           onPressed: busy ? null : onSubscribe,
           child: busy
               ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
-              : Text(context.l10n.subscribe),
+              : Text(trial ? context.l10n.startTrial : context.l10n.subscribe),
         ),
         const SizedBox(height: 12),
+        if (trial) ...[
+          Text(
+            context.l10n.trialNote(trialDays, subscriptionPrice),
+            style: context.text.bodySmall,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+        ],
         Text(context.l10n.stripeNote, style: context.text.bodySmall, textAlign: TextAlign.center),
         const SizedBox(height: 4),
         const LegalLinks(),

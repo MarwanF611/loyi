@@ -1845,4 +1845,126 @@ class L10nFr extends L10n {
 
   @override
   String get undo => 'Annuler';
+
+  @override
+  String get kitLinkUsed =>
+      'Ce lien a déjà été utilisé. Touchez à nouveau le tag.';
+
+  @override
+  String get notALoyiTag => 'Ce n\'est pas un tag Loyi.';
+
+  @override
+  String get kitAlreadyLinked => 'Ce tag est déjà associé à une carte.';
+
+  @override
+  String get kitTapAgain => 'Touchez à nouveau le tag, puis associez-le.';
+
+  @override
+  String get kitUnavailable =>
+      'Les tags sécurisés ne sont pas encore disponibles. Réessayez plus tard.';
+
+  @override
+  String get kitNewTagTitle => 'Nouveau tag Loyi';
+
+  @override
+  String get kitNewTagShop =>
+      'Choisissez la carte et le rôle de ce tag. Vous pourrez le désactiver plus tard sous Cartes.';
+
+  @override
+  String get kitNewTagClient =>
+      'Ce tag n\'est pas encore associé à un commerce. Demandez au comptoir, ou réessayez plus tard.';
+
+  @override
+  String get kitShopSignIn =>
+      'C\'est le tag de votre commerce ? Connectez-vous sur ce téléphone, puis touchez à nouveau le tag.';
+
+  @override
+  String get kitCard => 'Carte';
+
+  @override
+  String get kitNoCards =>
+      'Créez d\'abord une carte de fidélité, puis touchez à nouveau le tag.';
+
+  @override
+  String get kitLink => 'Associer le tag';
+
+  @override
+  String get kitLinked => 'Tag associé';
+
+  @override
+  String get kitLinkedSub =>
+      'Vos clients peuvent le toucher dès maintenant. Chaque contact crée un nouveau code à usage unique : un lien enregistré ne fonctionne pas deux fois.';
+
+  @override
+  String get kitOpenCard => 'Ouvrir la carte';
+
+  @override
+  String get tagTypeJoin => 'Inscription';
+
+  @override
+  String get tagTypeStamp => 'Tampon';
+
+  @override
+  String get secureTag => 'Tag de sécurité Loyi';
+
+  @override
+  String get secureTagSub =>
+      'Un nouveau code unique à chaque contact : un lien enregistré ou partagé ne fonctionne pas.';
+
+  @override
+  String get kitHowTo => 'Tags de votre kit de démarrage';
+
+  @override
+  String get kitHowToSub =>
+      'Connectez-vous sur votre téléphone, approchez-le d\'un tag du kit et choisissez cette carte. Rien à programmer.';
+
+  @override
+  String get ownStickers => 'Vos propres autocollants';
+
+  @override
+  String get ownStickersSub =>
+      'Tout autocollant NTAG213/215 fonctionne avec les liens ci-dessous, mais un lien tampon sur un autocollant ordinaire peut être enregistré et réutilisé après le délai d\'attente. Utilisez un tag du kit pour les tampons.';
+
+  @override
+  String trialBadge(int days) {
+    return '$days premiers jours gratuits';
+  }
+
+  @override
+  String get startTrial => 'Commencer l\'essai gratuit';
+
+  @override
+  String trialNote(int days, String price) {
+    return 'Vous ne payez rien aujourd\'hui. Après $days jours, votre abonnement démarre à $price par mois, sauf si vous résiliez avant. Nous vous envoyons aussi deux tags Loyi sécurisés ; Stripe vous demande l\'adresse.';
+  }
+
+  @override
+  String trialUntil(String date, String price) {
+    return 'Essai gratuit jusqu\'au $date. Ensuite $price par mois, sauf résiliation.';
+  }
+
+  @override
+  String get demoTitle => 'Essayez une carte Loyi';
+
+  @override
+  String get demoSub =>
+      'Voici ce que vos clients voient après avoir touché votre tag. Ici, un bouton remplace le tag.';
+
+  @override
+  String get demoStamp => 'Touchez le tag tampon';
+
+  @override
+  String demoStamped(int left) {
+    return 'Tampon ajouté. Encore $left.';
+  }
+
+  @override
+  String get demoFull =>
+      'Carte complète ! La récompense attend sur la carte du client.';
+
+  @override
+  String get demoAgain => 'Recommencer';
+
+  @override
+  String get demoForShops => 'Vous voulez ceci pour votre commerce ?';
 }

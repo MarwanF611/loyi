@@ -6,6 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHmac, createSign, createVerify, generateKeyPairSync } from "node:crypto";
 import worker, { accessToken, formEncode, resetCachesForTests, subscriptionStatus } from "../src/index.js";
+import { makeSun } from "../src/sun.js";
 
 const PROJECT = "demo-loyi";
 const env = {
@@ -17,6 +18,10 @@ const env = {
   STRIPE_API_BASE: "https://stripe.fake",
   APP_URL: "https://loyi.example",
   ALLOWED_ORIGINS: "https://loyi.example,http://localhost:5050",
+  TRIAL_DAYS: "14",
+  SHIPPING_COUNTRIES: "BE,NL",
+  SDM_META_KEY: "11".repeat(16),
+  SDM_FILE_KEY: "22".repeat(16),
 };
 const run = Date.now();
 const DAY = 86_400;
@@ -86,10 +91,24 @@ function subscription(id, uid, fields = {}) {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-function call(path, { token, origin = "https://loyi.example", method = "POST" } = {}) {
+function call(path, { token, origin = "https://loyi.example", method = "POST", body } = {}) {
   const headers = { Origin: origin };
   if (token) headers.Authorization = `Bearer ${token}`;
-  return worker.fetch(new Request(`https://billing.example${path}`, { method, headers }), env);
+  if (body) headers["Content-Type"] = "application/json";
+  return worker.fetch(
+    new Request(`https://billing.example${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined }),
+    env,
+  );
+}
+
+/** Writes string fields straight into the emulator (stands in for the app). */
+async function seed(path, fields) {
+  const res = await realFetch(`http://127.0.0.1:8085/v1/projects/${PROJECT}/databases/(default)/documents/${path}`, {
+    method: "PATCH",
+    headers: { Authorization: "Bearer owner", "Content-Type": "application/json" },
+    body: JSON.stringify({ fields: Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, { stringValue: v }])) }),
+  });
+  assert.ok(res.ok, await res.text());
 }
 
 function webhook(type, object, { secret = env.STRIPE_WEBHOOK_SECRET, t = now() } = {}) {
@@ -142,6 +161,9 @@ test("checkout: only signed-in shop accounts, with a genuine token", async () =>
   assert.equal(p.get("customer_email"), `${uid}@shop.test`);
   assert.equal(p.get("success_url"), "https://loyi.example/business?checkout=done");
   assert.equal(p.get("locale"), "auto"); // no language given: Stripe follows the browser
+  assert.equal(p.get("subscription_data[trial_period_days]"), "14"); // first subscription: free trial
+  assert.equal(p.get("shipping_address_collection[allowed_countries][0]"), "BE"); // starter kit address
+  assert.equal(p.get("shipping_address_collection[allowed_countries][1]"), "NL");
 
   // The app's language is passed on; anything else falls back to auto.
   await call("/checkout?locale=fr", { token: idToken(`${uid}-fr`) });
@@ -297,4 +319,86 @@ test("service account token: signed RS256 JWT exchanged at Google's token endpoi
   const [h, c, s] = assertion.split(".");
   assert.equal(JSON.parse(Buffer.from(c, "base64url")).scope, "https://www.googleapis.com/auth/datastore");
   assert.ok(createVerify("RSA-SHA256").update(`${h}.${c}`).verify(publicKey, Buffer.from(s, "base64url")));
+});
+
+test("a shop that had a subscription before gets no second trial", async () => {
+  const uid = `again-${run}`;
+  const sub = subscription(`sub_again_${run}`, uid, { status: "canceled", ended_at: now() - DAY });
+  await webhook("customer.subscription.deleted", sub);
+  assert.equal((await call("/checkout", { token: idToken(uid) })).status, 200);
+  assert.equal(stripe.calls.at(-1).params.get("subscription_data[trial_period_days]"), null);
+});
+
+// ── Secure tags ──────────────────────────────────────────────────────────────
+
+const tap = async (uidHex, counter) => makeSun(uidHex, counter, env.SDM_META_KEY, env.SDM_FILE_KEY);
+
+test("secure tags: link once, then one-time links with a stamp ticket", async () => {
+  const owner = `kitowner-${run}`;
+  const client = `kitclient-${run}`;
+  const tagUid = `04${String(run).slice(-12).padStart(12, "0")}`;
+  await seed(`programs/kitprog-${run}`, { ownerUid: owner, businessId: `kitbiz-${run}` });
+
+  // A client tapping a new tag: not linked yet, and clients can't link.
+  let res = await call("/kit-tap", { token: idToken(client, { provider: "anonymous" }), body: await tap(tagUid, 1) });
+  assert.deepEqual(await res.json(), { status: "unlinked", canLink: false });
+
+  // The shop taps it (newer counter) and links it as a stamp tag of its card.
+  const shopTap = await tap(tagUid, 2);
+  res = await call("/kit-tap", { token: idToken(owner), body: shopTap });
+  assert.deepEqual(await res.json(), { status: "unlinked", canLink: true });
+  // Someone else's card can't be chosen, and only the shop that tapped may link.
+  res = await call("/kit-link", { token: idToken(`other-${run}`), body: { ...shopTap, programId: `kitprog-${run}`, type: "stamp", label: "Counter" } });
+  assert.equal(res.status, 409);
+  res = await call("/kit-link", { token: idToken(owner), body: { ...shopTap, programId: `kitprog-${run}`, type: "stamp", label: "Counter" } });
+  assert.equal(res.status, 200);
+  const { tagId } = await res.json();
+  const tag = await doc(`tags/${tagId}`);
+  assert.equal(tag.ownerUid, owner);
+  assert.equal(tag.businessId, `kitbiz-${run}`);
+  assert.equal(tag.programId, `kitprog-${run}`);
+  assert.equal(tag.type, "stamp");
+  assert.equal(tag.secure, true);
+  assert.equal(tag.active, true);
+  assert.equal(tag.tapCount, "0");
+  // Linking twice doesn't work.
+  res = await call("/kit-link", { token: idToken(owner), body: { ...shopTap, programId: `kitprog-${run}`, type: "join", label: "x" } });
+  assert.equal(res.status, 409);
+
+  // A client's tap gives a ticket for that client and tag.
+  const clientTap = await tap(tagUid, 3);
+  res = await call("/kit-tap", { token: idToken(client, { provider: "anonymous" }), body: clientTap });
+  const result = await res.json();
+  assert.deepEqual(result, { status: "ok", tagId, ticketId: `${tagUid}_3` });
+  const ticket = await doc(`stampTickets/${tagUid}_3`);
+  assert.equal(ticket.clientUid, client);
+  assert.equal(ticket.tagId, tagId);
+  assert.ok(new Date(ticket.expiresAt) > new Date());
+
+  // The same link again (saved, shared or reloaded) and older links are refused.
+  for (const old of [clientTap, shopTap]) {
+    res = await call("/kit-tap", { token: idToken(`friend-${run}`, { provider: "anonymous" }), body: old });
+    assert.equal(res.status, 409);
+    assert.equal((await res.json()).code, "used");
+  }
+  // A forged link isn't a Loyi tag.
+  res = await call("/kit-tap", { token: idToken(client, { provider: "anonymous" }), body: { e: clientTap.e, c: "0000000000000000" } });
+  assert.equal(res.status, 400);
+  // Signing in is required.
+  assert.equal((await call("/kit-tap", { body: await tap(tagUid, 4) })).status, 401);
+  // The next real tap works again.
+  res = await call("/kit-tap", { token: idToken(client, { provider: "anonymous" }), body: await tap(tagUid, 5) });
+  assert.equal((await res.json()).ticketId, `${tagUid}_5`);
+});
+
+test("secure join tags return the tag without a ticket", async () => {
+  const owner = `kitjoin-${run}`;
+  const tagUid = `05${String(run).slice(-12).padStart(12, "0")}`;
+  await seed(`programs/kitjoinprog-${run}`, { ownerUid: owner, businessId: `kitjoinbiz-${run}` });
+  const shopTap = await tap(tagUid, 10);
+  await call("/kit-tap", { token: idToken(owner), body: shopTap });
+  const res = await call("/kit-link", { token: idToken(owner), body: { ...shopTap, programId: `kitjoinprog-${run}`, type: "join", label: "Door" } });
+  const { tagId } = await res.json();
+  const result = await (await call("/kit-tap", { token: idToken(`c-${run}`, { provider: "anonymous" }), body: await tap(tagUid, 11) })).json();
+  assert.deepEqual(result, { status: "ok", tagId });
 });

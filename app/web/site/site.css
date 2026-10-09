@@ -344,6 +344,22 @@ section { padding: 14px 0; scroll-margin-top: 80px; }
 .cta .eyebrow { color: rgba(255, 255, 255, 0.6); }
 .cta p { color: rgba(255, 255, 255, 0.72); max-width: 520px; margin: 18px auto 30px; }
 :root[data-theme="dark"] .cta { background: var(--panel-deep); }
+/* Pilot offer: a lighter, sunny version of the call to action. */
+.cta.pilot { background: var(--sun-soft); color: var(--ink); padding: clamp(40px, 6vw, 72px) 24px; }
+.cta.pilot h2 { color: var(--ink); }
+.cta.pilot .eyebrow { color: var(--ink-muted); }
+.cta.pilot p { color: var(--ink-muted); }
+.cta.pilot .btn-soft { background: var(--card); }
+:root[data-theme="dark"] .cta.pilot { background: var(--sun-soft); }
+/* Quotes from real shops (app/web_i18n/testimonials.json). */
+.quotes { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.quote { margin: 0; display: flex; flex-direction: column; gap: 16px; }
+.quote blockquote { margin: 0; font-size: 1.05rem; line-height: 1.55; }
+.quote figcaption { display: flex; align-items: center; gap: 12px; color: var(--ink-muted); font-size: 0.92rem; }
+.quote figcaption b { color: var(--ink); display: block; }
+.quote img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+.site-footer .company { font-size: 0.85rem; color: var(--ink-muted); margin-top: 10px; }
+
 .cta .glow {
   position: absolute; width: 520px; height: 520px; border-radius: 50%; left: 50%; top: 100%;
   transform: translate(-50%, -40%); background: radial-gradient(circle, color-mix(in srgb, var(--accent) 55%, transparent), transparent 65%);

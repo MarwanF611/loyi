@@ -181,7 +181,20 @@ service cloud.firestore {
 
     function cardKeys() {
       return ['clientUid', 'businessId', 'ownerUid', 'programId', 'stamps', 'rewardsAvailable', 'totalStamps',
-              'totalRedeemed', 'lastStampAt', 'lastTagId', 'mergedFrom', 'createdAt', 'updatedAt'];
+              'totalRedeemed', 'lastStampAt', 'lastTagId', 'lastTicketId', 'mergedFrom', 'createdAt', 'updatedAt'];
+    }
+
+    // A stamp from a secure tag (starter kit, NTAG 424 DNA) must spend a ticket the server issued
+    // to this client for this tag when it checked the tag's one-time link (billing-worker /kit-tap).
+    // Plain tags don't need one.
+    function ticketOk(tag, d) {
+      return !tag.get('secure', false) || ('lastTicketId' in d && validTicket(d));
+    }
+
+    function validTicket(d) {
+      let path = /databases/$(database)/documents/stampTickets/$(d.lastTicketId);
+      let t = get(path).data;
+      return t.clientUid == uid() && t.tagId == d.lastTagId && t.expiresAt > request.time && !existsAfter(path);
     }
 
     // First tap on any tag of a program creates the card (a stamp tag also gives the first stamp).
@@ -203,7 +216,8 @@ service cloud.firestore {
             : d.totalStamps == 1
               && d.stamps == 1 % p.stampsRequired
               && d.rewardsAvailable == math.floor(1 / p.stampsRequired)
-              && d.lastStampAt == request.time);
+              && d.lastStampAt == request.time
+              && ticketOk(tag, d));
     }
 
     // Exactly one stamp from an active stamp tag of this card, after the cooldown.
@@ -213,8 +227,10 @@ service cloud.firestore {
       let tag = tagOf(d.lastTagId);
       let p = programOf(old.programId);
       let next = old.stamps + 1;
-      return d.diff(old).affectedKeys().hasOnly(['stamps', 'rewardsAvailable', 'totalStamps', 'lastStampAt', 'lastTagId', 'updatedAt'])
+      return d.diff(old).affectedKeys().hasOnly(['stamps', 'rewardsAvailable', 'totalStamps', 'lastStampAt', 'lastTagId',
+                                                 'lastTicketId', 'updatedAt'])
         && tag.type == 'stamp' && tag.active && tag.programId == old.programId
+        && ticketOk(tag, d)
         && p.active
         && subscribed(old.ownerUid)
         && (old.lastStampAt == null
@@ -407,6 +423,21 @@ service cloud.firestore {
     // Stripe customer/subscription ids, for the billing server only.
     match /billing/{ownerUid} {
       allow read, write: if false;
+    }
+
+    // Secure tags: the server's record per physical tag (UID → tag, last tap counter). Server only.
+    match /kitTags/{tagUid} {
+      allow read, write: if false;
+    }
+
+    // One ticket per genuine tap of a secure stamp tag, issued by the server. Its client spends
+    // (deletes) it in the same write as the stamp it pays for; ticketOk() checks that.
+    match /stampTickets/{ticketId} {
+      allow get: if signedIn() && resource.data.clientUid == uid();
+      allow delete: if signedIn()
+        && resource.data.clientUid == uid()
+        && getAfter(cardPath(tagOf(resource.data.tagId).programId + '_' + uid())).data.lastTicketId == ticketId;
+      allow list, create, update: if false;
     }
   }
 }

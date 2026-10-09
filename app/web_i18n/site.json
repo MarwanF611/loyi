@@ -1,0 +1,11 @@
+{
+  "_help": "One place for the public site address, the contact address and the company details. Used by scripts/build-site.mjs (home page) and app/web_i18n/legal.py (legal pages). After buying a domain, change url and email here, then rebuild. Empty company fields keep the [placeholders] in the legal pages and hide the company line in the footer.",
+  "url": "https://loyi-b530b.web.app",
+  "email": "marwan.fikri20@gmail.com",
+  "company": {
+    "name": "",
+    "address": "",
+    "number": "",
+    "court": ""
+  }
+}

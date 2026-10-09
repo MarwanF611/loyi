@@ -35,9 +35,15 @@ monitoring or special categories), but name one contact person: [you].
 | Shop loyalty programmes (Loyi as **processor** for each shop) | Run the shop's programme, dashboard, client list, insights | Clients of that shop | Pseudonymous ID per shop, cards, stamps, rewards, tap times | The shop's; see the data processing agreement | Logs 2 years, unused cards 2 years, everything when the shop leaves | Google (Firebase) |
 | Follow-up messages (shop as controller, Loyi as processor) | Show a shop's message to a group of its clients | Clients of that shop | Card data, matched on the client's own device | Shop's legitimate interest (6(1)(f)), direct marketing with opt-out (21(2)) | Message until its end date (max. 2 months) | None (matching happens on the device) |
 | Shop accounts | Provide the business app | Shop owners | Email, shop name, colours, logo, cards, tags, messages | Contract (6(1)(b)) | Until the shop deletes its account | Google (Firebase) |
-| Subscriptions and invoices | Billing | Shop owners | Email, billing address, VAT number, payment status (card details stay with Stripe) | Contract (6(1)(b)); accounting law (6(1)(c)) | Invoices 7 years (Belgian accounting law) | Stripe, Cloudflare (billing server) |
+| Subscriptions and invoices | Billing, free trial | Shop owners | Email, billing address, VAT number, payment and trial status (card details stay with Stripe) | Contract (6(1)(b)); accounting law (6(1)(c)) | Invoices 7 years (Belgian accounting law) | Stripe, Cloudflare (billing server) |
+| Starter kit | Post two secure tags to a new shop | Shop owners | Shipping address (collected and kept by Stripe) | Contract (6(1)(b)) | Until the kit is sent; Stripe keeps it with the customer | Stripe, the postal service |
+| Secure tag check (Loyi as processor for the shop) | Accept a stamp only from a real tap | Clients of that shop | Anonymous client ID, the tag's one-time code; a ticket per tap until it's used | The shop's; see the data processing agreement | Ticket deleted with the stamp it pays for (unused ones: see note) | Cloudflare (billing server), Google (Firebase) |
 | Hosting logs | Deliver the site, protect it from abuse | Visitors | IP address, browser, requested page | Legitimate interest (6(1)(f)) | Google's short default log retention | Google (Firebase Hosting) |
 | Support emails | Answer questions and privacy requests | Anyone who writes | Email and its content | Legitimate interest / legal obligation for rights requests | As long as needed for the request, then delete | Your email provider |
+
+Note: a ticket whose tap never finished (the client closed the page) keeps an anonymous client ID and expires after
+5 minutes but isn't deleted yet. Add a clean-up (the Worker can delete `stampTickets` older than a day) before volume
+grows.
 
 Transfers outside the EU: Firebase Authentication and Stripe can process data in the US, covered by the EU–US Data
 Privacy Framework and standard contractual clauses. The database itself is in Belgium (europe-west1).
@@ -47,6 +53,8 @@ Privacy Framework and standard contractual clauses. The database itself is in Be
 - Clients are pseudonymous; each shop sees a different code per client (`clientCode`), so shops can't match lists.
 - Shops never receive names, emails or phone numbers of clients. No free-text notes about people.
 - Every database write is checked by `firestore.rules`, tested in `e2e/flow.test.js` (including attacks).
+- Secure tags (starter kit): every tap carries a new encrypted counter and MAC; the Worker refuses any counter it
+  has seen, and the rules accept a stamp from a secure tag only with that tap's one-time ticket.
 - Follow-up messages: no links allowed (enforced by the rules), max. 2 months, matched on the client's device; clients
   can hide one message or turn all of them off (then they aren't even loaded).
 - Retention runs automatically: stamp and reward logs and unused cards are deleted after 2 years

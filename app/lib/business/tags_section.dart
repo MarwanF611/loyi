@@ -48,6 +48,8 @@ class _TagsSectionState extends State<TagsSection> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SectionHeader(title: context.l10n.nfcTags, subtitle: context.l10n.nfcTagsSub),
+        const _KitHowTo(),
+        const SizedBox(height: 12),
         const _HowTo(),
         const SizedBox(height: 16),
         StreamBuilder<List<LoyiTag>>(
@@ -88,6 +90,36 @@ class _TagsSectionState extends State<TagsSection> {
   }
 }
 
+/// Starter kit tags are linked by tapping them, not created here.
+class _KitHowTo extends StatelessWidget {
+  const _KitHowTo();
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.loyi;
+    return Panel(
+      color: p.mintSoft,
+      padding: const EdgeInsets.all(18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(LoyiIcons.shieldCheck, color: p.mint),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.l10n.kitHowTo, style: context.text.titleSmall),
+                Text(context.l10n.kitHowToSub, style: context.text.bodySmall),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _HowTo extends StatelessWidget {
   const _HowTo();
 
@@ -121,7 +153,18 @@ class _HowTo extends StatelessWidget {
       color: p.surfaceMuted,
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 4),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.l10n.ownStickers, style: context.text.titleSmall),
+                Text(context.l10n.ownStickersSub, style: context.text.bodySmall),
+              ],
+            ),
+          ),
           step(1, context.l10n.tagStep1, context.l10n.tagStep1Sub),
           step(2, context.l10n.tagStep2, context.l10n.tagStep2Sub),
           step(3, context.l10n.programStickers, context.l10n.programStickersSub),
@@ -164,6 +207,17 @@ class _TagTile extends StatelessWidget {
                       style: context.text.titleMedium,
                     ),
                     Text(context.l10n.tapsSummary(tag.tapCount, lastTap), style: context.text.bodySmall),
+                    if (tag.secure)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Row(
+                          children: [
+                            Icon(LoyiIcons.shieldCheck, size: 16, color: p.mint),
+                            const SizedBox(width: 6),
+                            Flexible(child: Text(context.l10n.secureTag, style: context.text.labelMedium)),
+                          ],
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -181,54 +235,58 @@ class _TagTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.only(left: 14),
-            decoration: BoxDecoration(color: p.surfaceMuted, borderRadius: BorderRadius.circular(Radii.sm)),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SelectableText(url, maxLines: 1, style: context.text.bodySmall?.copyWith(color: p.ink)),
-                ),
-                IconButton(
-                  tooltip: context.l10n.copyLink,
-                  icon: const Icon(LoyiIcons.copy, size: 20),
-                  onPressed: () async {
-                    await Clipboard.setData(ClipboardData(text: url));
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.linkCopied)));
-                    }
-                  },
-                ),
-                // QR is only offered for join tags: a visible stamp QR could be photographed and reused.
-                if (isJoin)
+          // A secure tag has no fixed link to copy: it writes a new one at every tap.
+          if (tag.secure)
+            Text(context.l10n.secureTagSub, style: context.text.bodySmall)
+          else
+            Container(
+              padding: const EdgeInsets.only(left: 14),
+              decoration: BoxDecoration(color: p.surfaceMuted, borderRadius: BorderRadius.circular(Radii.sm)),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SelectableText(url, maxLines: 1, style: context.text.bodySmall?.copyWith(color: p.ink)),
+                  ),
                   IconButton(
-                    tooltip: context.l10n.showQrCode,
-                    icon: const Icon(LoyiIcons.qrCode, size: 22),
-                    onPressed: () => showLoyiSheet<void>(
-                      context,
-                      builder: (context) => Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(context.l10n.joinQrCode, style: context.text.headlineSmall),
-                          const SizedBox(height: 4),
-                          Text(context.l10n.joinQrCodeSub, style: context.text.bodyMedium),
-                          const SizedBox(height: 20),
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(Radii.lg),
-                              border: Border.all(color: p.line),
+                    tooltip: context.l10n.copyLink,
+                    icon: const Icon(LoyiIcons.copy, size: 20),
+                    onPressed: () async {
+                      await Clipboard.setData(ClipboardData(text: url));
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.linkCopied)));
+                      }
+                    },
+                  ),
+                  // QR is only offered for join tags: a visible stamp QR could be photographed and reused.
+                  if (isJoin)
+                    IconButton(
+                      tooltip: context.l10n.showQrCode,
+                      icon: const Icon(LoyiIcons.qrCode, size: 22),
+                      onPressed: () => showLoyiSheet<void>(
+                        context,
+                        builder: (context) => Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(context.l10n.joinQrCode, style: context.text.headlineSmall),
+                            const SizedBox(height: 4),
+                            Text(context.l10n.joinQrCodeSub, style: context.text.bodyMedium),
+                            const SizedBox(height: 20),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(Radii.lg),
+                                border: Border.all(color: p.line),
+                              ),
+                              child: SizedBox(width: 240, height: 240, child: QrImageView(data: url)),
                             ),
-                            child: SizedBox(width: 240, height: 240, child: QrImageView(data: url)),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

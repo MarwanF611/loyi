@@ -3,11 +3,44 @@
 Run `python3 app/web_i18n/legal.py` after editing a text; it writes app/web/<page>.html
 (Dutch, the default), app/web/fr/<page>.html and app/web/en/<page>.html.
 """
+import json
 import os
 import re
 
 WEB = os.path.join(os.path.dirname(__file__), '..', 'web')
-SITE = 'https://loyi-b530b.web.app'
+# Site address, contact address and company details: app/web_i18n/site.json.
+with open(os.path.join(os.path.dirname(__file__), 'site.json')) as _f:
+    CONFIG = json.load(_f)
+SITE = CONFIG['url'].rstrip('/')
+# The texts in legal.py are written with these values; site.json can change them.
+SOURCE_SITE, SOURCE_EMAIL = 'https://loyi-b530b.web.app', 'marwan.fikri20@gmail.com'
+# Which [placeholder] in legal.py stands for which company field.
+PLACEHOLDERS = {
+    'name': ('company name or your full name', 'bedrijfsnaam of je volledige naam', 'nom de la société ou votre nom complet'),
+    'address': ('street, postcode, city', 'straat, postcode, gemeente', 'rue, code postal, commune'),
+    'number': ('company number (KBO/BCE), if you have one', 'company number', 'ondernemingsnummer (KBO), als je er een hebt',
+               'ondernemingsnummer', "numéro d'entreprise (BCE), si vous en avez un", "numéro d'entreprise"),
+    'court': ('your judicial district, e.g. Antwerp', 'je gerechtelijk arrondissement, bv. Antwerpen',
+              'votre arrondissement judiciaire, p. ex. Bruxelles'),
+}
+
+
+def fill_in(html):
+    """Company details, contact address and site address from site.json."""
+    company = CONFIG.get('company', {})
+
+    def placeholder(m):
+        inner = ' '.join(m.group(1).split())
+        for field, texts in PLACEHOLDERS.items():
+            if inner in texts and company.get(field):
+                return company[field]
+        return m.group(0)
+
+    html = re.sub(r'\[([^\]<]{3,120})\]', placeholder, html)
+    host = SITE.split('://', 1)[-1]
+    return (html.replace(SOURCE_EMAIL, CONFIG['email'])
+                .replace(SOURCE_SITE, SITE)
+                .replace(SOURCE_SITE.split('://', 1)[-1], host))
 PREFIX = {'nl': '', 'fr': '/fr', 'en': '/en'}
 HOME = {'nl': '/', 'fr': '/fr/', 'en': '/en/'}
 NAMES = {'nl': 'Nederlands', 'fr': 'Français', 'en': 'English'}
@@ -62,6 +95,7 @@ def write(page, lang, title, description, body):
 </body>
 </html>
 '''
+    html = fill_in(html)
     if lang == 'fr':
         # French typography: a no-break space before ? ! : ; » and after «, so a sign never wraps alone.
         html = re.sub(r' ([?!:;»])', '\u00a0\\1', html).replace('« ', '«\u00a0')

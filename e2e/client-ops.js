@@ -2,7 +2,8 @@
 // auth_service.dart), used to test firestore.rules end to end. Keep in sync.
 import { doc, getDoc, increment, runTransaction, serverTimestamp, setDoc } from "firebase/firestore";
 
-export async function tap(db, uid, tagId) {
+/** One tap. A secure tag (starter kit) also needs the server's ticket for this tap: {ticketId}. */
+export async function tap(db, uid, tagId, { ticketId } = {}) {
   const tagRef = doc(db, "tags", tagId);
   const tag = (await getDoc(tagRef)).data();
   if (!tag?.active) throw new Error("tag not active");
@@ -38,6 +39,10 @@ export async function tap(db, uid, tagId) {
     const rewardsAvailable = (card?.rewardsAvailable ?? 0) + Math.floor(next / program.stampsRequired);
     const totalStamps = (card?.totalStamps ?? 0) + 1;
     const stamp = { stamps, rewardsAvailable, totalStamps, lastStampAt: now, lastTagId: tagId, updatedAt: now };
+    if (ticketId) {
+      stamp.lastTicketId = ticketId;
+      tx.delete(doc(db, "stampTickets", ticketId));
+    }
     if (card) tx.update(cardRef, stamp);
     else tx.set(cardRef, { ...base, ...stamp, totalRedeemed: 0, createdAt: now });
     tx.set(doc(db, "stampEvents", `${cardId}_${totalStamps}`), {

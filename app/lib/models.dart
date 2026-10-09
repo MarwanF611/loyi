@@ -234,6 +234,7 @@ class LoyiTag {
     required this.active,
     required this.tapCount,
     this.lastTapAt,
+    this.secure = false,
   });
 
   final String id;
@@ -243,6 +244,10 @@ class LoyiTag {
   final bool active;
   final int tapCount;
   final DateTime? lastTapAt;
+
+  /// A Loyi security tag from the starter kit (NTAG 424 DNA): it writes a new
+  /// one-time link at every tap, which the server checks (`/k?e=…&c=…`).
+  final bool secure;
 
   factory LoyiTag.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final d = doc.data()!;
@@ -254,6 +259,7 @@ class LoyiTag {
       active: d['active'] as bool? ?? true,
       tapCount: d['tapCount'] as int? ?? 0,
       lastTapAt: _date(d['lastTapAt']),
+      secure: d['secure'] as bool? ?? false,
     );
   }
 }
@@ -464,7 +470,13 @@ class ShopMessage {
 /// A business owner's Loyi subscription (`subscriptions/{ownerUid}`), written
 /// by the billing webhook. Tags only work while it hasn't expired.
 class Subscription {
-  const Subscription({required this.expiresAt, this.willRenew = true, this.billingIssue = false, this.store});
+  const Subscription({
+    required this.expiresAt,
+    this.willRenew = true,
+    this.billingIssue = false,
+    this.trial = false,
+    this.store,
+  });
 
   factory Subscription.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final d = doc.data() ?? const {};
@@ -472,6 +484,7 @@ class Subscription {
       expiresAt: _date(d['expiresAt']) ?? DateTime.fromMillisecondsSinceEpoch(0),
       willRenew: d['willRenew'] as bool? ?? true,
       billingIssue: d['billingIssue'] as bool? ?? false,
+      trial: d['trial'] as bool? ?? false,
       store: d['store'] as String?,
     );
   }
@@ -479,6 +492,9 @@ class Subscription {
   final DateTime expiresAt;
   final bool willRenew;
   final bool billingIssue;
+
+  /// In the free trial; the first payment is at [expiresAt].
+  final bool trial;
 
   /// `app_store`, `play_store`, `stripe` (web), or null for a manual grant.
   final String? store;

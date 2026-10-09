@@ -1,4 +1,7 @@
-// Loyi billing: Stripe subscriptions → Firestore `subscriptions/{uid}`.
+import { verifySun } from "./sun.js";
+
+// Loyi's server: Stripe subscriptions → Firestore `subscriptions/{uid}`, and the
+// check behind secure Loyi tags (NTAG 424 DNA, see src/sun.js and docs/KIT.md).
 //
 // Loyi runs on Firebase's free Spark plan (no Cloud Functions), so this small
 // Cloudflare Worker (free tier) is the only server. firestore.rules only let
@@ -9,8 +12,11 @@
 //   POST /checkout        signed-in shop → Stripe Checkout URL for the monthly plan
 //   POST /portal          signed-in shop → Stripe customer portal URL (card, invoices, cancel)
 //   POST /delete-account  signed-in shop → cancels its subscription and removes billing records
+//   POST /kit-tap         any signed-in user → checks a secure tag's one-time link (e, c) and
+//                         returns its tag id, plus a stamp ticket for stamp tags
+//   POST /kit-link        signed-in shop → links a new secure tag (just tapped) to one of its cards
 //   POST /stripe          Stripe webhook (signature-checked)
-// The first three need `Authorization: Bearer <Firebase ID token>`.
+// All but /stripe need `Authorization: Bearer <Firebase ID token>`.
 //
 // Webhooks are only a nudge: the subscription is always read back from the
 // Stripe API, so out-of-order or replayed events can't leave a wrong status.
@@ -19,12 +25,16 @@
 //   STRIPE_SECRET_KEY          sk_test_… or sk_live_… (a restricted key works too, see README)
 //   STRIPE_WEBHOOK_SECRET      whsec_… from the webhook endpoint
 //   FIREBASE_SERVICE_ACCOUNT   service account JSON with the "Cloud Datastore User" role
-// Vars (wrangler.toml): FIREBASE_PROJECT_ID, STRIPE_PRICE_ID, APP_URL, ALLOWED_ORIGINS
+//   SDM_META_KEY, SDM_FILE_KEY the two AES keys (32 hex) written onto secure tags (docs/KIT.md)
+// Vars (wrangler.toml): FIREBASE_PROJECT_ID, STRIPE_PRICE_ID, APP_URL, ALLOWED_ORIGINS, TRIAL_DAYS,
+//   SHIPPING_COUNTRIES
 
 const STRIPE_VERSION = "2024-06-20"; // pinned so response shapes don't change under us
 const DAY = 86_400_000;
 const PAST_DUE_GRACE = 7 * DAY; // Stripe retries a failed renewal; keep the shop running meanwhile
 const SIGNATURE_TOLERANCE_S = 300;
+const TICKET_TTL = 5 * 60_000; // a stamp ticket must be used right after the tap
+const LINK_TTL = 10 * 60_000; // time a shop has to link a tag it just tapped
 
 export default {
   async fetch(request, env) {
@@ -44,11 +54,15 @@ export default {
           return json(await createPortal(await requireShop(request, env), appUrl(origin, env), env, stripeLocale(url)), 200, cors);
         case "/delete-account":
           return json(await deleteAccount(await requireUser(request, env), env), 200, cors);
+        case "/kit-tap":
+          return json(await kitTap(await requireUser(request, env), await request.json(), env), 200, cors);
+        case "/kit-link":
+          return json(await kitLink(await requireShop(request, env), await request.json(), env), 200, cors);
         default:
           return json({ error: "Not found" }, 404, cors);
       }
     } catch (e) {
-      if (e instanceof HttpError) return json({ error: e.message }, e.status, cors);
+      if (e instanceof HttpError) return json({ error: e.message, code: e.code }, e.status, cors);
       // A 5xx makes Stripe retry the webhook later.
       console.error(e);
       return json({ error: "Server error" }, 500, cors);
@@ -57,9 +71,10 @@ export default {
 };
 
 class HttpError extends Error {
-  constructor(status, message) {
+  constructor(status, message, code) {
     super(message);
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -116,13 +131,21 @@ export async function createCheckout(user, returnTo, env, locale = "auto") {
   const current = await readDoc(`subscriptions/${user.uid}`, env);
   if (current && new Date(current.expiresAt) > new Date()) throw new HttpError(409, "You're already subscribed.");
   const billing = await readDoc(`billing/${user.uid}`, env);
+  // One free trial per shop: not for a shop that has had a subscription before.
+  const trialDays = billing?.subscriptionId ? 0 : Number(env.TRIAL_DAYS ?? 0);
+  const countries = (env.SHIPPING_COUNTRIES || "").split(",").map((c) => c.trim()).filter(Boolean);
 
   const params = {
     mode: "subscription",
     line_items: [{ price: env.STRIPE_PRICE_ID, quantity: 1 }],
     client_reference_id: user.uid,
     metadata: { firebase_uid: user.uid },
-    subscription_data: { metadata: { firebase_uid: user.uid } },
+    subscription_data: {
+      metadata: { firebase_uid: user.uid },
+      ...(trialDays > 0 ? { trial_period_days: trialDays } : {}),
+    },
+    // The address for the starter kit (two secure tags).
+    ...(countries.length ? { shipping_address_collection: { allowed_countries: countries } } : {}),
     success_url: `${returnTo}/business?checkout=done`,
     cancel_url: `${returnTo}/business`,
     billing_address_collection: "required",
@@ -166,6 +189,100 @@ export async function deleteAccount(user, env) {
   await deleteDoc(`billing/${user.uid}`, env);
   await deleteDoc(`subscriptions/${user.uid}`, env);
   return { ok: true, cancelled };
+}
+
+// ── Secure tags (starter kit) ────────────────────────────────────────────────
+//
+// kitTags/{tag UID}: {tagId, lastCounter, linkBy, linkCounter, linkUntil}, only this Worker reads or writes it.
+// stampTickets/{UID}_{counter}: {tagId, clientUid, expiresAt}; firestore.rules make a stamp from a secure tag
+// spend (delete) one ticket of the same client and tag, so only a real tap can stamp.
+
+async function readSun(body, env) {
+  if (!env.SDM_META_KEY || !env.SDM_FILE_KEY) throw new HttpError(503, "Secure tags aren't set up yet.", "unavailable");
+  const sun = await verifySun(body?.e, body?.c, env.SDM_META_KEY, env.SDM_FILE_KEY);
+  if (!sun) throw new HttpError(400, "This isn't a Loyi tag.", "invalid");
+  return sun;
+}
+
+/** Saves the tag's newest counter; false when another tap of the same tag got there first. */
+function saveKit(uid, version, data, env) {
+  return writeDoc(`kitTags/${uid}`, data, env, version.updateTime ? { updateTime: version.updateTime } : { mustNotExist: true });
+}
+
+export async function kitTap(user, body, env, now = Date.now()) {
+  const sun = await readSun(body, env);
+  const version = await readDocVersion(`kitTags/${sun.uid}`, env);
+  const kit = version.data ?? {};
+  // Every tap counts up; an older or repeated link is a saved or shared one.
+  if (kit.lastCounter != null && sun.counter <= Number(kit.lastCounter)) {
+    throw new HttpError(409, "This link was already used. Tap the tag again.", "used");
+  }
+  const tag = kit.tagId ? await readDoc(`tags/${kit.tagId}`, env) : null;
+
+  const used = () => new HttpError(409, "This link was already used. Tap the tag again.", "used");
+  if (!tag) {
+    const saved = await saveKit(
+      sun.uid,
+      version,
+      { lastCounter: sun.counter, linkBy: user.uid, linkCounter: sun.counter, linkUntil: new Date(now + LINK_TTL).toISOString() },
+      env,
+    );
+    if (!saved) throw used();
+    return { status: "unlinked", canLink: user.provider !== "anonymous" };
+  }
+
+  if (!(await saveKit(sun.uid, version, { tagId: kit.tagId, lastCounter: sun.counter }, env))) throw used();
+  if (tag.type !== "stamp") return { status: "ok", tagId: kit.tagId };
+
+  // Created only once per counter value, so two requests with the same link can't both get a ticket.
+  const ticketId = `${sun.uid}_${sun.counter}`;
+  const created = await writeDoc(
+    `stampTickets/${ticketId}`,
+    { tagId: kit.tagId, clientUid: user.uid, expiresAt: new Date(now + TICKET_TTL).toISOString() },
+    env,
+    { mustNotExist: true },
+  );
+  if (!created) throw used();
+  return { status: "ok", tagId: kit.tagId, ticketId };
+}
+
+export async function kitLink(user, body, env, now = Date.now()) {
+  const sun = await readSun(body, env);
+  const kit = (await readDoc(`kitTags/${sun.uid}`, env)) ?? {};
+  if (kit.tagId && (await readDoc(`tags/${kit.tagId}`, env))) throw new HttpError(409, "This tag is already linked.", "linked");
+  if (kit.linkBy !== user.uid || Number(kit.linkCounter) !== sun.counter || !(new Date(kit.linkUntil) > new Date(now))) {
+    throw new HttpError(409, "Tap the tag again, then link it.", "expired");
+  }
+  const type = body.type === "join" ? "join" : body.type === "stamp" ? "stamp" : null;
+  const label = typeof body.label === "string" ? body.label.trim().slice(0, 40) : "";
+  if (!type || !label) throw new HttpError(400, "Choose a card and a tag type.", "invalid");
+  const program = typeof body.programId === "string" ? await readDoc(`programs/${body.programId}`, env) : null;
+  if (!program || program.ownerUid !== user.uid) throw new HttpError(403, "That card isn't yours.", "forbidden");
+
+  const tagId = randomId();
+  await writeDoc(
+    `tags/${tagId}`,
+    {
+      businessId: program.businessId,
+      ownerUid: user.uid,
+      programId: body.programId,
+      type,
+      label,
+      active: true,
+      tapCount: 0,
+      secure: true,
+      createdAt: new Date(now).toISOString(),
+    },
+    env,
+    { mustNotExist: true },
+  );
+  await writeDoc(`kitTags/${sun.uid}`, { tagId, lastCounter: sun.counter }, env);
+  return { tagId };
+}
+
+function randomId() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  return [...crypto.getRandomValues(new Uint8Array(20))].map((b) => chars[b % chars.length]).join("");
 }
 
 // ── Webhook ──────────────────────────────────────────────────────────────────
@@ -229,6 +346,7 @@ export async function syncSubscription(subscriptionId, env) {
       environment: sub.livemode ? "LIVE" : "TEST",
       willRenew: status.willRenew,
       billingIssue: status.billingIssue,
+      trial: sub.status === "trialing",
       updatedAt: new Date().toISOString(),
     },
     env,
@@ -356,22 +474,36 @@ function docUrl(path, env) {
   return `${root}/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/${encoded}`;
 }
 
-const TIMESTAMP_FIELDS = new Set(["expiresAt", "updatedAt"]);
+const TIMESTAMP_FIELDS = new Set(["expiresAt", "updatedAt", "createdAt", "linkUntil"]);
 
 /** A document as plain values (timestamps as ISO strings), or null. */
 async function readDoc(path, env) {
-  const res = await fetch(docUrl(path, env), { headers: await authHeaders(env) });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Firestore read ${path}: ${res.status}`);
-  const out = {};
-  for (const [k, v] of Object.entries((await res.json()).fields ?? {})) {
-    out[k] =
-      "timestampValue" in v ? new Date(v.timestampValue).toISOString() : (v.stringValue ?? v.booleanValue ?? v.integerValue ?? null);
-  }
-  return out;
+  return (await readDocVersion(path, env)).data;
 }
 
-async function writeDoc(path, data, env) {
+/** {data, updateTime}: the version is for writeDoc's {updateTime} precondition. */
+async function readDocVersion(path, env) {
+  const res = await fetch(docUrl(path, env), { headers: await authHeaders(env) });
+  if (res.status === 404) return { data: null, updateTime: null };
+  if (!res.ok) throw new Error(`Firestore read ${path}: ${res.status}`);
+  const doc = await res.json();
+  const out = {};
+  for (const [k, v] of Object.entries(doc.fields ?? {})) {
+    out[k] =
+      "timestampValue" in v
+        ? new Date(v.timestampValue).toISOString()
+        : "integerValue" in v
+          ? Number(v.integerValue)
+          : (v.stringValue ?? v.booleanValue ?? null);
+  }
+  return { data: out, updateTime: doc.updateTime };
+}
+
+/**
+ * Replaces a document. With {mustNotExist} it only creates it, with {updateTime} it only replaces that
+ * version; either returns false when the document changed in between.
+ */
+async function writeDoc(path, data, env, { mustNotExist = false, updateTime = null } = {}) {
   const fields = {};
   for (const [k, v] of Object.entries(data)) {
     fields[k] =
@@ -381,7 +513,23 @@ async function writeDoc(path, data, env) {
           ? { timestampValue: v }
           : typeof v === "boolean"
             ? { booleanValue: v }
-            : { stringValue: String(v) };
+            : typeof v === "number"
+              ? { integerValue: String(v) }
+              : { stringValue: String(v) };
+  }
+  const precondition = mustNotExist ? { exists: false } : updateTime ? { updateTime } : null;
+  if (precondition) {
+    // A write with a precondition goes through :commit (the emulator ignores it as a PATCH parameter).
+    const name = docUrl(path, env).replace(/^.*?\/v1\//, "");
+    const res = await fetch(docUrl("", env).replace(/\/documents\/$/, "/documents:commit"), {
+      method: "POST",
+      headers: { ...(await authHeaders(env)), "Content-Type": "application/json" },
+      body: JSON.stringify({ writes: [{ update: { name: decodeURIComponent(name), fields }, currentDocument: precondition }] }),
+    });
+    if (res.ok) return true;
+    const text = await res.text();
+    if (/ALREADY_EXISTS|FAILED_PRECONDITION|NOT_FOUND/.test(text)) return false;
+    throw new Error(`Firestore write ${path}: ${res.status} ${text}`);
   }
   const res = await fetch(docUrl(path, env), {
     method: "PATCH",
@@ -389,6 +537,7 @@ async function writeDoc(path, data, env) {
     body: JSON.stringify({ fields }),
   });
   if (!res.ok) throw new Error(`Firestore write ${path}: ${res.status} ${await res.text()}`);
+  return true;
 }
 
 async function deleteDoc(path, env) {

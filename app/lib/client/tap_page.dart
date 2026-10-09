@@ -54,7 +54,7 @@ class _TapPageState extends State<TapPage> {
                   ? Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const _Pulse(),
+                        const TapPulse(),
                         const SizedBox(height: 28),
                         Text(context.l10n.addingToCard, style: context.text.headlineSmall, textAlign: TextAlign.center),
                         const SizedBox(height: 6),
@@ -96,14 +96,14 @@ class _TapPageState extends State<TapPage> {
 }
 
 /// Coral NFC badge with expanding rings while the tap is processed.
-class _Pulse extends StatefulWidget {
-  const _Pulse();
+class TapPulse extends StatefulWidget {
+  const TapPulse({super.key});
 
   @override
-  State<_Pulse> createState() => _PulseState();
+  State<TapPulse> createState() => _TapPulseState();
 }
 
-class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
+class _TapPulseState extends State<TapPulse> with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))
     ..repeat();
 

@@ -52,7 +52,9 @@ class LoyiException implements Exception {
 class Api {
   FirebaseFirestore get _db => FirebaseFirestore.instance;
 
-  Future<TapResult> tap(String tagId) async {
+  /// One tap on a tag. A secure tag's stamp also spends the server's [ticketId]
+  /// for this tap (see Billing.kitTap); firestore.rules require it.
+  Future<TapResult> tap(String tagId, {String? ticketId}) async {
     final uid = auth.user!.uid;
     final tagRef = _db.doc('tags/$tagId');
 
@@ -114,7 +116,9 @@ class Api {
           'lastStampAt': now,
           'lastTagId': tagId,
           'updatedAt': now,
+          'lastTicketId': ?ticketId,
         };
+        if (ticketId != null) tx.delete(_db.doc('stampTickets/$ticketId'));
         if (existing == null) {
           tx.set(cardRef, {..._cardBase(uid, program), ...stamp, 'totalRedeemed': 0, 'createdAt': now});
         } else {

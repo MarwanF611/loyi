@@ -3110,6 +3110,210 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'Undo'**
   String get undo;
+
+  /// No description provided for @kitLinkUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'This link was already used. Tap the tag again.'**
+  String get kitLinkUsed;
+
+  /// No description provided for @notALoyiTag.
+  ///
+  /// In en, this message translates to:
+  /// **'This isn\'t a Loyi tag.'**
+  String get notALoyiTag;
+
+  /// No description provided for @kitAlreadyLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'This tag is already linked to a card.'**
+  String get kitAlreadyLinked;
+
+  /// No description provided for @kitTapAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the tag again, then link it.'**
+  String get kitTapAgain;
+
+  /// No description provided for @kitUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure tags aren\'t available yet. Try again later.'**
+  String get kitUnavailable;
+
+  /// No description provided for @kitNewTagTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Loyi tag'**
+  String get kitNewTagTitle;
+
+  /// No description provided for @kitNewTagShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the card and what this tag does. You can switch it off later under Cards.'**
+  String get kitNewTagShop;
+
+  /// No description provided for @kitNewTagClient.
+  ///
+  /// In en, this message translates to:
+  /// **'This tag isn\'t linked to a shop yet. Ask at the counter, or try again later.'**
+  String get kitNewTagClient;
+
+  /// No description provided for @kitShopSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Is this your shop\'s tag? Sign in on this phone, then tap the tag again.'**
+  String get kitShopSignIn;
+
+  /// No description provided for @kitCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get kitCard;
+
+  /// No description provided for @kitNoCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a loyalty card first, then tap the tag again.'**
+  String get kitNoCards;
+
+  /// No description provided for @kitLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Link tag'**
+  String get kitLink;
+
+  /// No description provided for @kitLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag linked'**
+  String get kitLinked;
+
+  /// No description provided for @kitLinkedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Clients can tap it now. Every tap makes a new one-time code, so a saved link doesn\'t work twice.'**
+  String get kitLinkedSub;
+
+  /// No description provided for @kitOpenCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the card'**
+  String get kitOpenCard;
+
+  /// No description provided for @tagTypeJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get tagTypeJoin;
+
+  /// No description provided for @tagTypeStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamp'**
+  String get tagTypeStamp;
+
+  /// No description provided for @secureTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Loyi security tag'**
+  String get secureTag;
+
+  /// No description provided for @secureTagSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A new one-time code at every tap: a saved or shared link doesn\'t work.'**
+  String get secureTagSub;
+
+  /// No description provided for @kitHowTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Starter kit tags'**
+  String get kitHowTo;
+
+  /// No description provided for @kitHowToSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in on your phone, hold it to a kit tag and choose this card. Nothing to program.'**
+  String get kitHowToSub;
+
+  /// No description provided for @ownStickers.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own stickers'**
+  String get ownStickers;
+
+  /// No description provided for @ownStickersSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Any NTAG213/215 sticker works with the links below, but a stamp link written on a plain sticker can be saved and reused after the waiting time. Use a kit tag for stamps.'**
+  String get ownStickersSub;
+
+  /// No description provided for @trialBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'First {days} days free'**
+  String trialBadge(int days);
+
+  /// No description provided for @startTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Start free trial'**
+  String get startTrial;
+
+  /// No description provided for @trialNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay nothing today. After {days} days your subscription starts at {price} a month, unless you cancel before then. We also post you two secure Loyi tags; Stripe asks for the address.'**
+  String trialNote(int days, String price);
+
+  /// No description provided for @trialUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Free trial until {date}. Then {price} a month, unless you cancel.'**
+  String trialUntil(String date, String price);
+
+  /// No description provided for @demoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a Loyi card'**
+  String get demoTitle;
+
+  /// No description provided for @demoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'This is what your clients see after tapping your tag. Here a button stands in for the tag.'**
+  String get demoSub;
+
+  /// No description provided for @demoStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the stamp tag'**
+  String get demoStamp;
+
+  /// No description provided for @demoStamped.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamp added. {left} to go.'**
+  String demoStamped(int left);
+
+  /// No description provided for @demoFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Card full! The reward is waiting on the client\'s card.'**
+  String get demoFull;
+
+  /// No description provided for @demoAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Start over'**
+  String get demoAgain;
+
+  /// No description provided for @demoForShops.
+  ///
+  /// In en, this message translates to:
+  /// **'Want this for your shop?'**
+  String get demoForShops;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

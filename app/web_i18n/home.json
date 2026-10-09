@@ -7,10 +7,6 @@
     "nl": "Loyi geeft je zaak digitale stempelkaarten. Klanten tikken op een NFC-tag aan je toog: geen app, geen papieren kaartjes. Zie je vaste klanten, volg ze op zonder gegevens te verzamelen en ken je drukke uren. €19 per maand.",
     "fr": "Loyi offre à votre commerce des cartes de fidélité numériques. Vos clients touchent un tag NFC au comptoir : pas d'app, pas de carte papier. Voyez vos habitués, relancez-les sans collecter de données et connaissez vos heures d'affluence. 19 € par mois."
   },
-  "Loyi · Stamp cards your clients actually keep": {
-    "nl": "Loyi · Stempelkaarten die je klanten echt bijhouden",
-    "fr": "Loyi · Des cartes de fidélité que vos clients gardent vraiment"
-  },
   "One tap on an NFC tag. No app for your clients. Your logo, your colours, your rewards.": {
     "nl": "Eén tik op een NFC-tag. Geen app voor je klanten. Jouw logo, jouw kleuren, jouw beloningen.",
     "fr": "Un contact sur un tag NFC. Aucune app pour vos clients. Votre logo, vos couleurs, vos récompenses."
@@ -78,10 +74,6 @@
   "One tap on an NFC tag at your counter and the stamp is on their phone. No app to install, no paper cards to lose. Your logo, your colours, your rewards.": {
     "nl": "Eén tik op een NFC-tag aan je toog en de stempel staat op hun telefoon. Geen app te installeren, geen papieren kaartjes om te verliezen. Jouw logo, jouw kleuren, jouw beloningen.",
     "fr": "Un contact sur un tag NFC au comptoir et le tampon est sur leur téléphone. Aucune app à installer, aucune carte papier à perdre. Votre logo, vos couleurs, vos récompenses."
-  },
-  "See how it works": {
-    "nl": "Zo werkt het",
-    "fr": "Voir comment ça marche"
   },
   "Stamp added": {
     "nl": "Stempel erbij",
@@ -179,10 +171,6 @@
     "nl": "In drie stappen live",
     "fr": "En ligne en trois étapes"
   },
-  "No hardware to rent and no cash register to connect. Two small NFC stickers and a browser.": {
-    "nl": "Geen toestel te huren en geen kassa te koppelen. Twee kleine NFC-stickers en een browser.",
-    "fr": "Aucun appareil à louer, aucune caisse à connecter. Deux petits autocollants NFC et un navigateur."
-  },
   "Your shop": {
     "nl": "Je zaak",
     "fr": "Votre commerce"
@@ -194,14 +182,6 @@
   "Create your account, pick your colours and upload your logo. Choose how many stamps fill a card and which rewards your clients can pick.": {
     "nl": "Maak je account, kies je kleuren en upload je logo. Kies hoeveel stempels een kaart vullen en welke beloningen je klanten kunnen kiezen.",
     "fr": "Créez votre compte, choisissez vos couleurs et importez votre logo. Choisissez le nombre de tampons d'une carte et les récompenses proposées."
-  },
-  "Place two NFC stickers": {
-    "nl": "Kleef twee NFC-stickers",
-    "fr": "Placez deux autocollants NFC"
-  },
-  "A join tag where clients can see it, at the door or on the counter. A stamp tag behind the counter that you hold out after each purchase.": {
-    "nl": "Een aanmeldtag waar klanten hem zien, aan de deur of op de toog. Een stempeltag achter de toog die je na elke aankoop voorhoudt.",
-    "fr": "Un tag d'inscription bien visible, à l'entrée ou sur le comptoir. Un tag tampon derrière le comptoir, que vous présentez après chaque achat."
   },
   "Clients tap and collect": {
     "nl": "Klanten tikken en sparen",
@@ -415,10 +395,6 @@
     "nl": "Moeilijk om te sjoemelen",
     "fr": "Difficile à tromper"
   },
-  "The stamp tag stays behind your counter, you choose the time between two stamps, and every stamp is checked on our server.": {
-    "nl": "De stempeltag blijft achter je toog, jij kiest de tijd tussen twee stempels, en elke stempel wordt op onze server gecontroleerd.",
-    "fr": "Le tag tampon reste derrière votre comptoir, vous choisissez le délai entre deux tampons et chaque tampon est vérifié sur notre serveur."
-  },
   "QR code included": {
     "nl": "QR-code inbegrepen",
     "fr": "Code QR inclus"
@@ -446,10 +422,6 @@
   "/ month excl. VAT": {
     "nl": "/ maand excl. btw",
     "fr": "/ mois HTVA"
-  },
-  "Billed monthly. Cancel anytime.": {
-    "nl": "Maandelijks gefactureerd. Altijd opzegbaar.",
-    "fr": "Facturé chaque mois. Résiliable à tout moment."
   },
   "Unlimited clients, stamps and rewards": {
     "nl": "Onbeperkt klanten, stempels en beloningen",
@@ -482,14 +454,6 @@
   "Good to know": {
     "nl": "Goed om te weten",
     "fr": "Bon à savoir"
-  },
-  "NFC stickers": {
-    "nl": "NFC-stickers",
-    "fr": "Autocollants NFC"
-  },
-  "Use two NTAG213 or NTAG215 stickers, about €1 each online. You write your links onto them with the free NFC Tools app; the dashboard shows you how.": {
-    "nl": "Gebruik twee NTAG213- of NTAG215-stickers, online zo'n €1 per stuk. Je schrijft je links erop met de gratis app NFC Tools; het dashboard toont je hoe.",
-    "fr": "Utilisez deux autocollants NTAG213 ou NTAG215, environ 1 € pièce en ligne. Vous y écrivez vos liens avec l'app gratuite NFC Tools ; le tableau de bord vous montre comment."
   },
   "Paying": {
     "nl": "Betalen",
@@ -539,21 +503,9 @@
     "nl": "Bijna elke recente smartphone leest NFC-tags: iPhones vanaf de XS (2018) en Android-telefoons met NFC aan. Klanten zonder NFC kunnen meedoen via je QR-code.",
     "fr": "Presque tous les smartphones récents lisent les tags NFC : les iPhone à partir du XS (2018) et les téléphones Android avec le NFC activé. Les clients sans NFC peuvent s'inscrire avec votre code QR."
   },
-  "Where do I get NFC tags?": {
-    "nl": "Waar vind ik NFC-tags?",
-    "fr": "Où trouver des tags NFC ?"
-  },
-  "Any shop that sells NTAG213 or NTAG215 stickers, online or in electronics stores. Your dashboard gives you the link for each tag and explains how to write it with the free NFC Tools app in a minute.": {
-    "nl": "In elke winkel die NTAG213- of NTAG215-stickers verkoopt, online of in elektronicawinkels. Je dashboard geeft je de link voor elke tag en legt uit hoe je hem in een minuut schrijft met de gratis app NFC Tools.",
-    "fr": "Dans toute boutique qui vend des autocollants NTAG213 ou NTAG215, en ligne ou en magasin d'électronique. Votre tableau de bord vous donne le lien de chaque tag et explique comment l'écrire en une minute avec l'app gratuite NFC Tools."
-  },
   "Can clients collect stamps without buying anything?": {
     "nl": "Kunnen klanten stempels sparen zonder iets te kopen?",
     "fr": "Les clients peuvent-ils collecter des tampons sans rien acheter ?"
-  },
-  "The stamp tag stays behind your counter, so a stamp needs you. You also choose a minimum time between two stamps, and you can switch a tag off from your dashboard at any moment.": {
-    "nl": "De stempeltag blijft achter je toog, dus een stempel kan niet zonder jou. Je kiest ook een minimale tijd tussen twee stempels, en je kunt een tag op elk moment uitzetten vanuit je dashboard.",
-    "fr": "Le tag tampon reste derrière votre comptoir : un tampon passe donc par vous. Vous choisissez aussi un délai minimum entre deux tampons et pouvez désactiver un tag à tout moment depuis votre tableau de bord."
   },
   "Can I change my rewards later?": {
     "nl": "Kan ik mijn beloningen later aanpassen?",
@@ -623,10 +575,6 @@
     "nl": "Maak je account, ontwerp je kaart en kleef je tags. Je vaste klanten zullen je dankbaar zijn.",
     "fr": "Créez votre compte, concevez votre carte et collez vos tags. Vos habitués vous remercieront."
   },
-  "Create your shop account": {
-    "nl": "Maak je account voor je zaak",
-    "fr": "Créer le compte de votre commerce"
-  },
   "Digital stamp cards for local shops.": {
     "nl": "Digitale stempelkaarten voor lokale zaken.",
     "fr": "Cartes de fidélité numériques pour les commerces de proximité."
@@ -634,10 +582,6 @@
   "Questions?": {
     "nl": "Vragen?",
     "fr": "Des questions ?"
-  },
-  "marwan.fikri20@gmail.com": {
-    "nl": "marwan.fikri20@gmail.com",
-    "fr": "marwan.fikri20@gmail.com"
   },
   "Footer": {
     "nl": "Voettekst",
@@ -706,5 +650,137 @@
   "Data processing agreement": {
     "nl": "Verwerkersovereenkomst",
     "fr": "Accord de traitement des données"
+  },
+  "Try it free for 14 days": {
+    "nl": "Probeer 14 dagen gratis",
+    "fr": "Essayez 14 jours gratuitement"
+  },
+  "Try the demo card": {
+    "nl": "Probeer de demokaart",
+    "fr": "Essayez la carte de démo"
+  },
+  "No hardware to rent and no cash register to connect. Two small tags in the post and a browser.": {
+    "nl": "Geen toestel om te huren en geen kassa om te koppelen. Twee kleine tags in de bus en een browser.",
+    "fr": "Aucun appareil à louer, aucune caisse à connecter. Deux petits tags par la poste et un navigateur."
+  },
+  "Stick on your two tags": {
+    "nl": "Plak je twee tags",
+    "fr": "Collez vos deux tags"
+  },
+  "We post you two secure tags; hold your phone to each one to link it. A join tag where clients can see it, and a stamp tag behind the counter that you hold out after each purchase.": {
+    "nl": "We sturen je twee beveiligde tags op; hou je telefoon ertegen om ze te koppelen. Een aanmeldtag waar klanten hem zien, en een stempeltag achter de toog die je na elke aankoop voorhoudt.",
+    "fr": "Nous vous envoyons deux tags sécurisés ; approchez votre téléphone de chacun pour l'associer. Un tag d'inscription bien visible, et un tag tampon derrière le comptoir, que vous présentez après chaque achat."
+  },
+  "Every tap on a Loyi tag makes a new one-time code that our server checks, so a saved or shared link doesn't work. You also choose the time between two stamps.": {
+    "nl": "Elke tik op een Loyi-tag maakt een nieuwe eenmalige code die onze server controleert, dus een opgeslagen of gedeelde link werkt niet. Je kiest ook de wachttijd tussen twee stempels.",
+    "fr": "Chaque contact avec un tag Loyi crée un nouveau code à usage unique que notre serveur vérifie : un lien enregistré ou partagé ne fonctionne donc pas. Vous choisissez aussi le délai entre deux tampons."
+  },
+  "First 14 days free, then billed monthly. Cancel anytime.": {
+    "nl": "Eerste 14 dagen gratis, daarna maandelijks gefactureerd. Altijd opzegbaar.",
+    "fr": "14 premiers jours gratuits, puis facturation mensuelle. Résiliable à tout moment."
+  },
+  "Two secure Loyi tags, sent by post": {
+    "nl": "Twee beveiligde Loyi-tags, per post",
+    "fr": "Deux tags Loyi sécurisés, envoyés par la poste"
+  },
+  "Start your free trial": {
+    "nl": "Start je gratis proefperiode",
+    "fr": "Commencez votre essai gratuit"
+  },
+  "Free trial": {
+    "nl": "Gratis proefperiode",
+    "fr": "Essai gratuit"
+  },
+  "Try Loyi for 14 days without paying. Stripe asks for your card at the start; cancel before the trial ends and you pay nothing.": {
+    "nl": "Probeer Loyi 14 dagen zonder te betalen. Stripe vraagt je kaart bij de start; zeg je op voor het einde van de proefperiode, dan betaal je niets.",
+    "fr": "Essayez Loyi pendant 14 jours sans payer. Stripe vous demande votre carte au départ ; résiliez avant la fin de l'essai et vous ne payez rien."
+  },
+  "Tags": {
+    "nl": "Tags",
+    "fr": "Tags"
+  },
+  "Two secure Loyi tags come in the post, ready to use: hold your phone to each one to link it. Want more join tags? Any NTAG213 sticker works for joining.": {
+    "nl": "Twee beveiligde Loyi-tags komen klaar voor gebruik in de bus: hou je telefoon ertegen om ze te koppelen. Meer aanmeldtags nodig? Elke NTAG213-sticker werkt om aan te melden.",
+    "fr": "Deux tags Loyi sécurisés arrivent par la poste, prêts à l'emploi : approchez votre téléphone de chacun pour l'associer. Besoin de plus de tags d'inscription ? N'importe quel autocollant NTAG213 convient pour l'inscription."
+  },
+  "Pilot": {
+    "nl": "Pilootproject",
+    "fr": "Projet pilote"
+  },
+  "Be one of our first 20 shops": {
+    "nl": "Word een van onze eerste 20 zaken",
+    "fr": "Faites partie de nos 20 premiers commerces"
+  },
+  "Pilot shops get three months free in exchange for honest feedback. If Loyi works for you, we'd love a short quote and a photo for this page.": {
+    "nl": "Pilootzaken krijgen drie maanden gratis in ruil voor eerlijke feedback. Werkt Loyi voor jou, dan krijgen we graag een korte quote en een foto voor deze pagina.",
+    "fr": "Les commerces pilotes reçoivent trois mois gratuits en échange d'un avis honnête. Si Loyi vous convient, nous aimerions une courte citation et une photo pour cette page."
+  },
+  "Become a pilot shop": {
+    "nl": "Word pilootzaak",
+    "fr": "Devenir commerce pilote"
+  },
+  "Where do I get the tags?": {
+    "nl": "Waar haal ik de tags?",
+    "fr": "Où trouver les tags ?"
+  },
+  "Two secure tags come in the post when you start. Extra join tags can be any NTAG213 or NTAG215 sticker, written with a free app like NFC Tools; your dashboard shows how.": {
+    "nl": "Je krijgt twee beveiligde tags in de bus als je start. Extra aanmeldtags mogen gewone NTAG213- of NTAG215-stickers zijn, beschreven met een gratis app zoals NFC Tools; je dashboard toont hoe.",
+    "fr": "Vous recevez deux tags sécurisés par la poste au démarrage. Des tags d'inscription supplémentaires peuvent être n'importe quel autocollant NTAG213 ou NTAG215, programmé avec une app gratuite comme NFC Tools ; votre tableau de bord vous montre comment."
+  },
+  "The stamp tag stays behind your counter, so a stamp needs you. Each tap on a Loyi tag makes a new one-time code, so a saved or shared link doesn't work from home. You also choose a minimum time between two stamps, and you can switch a tag off from your dashboard at any moment.": {
+    "nl": "De stempeltag blijft achter je toog, dus voor een stempel is er jou nodig. Elke tik op een Loyi-tag maakt een nieuwe eenmalige code, dus een opgeslagen of gedeelde link werkt niet van thuis uit. Je kiest ook een minimale tijd tussen twee stempels, en je zet een tag op elk moment uit vanuit je dashboard.",
+    "fr": "Le tag tampon reste derrière votre comptoir : un tampon passe donc par vous. Chaque contact avec un tag Loyi crée un nouveau code à usage unique, si bien qu'un lien enregistré ou partagé ne fonctionne pas depuis chez soi. Vous choisissez aussi un délai minimum entre deux tampons, et vous pouvez désactiver un tag à tout moment depuis votre tableau de bord."
+  },
+  "What if a client clears their browser or loses their phone?": {
+    "nl": "Wat als een klant zijn browser wist of zijn telefoon verliest?",
+    "fr": "Et si un client efface son navigateur ou perd son téléphone ?"
+  },
+  "Until they save their cards, stamps live in that phone's browser. Saving takes a few seconds with email or Google, right from the card. After that they sign in on any phone and all their cards are back. Cards that were never saved are lost with the browser.": {
+    "nl": "Zolang klanten hun kaarten niet bewaren, staan de stempels in de browser van die telefoon. Bewaren duurt enkele seconden met e-mail of Google, rechtstreeks vanaf de kaart. Daarna loggen ze in op eender welke telefoon en zijn al hun kaarten terug. Kaarten die nooit bewaard werden, gaan verloren met de browser.",
+    "fr": "Tant que le client n'a pas sauvegardé ses cartes, les tampons restent dans le navigateur de ce téléphone. La sauvegarde prend quelques secondes avec un e-mail ou Google, directement depuis la carte. Ensuite, il se connecte sur n'importe quel téléphone et retrouve toutes ses cartes. Les cartes jamais sauvegardées disparaissent avec le navigateur."
+  },
+  "Can I try it before I pay?": {
+    "nl": "Kan ik het uitproberen voor ik betaal?",
+    "fr": "Puis-je essayer avant de payer ?"
+  },
+  "Yes. The first 14 days are free, and you can cancel before then at no cost. Or try the": {
+    "nl": "Ja. De eerste 14 dagen zijn gratis, en je kunt voordien kosteloos opzeggen. Of probeer nu meteen de",
+    "fr": "Oui. Les 14 premiers jours sont gratuits, et vous pouvez résilier avant sans frais. Ou essayez dès maintenant la"
+  },
+  "demo card": {
+    "nl": "demokaart",
+    "fr": "carte de démo"
+  },
+  "on your phone right now, no account needed.": {
+    "nl": "op je telefoon, zonder account.",
+    "fr": "sur votre téléphone, sans compte."
+  },
+  "Loyi dashboard with today's stamps and new clients": {
+    "nl": "Loyi-dashboard met de stempels en nieuwe klanten van vandaag",
+    "fr": "Tableau de bord Loyi avec les tampons et nouveaux clients du jour"
+  },
+  "A client's full stamp card with confetti": {
+    "nl": "Een volle stempelkaart van een klant, met confetti",
+    "fr": "La carte de fidélité complète d'un client, avec des confettis"
+  },
+  "A client's loyalty cards from different shops": {
+    "nl": "De klantenkaarten van een klant bij verschillende zaken",
+    "fr": "Les cartes de fidélité d'un client dans différents commerces"
+  },
+  "Client list with anonymous client codes": {
+    "nl": "Klantenlijst met anonieme klantcodes",
+    "fr": "Liste de clients avec des codes clients anonymes"
+  },
+  "Insights with stamps per day and busy hours": {
+    "nl": "Inzichten met stempels per dag en drukke uren",
+    "fr": "Statistiques avec les tampons par jour et les heures de pointe"
+  },
+  "A follow-up message for clients who haven't been back": {
+    "nl": "Een opvolgbericht voor klanten die niet meer terugkwamen",
+    "fr": "Un message de suivi pour les clients qui ne sont pas revenus"
+  },
+  "A shop's message on the client's card": {
+    "nl": "Een bericht van een zaak op de kaart van de klant",
+    "fr": "Le message d'un commerce sur la carte du client"
   }
 }
