@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../admin/kit_admin_form.dart';
 import '../models.dart';
 import '../services/api.dart';
 import '../services/auth_service.dart';
@@ -16,7 +17,7 @@ import 'tap_page.dart';
 /// Landing page for `/k?e=…&c=…`, the one-time link a secure Loyi tag (starter
 /// kit) writes at every tap. The billing server checks it; a linked tag then
 /// works like `/t/<tagId>`, with a ticket for stamps. A tag that isn't linked
-/// yet can be linked here by its shop.
+/// yet can be linked here by its shop, or by a Loyi admin preparing a kit.
 class KitTapPage extends StatefulWidget {
   const KitTapPage({super.key, required this.e, required this.c});
 
@@ -81,6 +82,8 @@ class _KitTapPageState extends State<KitTapPage> {
                         Text(context.l10n.onlyAMoment, style: context.text.bodyMedium),
                       ],
                     )
+                  : unlinked.admin
+                  ? KitAdminForm(e: widget.e, c: widget.c)
                   : unlinked.canLink
                   ? _LinkForm(e: widget.e, c: widget.c)
                   : _Message(

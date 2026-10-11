@@ -36,8 +36,32 @@ class Billing {
       tagId: body['tagId'] as String?,
       ticketId: body['ticketId'] as String?,
       canLink: body['canLink'] as bool? ?? false,
+      admin: body['admin'] as bool? ?? false,
     );
   }
+
+  /// Loyi admin: every shop, to choose where a kit tag goes.
+  Future<List<AdminShop>> adminShops() async {
+    final body = await _post('/admin/shops');
+    return [for (final s in body['shops'] as List) AdminShop.fromMap(s as Map<String, dynamic>)];
+  }
+
+  /// Loyi admin: links the tag just tapped to a shop's card, or to a new first card ([newCard]).
+  Future<void> adminKitLink({
+    required String e,
+    required String c,
+    String? programId,
+    Map<String, Object>? newCard,
+    required String type,
+    required String label,
+  }) async => await _post('/admin/kit-link', {
+    'e': e,
+    'c': c,
+    'programId': ?programId,
+    'newCard': ?newCard,
+    'type': type,
+    'label': label,
+  });
 
   /// Links a new secure tag the shop just tapped to one of its cards. Returns the tag id.
   Future<String> kitLink({
@@ -75,12 +99,13 @@ class Billing {
     final body = jsonDecode(res.body.isEmpty ? '{}' : res.body) as Map<String, dynamic>;
     if (res.statusCode >= 400) {
       throw LoyiException(switch ((res.statusCode, path)) {
-        (_, '/kit-tap' || '/kit-link') => switch (body['code']) {
+        (_, '/kit-tap' || '/kit-link' || '/admin/shops' || '/admin/kit-link') => switch (body['code']) {
           'used' => l10n.kitLinkUsed,
           'invalid' => l10n.notALoyiTag,
           'linked' => l10n.kitAlreadyLinked,
           'expired' => l10n.kitTapAgain,
           'unavailable' => l10n.kitUnavailable,
+          'forbidden' when path.startsWith('/admin') => l10n.adminOnly,
           _ when res.statusCode == 401 => l10n.signInAgain,
           _ => l10n.somethingWentWrong,
         },
@@ -106,7 +131,7 @@ final billing = Billing();
 
 /// What the server said about one tap on a secure tag.
 class KitTap {
-  const KitTap({required this.linked, this.tagId, this.ticketId, this.canLink = false});
+  const KitTap({required this.linked, this.tagId, this.ticketId, this.canLink = false, this.admin = false});
 
   /// False for a tag that isn't linked to a card yet.
   final bool linked;
@@ -117,4 +142,54 @@ class KitTap {
 
   /// The signed-in user is a shop and may link this tag now.
   final bool canLink;
+
+  /// The signed-in user is a Loyi admin preparing a kit (any shop).
+  final bool admin;
+}
+
+/// A shop as the kit admin sees it.
+class AdminShop {
+  const AdminShop({
+    required this.businessId,
+    required this.name,
+    required this.legalName,
+    required this.city,
+    required this.address,
+    required this.phone,
+    required this.subscribed,
+    required this.trial,
+    required this.programs,
+    required this.secureTags,
+  });
+
+  factory AdminShop.fromMap(Map<String, dynamic> m) => AdminShop(
+    businessId: m['businessId'] as String,
+    name: m['name'] as String? ?? '',
+    legalName: m['legalName'] as String? ?? '',
+    city: m['city'] as String? ?? '',
+    address: m['address'] as String? ?? '',
+    phone: m['phone'] as String? ?? '',
+    subscribed: m['subscribed'] as bool? ?? false,
+    trial: m['trial'] as bool? ?? false,
+    programs: [
+      for (final p in m['programs'] as List? ?? const []) (id: p['id'] as String, name: p['name'] as String? ?? ''),
+    ],
+    secureTags: m['secureTags'] as int? ?? 0,
+  );
+
+  final String businessId;
+  final String name;
+  final String legalName;
+  final String city;
+  final String address;
+  final String phone;
+  final bool subscribed;
+  final bool trial;
+  final List<({String id, String name})> programs;
+  final int secureTags;
+
+  bool matches(String query) {
+    final q = query.trim().toLowerCase();
+    return q.isEmpty || '$name $legalName $city'.toLowerCase().contains(q);
+  }
 }

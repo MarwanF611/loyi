@@ -15,6 +15,9 @@ import { verifySun } from "./sun.js";
 //   POST /kit-tap         any signed-in user → checks a secure tag's one-time link (e, c) and
 //                         returns its tag id, plus a stamp ticket for stamp tags
 //   POST /kit-link        signed-in shop → links a new secure tag (just tapped) to one of its cards
+//   POST /admin/shops     Loyi admin → every shop with its cards, details and subscription (for the kit)
+//   POST /admin/kit-link  Loyi admin → links a just-tapped secure tag to any shop's card, optionally
+//                         creating that shop's first card, so kits arrive ready to use
 //   POST /stripe          Stripe webhook (signature-checked)
 // All but /stripe need `Authorization: Bearer <Firebase ID token>`.
 //
@@ -27,7 +30,7 @@ import { verifySun } from "./sun.js";
 //   FIREBASE_SERVICE_ACCOUNT   service account JSON with the "Cloud Datastore User" role
 //   SDM_META_KEY, SDM_FILE_KEY the two AES keys (32 hex) written onto secure tags (docs/KIT.md)
 // Vars (wrangler.toml): FIREBASE_PROJECT_ID, STRIPE_PRICE_ID, APP_URL, ALLOWED_ORIGINS, TRIAL_DAYS,
-//   SHIPPING_COUNTRIES
+//   SHIPPING_COUNTRIES, ADMIN_EMAILS (verified sign-in emails allowed to use /admin/*)
 
 const STRIPE_VERSION = "2024-06-20"; // pinned so response shapes don't change under us
 const DAY = 86_400_000;
@@ -58,6 +61,10 @@ export default {
           return json(await kitTap(await requireUser(request, env), await request.json(), env), 200, cors);
         case "/kit-link":
           return json(await kitLink(await requireShop(request, env), await request.json(), env), 200, cors);
+        case "/admin/shops":
+          return json(await adminShops(await requireAdmin(request, env), env), 200, cors);
+        case "/admin/kit-link":
+          return json(await adminKitLink(await requireAdmin(request, env), await request.json(), env), 200, cors);
         default:
           return json({ error: "Not found" }, 404, cors);
       }
@@ -113,6 +120,18 @@ async function requireUser(request, env) {
   } catch {
     throw new HttpError(401, "Sign in again.");
   }
+}
+
+/** Loyi's own people: a verified email listed in ADMIN_EMAILS. */
+export function isAdmin(user, env) {
+  const admins = (env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+  return Boolean(user.email && user.emailVerified && admins.includes(user.email.toLowerCase()));
+}
+
+async function requireAdmin(request, env) {
+  const user = await requireUser(request, env);
+  if (!isAdmin(user, env)) throw new HttpError(403, "Only for Loyi admins.", "forbidden");
+  return user;
 }
 
 async function requireShop(request, env) {
@@ -256,7 +275,7 @@ export async function kitTap(user, body, env, now = Date.now()) {
       env,
     );
     if (!saved) throw used();
-    return { status: "unlinked", canLink: user.provider !== "anonymous" };
+    return { status: "unlinked", canLink: user.provider !== "anonymous", admin: isAdmin(user, env) };
   }
 
   if (!(await saveKit(sun.uid, version, { tagId: kit.tagId, lastCounter: sun.counter }, env))) throw used();
@@ -274,26 +293,33 @@ export async function kitTap(user, body, env, now = Date.now()) {
   return { status: "ok", tagId: kit.tagId, ticketId };
 }
 
-export async function kitLink(user, body, env, now = Date.now()) {
+/** The tag just tapped by `user` (within LINK_TTL), not linked yet. Returns its SUN data. */
+async function freshUnlinkedTap(user, body, env, now) {
   const sun = await readSun(body, env);
   const kit = (await readDoc(`kitTags/${sun.uid}`, env)) ?? {};
   if (kit.tagId && (await readDoc(`tags/${kit.tagId}`, env))) throw new HttpError(409, "This tag is already linked.", "linked");
   if (kit.linkBy !== user.uid || Number(kit.linkCounter) !== sun.counter || !(new Date(kit.linkUntil) > new Date(now))) {
     throw new HttpError(409, "Tap the tag again, then link it.", "expired");
   }
+  return sun;
+}
+
+function tagChoice(body) {
   const type = body.type === "join" ? "join" : body.type === "stamp" ? "stamp" : null;
   const label = typeof body.label === "string" ? body.label.trim().slice(0, 40) : "";
   if (!type || !label) throw new HttpError(400, "Choose a card and a tag type.", "invalid");
-  const program = typeof body.programId === "string" ? await readDoc(`programs/${body.programId}`, env) : null;
-  if (!program || program.ownerUid !== user.uid) throw new HttpError(403, "That card isn't yours.", "forbidden");
+  return { type, label };
+}
 
+/** Creates the secure tag for `program` and points the physical tag at it. */
+async function linkTag(sun, programId, program, { type, label }, env, now) {
   const tagId = randomId();
   await writeDoc(
     `tags/${tagId}`,
     {
       businessId: program.businessId,
-      ownerUid: user.uid,
-      programId: body.programId,
+      ownerUid: program.ownerUid,
+      programId,
       type,
       label,
       active: true,
@@ -305,7 +331,88 @@ export async function kitLink(user, body, env, now = Date.now()) {
     { mustNotExist: true },
   );
   await writeDoc(`kitTags/${sun.uid}`, { tagId, lastCounter: sun.counter }, env);
-  return { tagId };
+  return tagId;
+}
+
+export async function kitLink(user, body, env, now = Date.now()) {
+  const sun = await freshUnlinkedTap(user, body, env, now);
+  const choice = tagChoice(body);
+  const program = typeof body.programId === "string" ? await readDoc(`programs/${body.programId}`, env) : null;
+  if (!program || program.ownerUid !== user.uid) throw new HttpError(403, "That card isn't yours.", "forbidden");
+  return { tagId: await linkTag(sun, body.programId, program, choice, env, now) };
+}
+
+// ── Admin: prepare starter kits ──────────────────────────────────────────────
+
+/** Every shop with what Loyi needs to prepare its kit. Small numbers: one pass over each collection. */
+export async function adminShops(_admin, env) {
+  const [businesses, programs, details, subscriptions, tags] = await Promise.all(
+    ["businesses", "programs", "businessDetails", "subscriptions", "tags"].map((c) => listDocs(c, env)),
+  );
+  const byOwner = (docs) => Object.fromEntries(docs.map((d) => [d.id, d.data]));
+  const detailsOf = byOwner(details);
+  const subscriptionOf = byOwner(subscriptions);
+  const shops = businesses.map(({ id, data: b }) => {
+    const d = detailsOf[b.ownerUid] ?? {};
+    const sub = subscriptionOf[b.ownerUid];
+    return {
+      businessId: id,
+      name: b.name ?? "",
+      legalName: d.legalName ?? "",
+      city: d.city ?? "",
+      address: d.street ? `${d.street}, ${d.postcode} ${d.city}, ${d.country}` : "",
+      phone: d.phone ?? "",
+      subscribed: Boolean(sub && new Date(sub.expiresAt) > new Date()),
+      trial: Boolean(sub?.trial),
+      programs: programs
+        .filter((p) => p.data.businessId === id && p.data.ownerUid === b.ownerUid)
+        .map((p) => ({ id: p.id, name: p.data.name ?? "" })),
+      secureTags: tags.filter((t) => t.data.businessId === id && t.data.secure === true).length,
+    };
+  });
+  shops.sort((a, b) => a.name.localeCompare(b.name));
+  return { shops };
+}
+
+/**
+ * Links a just-tapped tag to a shop's card. With `newCard` ({businessId, name, stampsRequired, reward}) it
+ * first creates that shop's card, for a shop that hasn't made one yet; the shop can change it later.
+ */
+export async function adminKitLink(admin, body, env, now = Date.now()) {
+  const sun = await freshUnlinkedTap(admin, body, env, now);
+  const choice = tagChoice(body);
+  let programId = body.programId;
+  let program;
+  if (body.newCard) {
+    const { businessId, name, stampsRequired, reward } = body.newCard;
+    const business = typeof businessId === "string" ? await readDoc(`businesses/${businessId}`, env) : null;
+    const cardName = typeof name === "string" ? name.trim().slice(0, 60) : "";
+    const rewardTitle = typeof reward === "string" ? reward.trim().slice(0, 80) : "";
+    const stamps = Number(stampsRequired);
+    if (!business || !cardName || !rewardTitle || !Number.isInteger(stamps) || stamps < 1 || stamps > 50) {
+      throw new HttpError(400, "Choose a shop, a card name, the number of stamps and a reward.", "invalid");
+    }
+    programId = randomId();
+    program = { businessId, ownerUid: business.ownerUid };
+    await writeDoc(
+      `programs/${programId}`,
+      {
+        ...program,
+        name: cardName,
+        stampsRequired: stamps,
+        stampCooldownMinutes: 30,
+        rewards: [{ id: "r1", title: rewardTitle, active: true }],
+        active: true,
+        createdAt: new Date(now).toISOString(),
+      },
+      env,
+      { mustNotExist: true },
+    );
+  } else {
+    program = typeof programId === "string" ? await readDoc(`programs/${programId}`, env) : null;
+    if (!program) throw new HttpError(404, "That card doesn't exist.", "invalid");
+  }
+  return { tagId: await linkTag(sun, programId, program, choice, env, now), programId };
 }
 
 function randomId() {
@@ -482,7 +589,12 @@ export async function verifyFirebaseToken(token, env, now = Date.now()) {
   const t = now / 1000;
   if (claims.aud !== project || claims.iss !== `https://securetoken.google.com/${project}`) throw new Error("wrong project");
   if (!(claims.exp > t) || claims.iat > t + 60 || !claims.sub) throw new Error("expired");
-  return { uid: claims.sub, provider: claims.firebase?.sign_in_provider ?? null, email: claims.email ?? null };
+  return {
+    uid: claims.sub,
+    provider: claims.firebase?.sign_in_provider ?? null,
+    email: claims.email ?? null,
+    emailVerified: claims.email_verified === true,
+  };
 }
 
 async function googleKeys(now) {
@@ -504,6 +616,50 @@ function docUrl(path, env) {
 
 const TIMESTAMP_FIELDS = new Set(["expiresAt", "updatedAt", "createdAt", "linkUntil"]);
 
+/** A JS value as a Firestore REST value; ISO strings under TIMESTAMP_FIELDS become timestamps. */
+function encodeValue(v, key) {
+  if (v === null || v === undefined) return { nullValue: null };
+  if (TIMESTAMP_FIELDS.has(key) && typeof v === "string") return { timestampValue: v };
+  if (typeof v === "boolean") return { booleanValue: v };
+  if (typeof v === "number") return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+  if (Array.isArray(v)) return { arrayValue: { values: v.map((x) => encodeValue(x)) } };
+  if (typeof v === "object") return { mapValue: { fields: encodeFields(v) } };
+  return { stringValue: String(v) };
+}
+
+function encodeFields(obj) {
+  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, encodeValue(v, k)]));
+}
+
+/** A Firestore REST value as plain JS (timestamps as ISO strings). */
+function decodeValue(v) {
+  if ("timestampValue" in v) return new Date(v.timestampValue).toISOString();
+  if ("integerValue" in v) return Number(v.integerValue);
+  if ("doubleValue" in v) return v.doubleValue;
+  if ("arrayValue" in v) return (v.arrayValue.values ?? []).map(decodeValue);
+  if ("mapValue" in v) return decodeFields(v.mapValue.fields ?? {});
+  return v.stringValue ?? v.booleanValue ?? null;
+}
+
+function decodeFields(fields) {
+  return Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, decodeValue(v)]));
+}
+
+/** Every document of a collection as {id, data}. */
+async function listDocs(collection, env) {
+  const out = [];
+  let pageToken = "";
+  do {
+    const url = `${docUrl(collection, env)}?pageSize=300${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ""}`;
+    const res = await fetch(url, { headers: await authHeaders(env) });
+    if (!res.ok) throw new Error(`Firestore list ${collection}: ${res.status}`);
+    const page = await res.json();
+    for (const d of page.documents ?? []) out.push({ id: d.name.split("/").pop(), data: decodeFields(d.fields ?? {}) });
+    pageToken = page.nextPageToken ?? "";
+  } while (pageToken);
+  return out;
+}
+
 /** A document as plain values (timestamps as ISO strings), or null. */
 async function readDoc(path, env) {
   return (await readDocVersion(path, env)).data;
@@ -515,16 +671,7 @@ async function readDocVersion(path, env) {
   if (res.status === 404) return { data: null, updateTime: null };
   if (!res.ok) throw new Error(`Firestore read ${path}: ${res.status}`);
   const doc = await res.json();
-  const out = {};
-  for (const [k, v] of Object.entries(doc.fields ?? {})) {
-    out[k] =
-      "timestampValue" in v
-        ? new Date(v.timestampValue).toISOString()
-        : "integerValue" in v
-          ? Number(v.integerValue)
-          : (v.stringValue ?? v.booleanValue ?? null);
-  }
-  return { data: out, updateTime: doc.updateTime };
+  return { data: decodeFields(doc.fields ?? {}), updateTime: doc.updateTime };
 }
 
 /**
@@ -532,19 +679,7 @@ async function readDocVersion(path, env) {
  * version; either returns false when the document changed in between.
  */
 async function writeDoc(path, data, env, { mustNotExist = false, updateTime = null } = {}) {
-  const fields = {};
-  for (const [k, v] of Object.entries(data)) {
-    fields[k] =
-      v === null || v === undefined
-        ? { nullValue: null }
-        : TIMESTAMP_FIELDS.has(k)
-          ? { timestampValue: v }
-          : typeof v === "boolean"
-            ? { booleanValue: v }
-            : typeof v === "number"
-              ? { integerValue: String(v) }
-              : { stringValue: String(v) };
-  }
+  const fields = encodeFields(data);
   const precondition = mustNotExist ? { exists: false } : updateTime ? { updateTime } : null;
   if (precondition) {
     // A write with a precondition goes through :commit (the emulator ignores it as a PATCH parameter).

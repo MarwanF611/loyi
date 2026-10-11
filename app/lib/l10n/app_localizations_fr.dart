@@ -2044,4 +2044,79 @@ class L10nFr extends L10n {
 
   @override
   String get vatHelper => 'Uniquement si vous êtes assujetti à la TVA';
+
+  @override
+  String get adminKitTitle => 'Préparer un kit';
+
+  @override
+  String get adminKitSub =>
+      'Choisissez le commerce auquel ce tag est destiné. Il fonctionne dès son arrivée.';
+
+  @override
+  String get adminSearchShops => 'Rechercher un commerce';
+
+  @override
+  String get adminNoShops => 'Aucun commerce trouvé.';
+
+  @override
+  String get adminTrial => 'Essai';
+
+  @override
+  String get adminActive => 'Actif';
+
+  @override
+  String get adminNotSubscribed => 'Sans abonnement';
+
+  @override
+  String adminTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tags Loyi',
+      one: '1 tag Loyi',
+      zero: 'aucun tag Loyi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminChange => 'Modifier';
+
+  @override
+  String get adminNewCard => 'Nouvelle carte pour ce commerce';
+
+  @override
+  String get adminDefaultCardName => 'Carte de fidélité';
+
+  @override
+  String get adminCardName => 'Nom de la carte';
+
+  @override
+  String get adminStamps => 'Tampons pour une carte complète (1–50)';
+
+  @override
+  String get adminReward => 'Récompense';
+
+  @override
+  String adminLinkTo(String shop) {
+    return 'Associer à $shop';
+  }
+
+  @override
+  String adminLinked(String shop) {
+    return 'Associé à $shop';
+  }
+
+  @override
+  String get adminShipTo => 'Envoyer à';
+
+  @override
+  String get adminNoDetails =>
+      'Pas encore d\'adresse : le commerce n\'a pas encore rempli ses coordonnées.';
+
+  @override
+  String get adminNextTag => 'Touchez le tag suivant pour le préparer.';
+
+  @override
+  String get adminOnly => 'Réservé aux administrateurs de Loyi.';
 }

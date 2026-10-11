@@ -2031,4 +2031,79 @@ class L10nNl extends L10n {
 
   @override
   String get vatHelper => 'Alleen als je btw-plichtig bent';
+
+  @override
+  String get adminKitTitle => 'Kit klaarmaken';
+
+  @override
+  String get adminKitSub =>
+      'Kies de zaak waar deze tag naartoe gaat. Hij werkt meteen als hij aankomt.';
+
+  @override
+  String get adminSearchShops => 'Zaken zoeken';
+
+  @override
+  String get adminNoShops => 'Geen zaken gevonden.';
+
+  @override
+  String get adminTrial => 'Proefperiode';
+
+  @override
+  String get adminActive => 'Actief';
+
+  @override
+  String get adminNotSubscribed => 'Geen abonnement';
+
+  @override
+  String adminTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Loyi-tags',
+      one: '1 Loyi-tag',
+      zero: 'geen Loyi-tags',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminChange => 'Wijzigen';
+
+  @override
+  String get adminNewCard => 'Nieuwe kaart voor deze zaak';
+
+  @override
+  String get adminDefaultCardName => 'Klantenkaart';
+
+  @override
+  String get adminCardName => 'Naam van de kaart';
+
+  @override
+  String get adminStamps => 'Stempels voor een volle kaart (1–50)';
+
+  @override
+  String get adminReward => 'Beloning';
+
+  @override
+  String adminLinkTo(String shop) {
+    return 'Koppelen aan $shop';
+  }
+
+  @override
+  String adminLinked(String shop) {
+    return 'Gekoppeld aan $shop';
+  }
+
+  @override
+  String get adminShipTo => 'Verzenden naar';
+
+  @override
+  String get adminNoDetails =>
+      'Nog geen adres: de zaak heeft haar gegevens nog niet ingevuld.';
+
+  @override
+  String get adminNextTag => 'Tik op de volgende tag om hem klaar te maken.';
+
+  @override
+  String get adminOnly => 'Alleen voor beheerders van Loyi.';
 }

@@ -3458,6 +3458,126 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'Only if you\'re VAT-registered'**
   String get vatHelper;
+
+  /// No description provided for @adminKitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare a kit'**
+  String get adminKitTitle;
+
+  /// No description provided for @adminKitSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the shop this tag goes to. It works as soon as it arrives.'**
+  String get adminKitSub;
+
+  /// No description provided for @adminSearchShops.
+  ///
+  /// In en, this message translates to:
+  /// **'Search shops'**
+  String get adminSearchShops;
+
+  /// No description provided for @adminNoShops.
+  ///
+  /// In en, this message translates to:
+  /// **'No shops found.'**
+  String get adminNoShops;
+
+  /// No description provided for @adminTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial'**
+  String get adminTrial;
+
+  /// No description provided for @adminActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get adminActive;
+
+  /// No description provided for @adminNotSubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscription'**
+  String get adminNotSubscribed;
+
+  /// No description provided for @adminTags.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no Loyi tags} =1{1 Loyi tag} other{{count} Loyi tags}}'**
+  String adminTags(int count);
+
+  /// No description provided for @adminChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get adminChange;
+
+  /// No description provided for @adminNewCard.
+  ///
+  /// In en, this message translates to:
+  /// **'New card for this shop'**
+  String get adminNewCard;
+
+  /// No description provided for @adminDefaultCardName.
+  ///
+  /// In en, this message translates to:
+  /// **'Loyalty card'**
+  String get adminDefaultCardName;
+
+  /// No description provided for @adminCardName.
+  ///
+  /// In en, this message translates to:
+  /// **'Card name'**
+  String get adminCardName;
+
+  /// No description provided for @adminStamps.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamps for a full card (1–50)'**
+  String get adminStamps;
+
+  /// No description provided for @adminReward.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward'**
+  String get adminReward;
+
+  /// No description provided for @adminLinkTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Link to {shop}'**
+  String adminLinkTo(String shop);
+
+  /// No description provided for @adminLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to {shop}'**
+  String adminLinked(String shop);
+
+  /// No description provided for @adminShipTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Ship to'**
+  String get adminShipTo;
+
+  /// No description provided for @adminNoDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'No address yet: the shop hasn\'t filled in its details.'**
+  String get adminNoDetails;
+
+  /// No description provided for @adminNextTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the next tag to prepare it.'**
+  String get adminNextTag;
+
+  /// No description provided for @adminOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only for Loyi admins.'**
+  String get adminOnly;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

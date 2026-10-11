@@ -17,3 +17,5 @@ ALLOWED_ORIGINS = "https://loyi-b530b.web.app,https://loyi-b530b.firebaseapp.com
 TRIAL_DAYS = "14"
 # Checkout asks for a shipping address in these countries for the starter kit (two secure tags).
 SHIPPING_COUNTRIES = "BE,NL,LU,FR,DE"
+# Verified sign-in emails that may prepare starter kits (link tags to any shop): comma-separated.
+ADMIN_EMAILS = "marwan.fikri20@gmail.com"

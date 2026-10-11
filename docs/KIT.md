@@ -77,7 +77,23 @@ cd billing-worker && SDM_META_KEY=… SDM_FILE_KEY=… node tools/check-tag.mjs 
 `✓ Genuine tap` means the tag is ready. Tap twice: the counter must go up. Program all tags of a batch the same way;
 each tag is told apart by its UID, so nothing in the link is shop-specific and any kit can go to any shop.
 
-## 4. Send kits
+## 4. Prepare a kit for a shop (admin)
+
+Kits arrive linked, so the shop only has to put them on the counter. Your verified sign-in email must be in
+`ADMIN_EMAILS` (`billing-worker/wrangler.toml`; Google sign-in counts as verified).
+
+1. On your phone, sign in on the website (Shop sign in, with Google). You don't need a shop of your own.
+2. Tap a programmed tag. Instead of the shop's screen you get **Prepare a kit**.
+3. Search the shop (name, official name or city) and pick it. The list shows its subscription (trial/active)
+   and how many Loyi tags it has.
+4. Choose its card, or **New card for this shop** if it hasn't made one yet (name, stamps, reward: the shop
+   can change all of it later). Choose **Stamp** or **Join** and where it goes, then **Link**.
+5. The screen shows the shop's official name, address and phone: the shipping label. Tap the next tag.
+
+Test each linked tag once with a phone that isn't signed in as admin: a join tag adds the card, a stamp tag
+gives a stamp (on a test card you can delete afterwards).
+
+## 5. Send kits
 
 Stripe Checkout asks new shops for a shipping address (countries in `SHIPPING_COUNTRIES`, wrangler.toml). Turn on
 Stripe's email for new customers (Settings → Team and security → Email notifications → *Successful payments* and
@@ -87,7 +103,7 @@ Stripe's email for new customers (Settings → Team and security → Email notif
 Trial cost: two tags + postage is about €8 per shop, also for shops that cancel during the trial. Send kits after the
 first payment instead if that becomes a problem (filter Stripe customers on status `active`).
 
-## 5. Support
+## 6. Support
 
 - **"This link was already used"**: someone reloaded the page or opened a saved link. Tap the tag again.
 - **Tag lost or stolen**: switch it off in the dashboard (Cards → the card → the tag's switch). A new kit tag is
