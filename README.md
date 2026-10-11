@@ -89,6 +89,7 @@ account and data (art. 17). `/delete-account` explains the same for Google Play.
 **Data model (Firestore)**
 
 - `businesses/{id}`: name, `colors` (1–3 brand colours; `color` is the first), `logoVersion`, ownerUid (one business per owner in the MVP)
+- `businessDetails/{ownerUid}`: the shop's official name, address, country, company number (Belgian KBO checked with its mod-97 digits), optional VAT number and phone. Owner only; sign-up step 3 and Settings; the billing server copies it into the Stripe customer so Checkout is filled in
 - `logos/{businessId}`: the logo image itself (max 200 KB, 256 px), public
 - `programs/{id}`: a loyalty card: `stampsRequired`, `rewards[]` (each can be switched on or off), `stampCooldownMinutes`, `active`, and `design` (card colour, optional second colour, style `solid | gradient | pattern`, stamp colour, stamp icon). Designs are limited to colours, an icon and the logo, so the same design can later become an Apple/Google Wallet pass
 - `tags/{id}`: `type: join | stamp`, linked to one program. The tag's URL is `/t/<id>`. `secure: true` for starter kit tags (created only by the billing server), whose URL is `/k?e=…&c=…`

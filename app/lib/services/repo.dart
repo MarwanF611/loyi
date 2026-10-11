@@ -17,6 +17,20 @@ class Repo {
 
   String newId() => _db.collection('_').doc().id;
 
+  // ── Official details (private) ────────────────────────────────────────────
+
+  /// The owner's official details, or null before they're filled in.
+  Stream<BusinessDetails?> businessDetails(String ownerUid) =>
+      _db.doc('businessDetails/$ownerUid').snapshots().map((d) => d.exists ? BusinessDetails.fromMap(d.data()!) : null);
+
+  Future<void> saveBusinessDetails(Business business, BusinessDetails details) =>
+      _db.doc('businessDetails/${business.ownerUid}').set({
+        ...details.toMap(),
+        'ownerUid': business.ownerUid,
+        'businessId': business.id,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
   // ── Business ──────────────────────────────────────────────────────────────
 
   /// MVP: one business per owner account.
@@ -157,6 +171,7 @@ class Repo {
     for (final c in ['stampEvents', 'redemptions', 'messages', 'cards', 'tags', 'programs']) {
       await _deleteAll(_db.collection(c).where('ownerUid', isEqualTo: ownerUid));
     }
+    await _db.doc('businessDetails/$ownerUid').delete();
     final businesses = await _businesses.where('ownerUid', isEqualTo: ownerUid).get();
     for (final b in businesses.docs) {
       await _db.doc('logos/${b.id}').delete();

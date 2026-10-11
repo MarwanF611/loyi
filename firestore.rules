@@ -107,6 +107,31 @@ service cloud.firestore {
       allow delete: if isBusinessUser() && resource.data.ownerUid == uid();
     }
 
+    // A shop's official details (invoices, DPA, posting the starter kit): owner only, never public.
+    // The billing Worker reads them with its service account to fill in Stripe Checkout.
+    function shortText(data, field, min, max) {
+      return data[field] is string && data[field].size() >= min && data[field].size() <= max;
+    }
+
+    match /businessDetails/{ownerUid} {
+      allow read: if isBusinessUser() && uid() == ownerUid;
+      allow create, update: if isBusinessUser() && uid() == ownerUid
+        && request.resource.data.keys().hasOnly(['ownerUid', 'businessId', 'legalName', 'street', 'postcode', 'city',
+                                                 'country', 'companyNumber', 'vatNumber', 'phone', 'updatedAt'])
+        && request.resource.data.ownerUid == uid()
+        && ownsBusiness(request.resource.data.businessId)
+        && shortText(request.resource.data, 'legalName', 1, 120)
+        && shortText(request.resource.data, 'street', 1, 120)
+        && shortText(request.resource.data, 'postcode', 4, 10)
+        && shortText(request.resource.data, 'city', 1, 80)
+        && request.resource.data.country in ['BE', 'NL', 'LU', 'FR', 'DE']
+        && shortText(request.resource.data, 'companyNumber', 1, 30)
+        && shortText(request.resource.data, 'vatNumber', 0, 20)
+        && shortText(request.resource.data, 'phone', 0, 30)
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isBusinessUser() && uid() == ownerUid;
+    }
+
     // Logos live in Firestore (no Cloud Storage on Spark): one small image per business.
     match /logos/{businessId} {
       allow read: if true;

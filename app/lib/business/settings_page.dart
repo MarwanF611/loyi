@@ -12,6 +12,7 @@ import '../widgets/loyalty_card_view.dart';
 import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 import 'business_form.dart';
+import 'details_form.dart';
 import 'business_scope.dart';
 import 'shell.dart';
 
@@ -69,6 +70,18 @@ class BusinessSettingsPage extends StatelessWidget {
                             }
                           },
                         ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Panel(
+                    padding: const EdgeInsets.all(22),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(l.businessDetailsTitle, style: context.text.titleLarge),
+                        const SizedBox(height: 16),
+                        _DetailsEditor(business: business),
                       ],
                     ),
                   ),
@@ -147,6 +160,41 @@ class BusinessSettingsPage extends StatelessWidget {
             ),
           ),
         ],
+      );
+    },
+  );
+}
+
+/// The official details in Settings; saving shows "Saved".
+class _DetailsEditor extends StatefulWidget {
+  const _DetailsEditor({required this.business});
+
+  final Business business;
+
+  @override
+  State<_DetailsEditor> createState() => _DetailsEditorState();
+}
+
+class _DetailsEditorState extends State<_DetailsEditor> {
+  late final Stream<BusinessDetails?> _details = repo.businessDetails(widget.business.ownerUid);
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<BusinessDetails?>(
+    stream: _details,
+    builder: (context, snap) {
+      if (!snap.hasData && snap.connectionState == ConnectionState.waiting) {
+        return const Skeleton(height: 320, radius: Radii.md);
+      }
+      // Created once with the stored values; the form keeps what's typed after that.
+      return BusinessDetailsForm(
+        initial: snap.data,
+        submitLabel: context.l10n.save,
+        onSubmit: (details) async {
+          await repo.saveBusinessDetails(widget.business, details);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.saved)));
+          }
+        },
       );
     },
   );

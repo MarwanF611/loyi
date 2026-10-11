@@ -15,12 +15,14 @@ import '../widgets/color_picker.dart';
 import '../widgets/loyalty_card_view.dart';
 import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
+import 'details_form.dart';
 import 'subscribe_page.dart';
 
 // Business sign-up after the account exists:
 //   1. account + business name (login page; [NameStep] if the shop is missing, e.g. Google sign-in)
 //   2. brand colours ([ColorsStep])
-//   3. payment ([PayStep])
+//   3. official details: name, address, company and VAT number ([DetailsGate], [DetailsStep])
+//   4. payment ([PayStep])
 // then the dashboard. Each step is derived from stored data, so leaving and
 // signing in later continues where the owner stopped.
 
@@ -29,7 +31,9 @@ import 'subscribe_page.dart';
 class SetupScaffold extends StatelessWidget {
   const SetupScaffold({super.key, this.step, required this.title, required this.subtitle, required this.child});
 
-  /// 1-based step of 3, or null to hide the progress (renewing).
+  /// 1-based step of [steps], or null to hide the progress (renewing).
+  static const steps = 4;
+
   final int? step;
   final String title;
   final String subtitle;
@@ -63,12 +67,12 @@ class SetupScaffold extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (step != null) ...[
-                  Text(context.l10n.stepOf(step!, 3), style: context.text.labelLarge?.copyWith(color: p.accent)),
+                  Text(context.l10n.stepOf(step!, steps), style: context.text.labelLarge?.copyWith(color: p.accent)),
                   const SizedBox(height: 8),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
-                      value: step! / 3,
+                      value: step! / steps,
                       minHeight: 6,
                       backgroundColor: p.surfaceMuted,
                       color: p.accent,
@@ -230,7 +234,60 @@ class _ColorsStepState extends State<ColorsStep> {
   );
 }
 
-/// Step 3: subscribe (or renew after the subscription ended).
+/// Shows [builder] once the shop's official details are complete; until then
+/// step 3, [DetailsStep]. Shops that signed up before it existed get it too.
+class DetailsGate extends StatefulWidget {
+  const DetailsGate({super.key, required this.business, required this.builder});
+
+  final Business business;
+  final WidgetBuilder builder;
+
+  @override
+  State<DetailsGate> createState() => _DetailsGateState();
+}
+
+class _DetailsGateState extends State<DetailsGate> {
+  // One stream for the gate's lifetime: a new one per rebuild would flash the loading state.
+  late final Stream<BusinessDetails?> _details = repo.businessDetails(widget.business.ownerUid);
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<BusinessDetails?>(
+    stream: _details,
+    builder: (context, snap) {
+      if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      }
+      final details = snap.data;
+      if (details == null || !details.complete) return DetailsStep(business: widget.business, initial: details);
+      return widget.builder(context);
+    },
+  );
+}
+
+/// Step 3: the official details, for invoices, the processing agreement and the kit.
+class DetailsStep extends StatelessWidget {
+  const DetailsStep({super.key, required this.business, this.initial});
+
+  final Business business;
+  final BusinessDetails? initial;
+
+  @override
+  Widget build(BuildContext context) => SetupScaffold(
+    step: 3,
+    title: context.l10n.businessDetailsTitle,
+    subtitle: context.l10n.businessDetailsSub,
+    child: Panel(
+      padding: const EdgeInsets.all(22),
+      child: BusinessDetailsForm(
+        initial: initial,
+        submitLabel: context.l10n.continueAction,
+        onSubmit: (details) => repo.saveBusinessDetails(business, details),
+      ),
+    ),
+  );
+}
+
+/// Step 4: subscribe (or renew after the subscription ended).
 class PayStep extends StatelessWidget {
   const PayStep({super.key, required this.status});
 
@@ -241,7 +298,7 @@ class PayStep extends StatelessWidget {
     final expired = status.state == PlanState.expired;
     final l = context.l10n;
     return SetupScaffold(
-      step: expired ? null : 3,
+      step: expired ? null : 4,
       title: expired
           ? l.subscriptionEnded
           : kIsWeb

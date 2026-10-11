@@ -124,6 +124,36 @@ test("Loyi rules: full flow and abuse attempts", async (t) => {
     await denied(updateDoc(doc(biz.db, "tags", stampTag.id), { type: "join" }));
   });
 
+  await t.test("official details: private to the owner, checked fields", async () => {
+    const details = {
+      ownerUid: owner.uid,
+      businessId: bizRef.id,
+      legalName: "Bakkerij Peeters BV",
+      street: "Kerkstraat 1",
+      postcode: "9000",
+      city: "Gent",
+      country: "BE",
+      companyNumber: "0123.456.749",
+      vatNumber: "",
+      phone: "",
+      updatedAt: serverTimestamp(),
+    };
+    const mine = doc(biz.db, "businessDetails", owner.uid);
+    await setDoc(mine, details);
+    assert.equal((await getDoc(mine)).get("city"), "Gent");
+    // Nobody else reads them: not clients, not another shop.
+    await denied(getDoc(doc(alice.db, "businessDetails", owner.uid)));
+    await denied(getDoc(doc(other.db, "businessDetails", owner.uid)));
+    // Only under your own id, for your own shop, with known and sensible fields.
+    await denied(setDoc(doc(other.db, "businessDetails", owner.uid), { ...details, ownerUid: other.uid() }));
+    await denied(setDoc(doc(other.db, "businessDetails", other.uid()), { ...details, ownerUid: other.uid() }));
+    await denied(setDoc(mine, { ...details, country: "US" }));
+    await denied(setDoc(mine, { ...details, legalName: "" }));
+    await denied(setDoc(mine, { ...details, street: "x".repeat(121) }));
+    await denied(setDoc(mine, { ...details, notes: "VIP" }));
+    await denied(setDoc(doc(alice.db, "businessDetails", alice.uid()), { ...details, ownerUid: alice.uid() }));
+  });
+
   await t.test("join, then stamps until the card is full", async () => {
     assert.equal((await tap(alice.db, alice.uid(), joinTag.id)).outcome, "joined");
     assert.equal((await tap(alice.db, alice.uid(), joinTag.id)).outcome, "already_member");

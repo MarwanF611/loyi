@@ -4,7 +4,7 @@ Keep the three languages saying the same thing; the Dutch text is the reference
 for Belgian users. [Placeholders] still need the owner's details before launch."""
 from legal_shell import write
 
-UPDATED = {'nl': '9 oktober 2026', 'fr': '9 octobre 2026', 'en': '9 October 2026'}
+UPDATED = {'nl': '11 oktober 2026', 'fr': '11 octobre 2026', 'en': '11 October 2026'}
 
 # ── Privacy policy ─────────────────────────────────────────────────────────────
 
@@ -48,6 +48,9 @@ PRIVACY = {
   <div class="card">
     <ul>
       <li>Account: email address (or your Google account's email when you use "Continue with Google").</li>
+      <li>Official details: your shop's official name, address, company number, VAT number if you have one and
+        optionally a phone number. We use them for your invoices (Stripe receives them), the data processing agreement
+        and posting your Loyi tags. Only you and Loyi see them; clients never do.</li>
       <li>Shop details you enter: name, brand colours, logo, loyalty cards, rewards and NFC tags.</li>
       <li>Activity: stamps given and rewards used by your clients (with anonymous client IDs). Your dashboard,
         client list and insights are counted from this; each client appears as a code that only works in your shop.</li>
@@ -162,6 +165,9 @@ PRIVACY = {
   <div class="card">
     <ul>
       <li>Account: e-mailadres (of het e-mailadres van je Google-account als je "Doorgaan met Google" gebruikt).</li>
+      <li>Officiële gegevens: de officiële naam van je zaak, het adres, het ondernemingsnummer, je btw-nummer als je
+        er een hebt en eventueel een telefoonnummer. We gebruiken ze voor je facturen (Stripe krijgt ze), de
+        verwerkersovereenkomst en het opsturen van je Loyi-tags. Alleen jij en Loyi zien ze, klanten nooit.</li>
       <li>Gegevens van je zaak die je invult: naam, huiskleuren, logo, klantenkaarten, beloningen en NFC-tags.</li>
       <li>Activiteit: gegeven stempels en gebruikte beloningen van je klanten (met anonieme klant-ID's). Je dashboard,
         klantenlijst en inzichten worden hiermee berekend; elke klant verschijnt als een code die alleen in jouw zaak
@@ -286,6 +292,10 @@ PRIVACY = {
   <div class="card">
     <ul>
       <li>Compte : adresse e-mail (ou l'e-mail de votre compte Google si vous utilisez « Continuer avec Google »).</li>
+      <li>Coordonnées officielles : le nom officiel de votre commerce, son adresse, son numéro d'entreprise, votre
+        numéro de TVA si vous en avez un et, si vous le souhaitez, un numéro de téléphone. Nous les utilisons pour vos
+        factures (Stripe les reçoit), l'accord de traitement des données et l'envoi de vos tags Loyi. Seuls vous et
+        Loyi les voyez, jamais les clients.</li>
       <li>Informations que vous saisissez : nom, couleurs de marque, logo, cartes de fidélité, récompenses et tags
         NFC.</li>
       <li>Activité : tampons donnés et récompenses utilisées par vos clients (avec des identifiants clients anonymes).
@@ -429,6 +439,8 @@ TERMS = {
 
   <h2>4. Shops: your responsibilities</h2>
   <ul>
+    <li>You give your shop's correct official details (name, address, company number) and keep them up to date
+      under Settings.</li>
     <li>You honour the rewards you offer and the stamps your clients collected while your subscription was active.</li>
     <li>You keep your stamp tag behind the counter and only let clients tap it after a purchase.</li>
     <li>The content you upload (name, logo) is yours, and you may use it. You give Loyi the right to show it on your
@@ -513,6 +525,8 @@ TERMS = {
 
   <h2>4. Zaken: jouw verantwoordelijkheden</h2>
   <ul>
+    <li>Je geeft de juiste officiële gegevens van je zaak op (naam, adres, ondernemingsnummer) en houdt ze up-to-date
+      onder Instellingen.</li>
     <li>Je komt de beloningen na die je aanbiedt en de stempels die je klanten spaarden terwijl je abonnement actief
       was.</li>
     <li>Je houdt je stempeltag achter de toog en laat klanten hem alleen na een aankoop aantikken.</li>
@@ -602,6 +616,8 @@ TERMS = {
 
   <h2>4. Commerces : vos responsabilités</h2>
   <ul>
+    <li>Vous fournissez les coordonnées officielles exactes de votre commerce (nom, adresse, numéro d'entreprise) et
+      les tenez à jour dans Réglages.</li>
     <li>Vous honorez les récompenses que vous proposez et les tampons collectés par vos clients pendant que votre
       abonnement était actif.</li>
     <li>Vous gardez votre tag tampon derrière le comptoir et ne le faites toucher qu'après un achat.</li>

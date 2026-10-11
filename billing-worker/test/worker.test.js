@@ -60,6 +60,8 @@ globalThis.fetch = async (input, init = {}) => {
   const params = new URLSearchParams(init.body ?? "");
   stripe.calls.push({ method, path: url.pathname, params });
   if (url.pathname === "/v1/checkout/sessions") return Response.json({ url: `https://checkout.stripe.fake/${params.get("client_reference_id")}` });
+  if (url.pathname === "/v1/customers" && method === "POST") return Response.json({ id: `cus_new_${stripe.calls.length}` });
+  if (/^\/v1\/customers\/[^/]+(\/tax_ids)?$/.test(url.pathname) && method === "POST") return Response.json({ id: url.pathname.split("/")[3] });
   if (url.pathname === "/v1/billing_portal/sessions") return Response.json({ url: `https://portal.stripe.fake/${params.get("customer")}` });
   if (url.pathname === "/v1/subscriptions" && method === "GET") {
     const customer = url.searchParams.get("customer");
@@ -402,3 +404,41 @@ test("secure join tags return the tag without a ticket", async () => {
   const result = await (await call("/kit-tap", { token: idToken(`c-${run}`, { provider: "anonymous" }), body: await tap(tagUid, 11) })).json();
   assert.deepEqual(result, { status: "ok", tagId });
 });
+
+test("checkout is filled in with the shop's official details", async () => {
+  const uid = `details-${run}`;
+  await seed(`businessDetails/${uid}`, {
+    ownerUid: uid,
+    legalName: "Bakkerij Peeters BV",
+    street: "Kerkstraat 1",
+    postcode: "9000",
+    city: "Gent",
+    country: "BE",
+    companyNumber: "0123.456.749",
+    vatNumber: "BE0123456749",
+    phone: "",
+  });
+  stripe.calls.length = 0;
+  assert.equal((await call("/checkout", { token: idToken(uid) })).status, 200);
+  const created = stripe.calls.find((c) => c.path === "/v1/customers");
+  assert.equal(created.params.get("name"), "Bakkerij Peeters BV");
+  assert.equal(created.params.get("address[postal_code]"), "9000");
+  assert.equal(created.params.get("shipping[address][city]"), "Gent");
+  assert.equal(created.params.get("metadata[company_number]"), "0123.456.749");
+  assert.equal(created.params.get("phone"), null); // empty phone left out
+  const tax = stripe.calls.find((c) => c.path.endsWith("/tax_ids"));
+  assert.equal(tax.params.get("value"), "BE0123456749");
+  const session = stripe.calls.at(-1).params;
+  assert.match(session.get("customer"), /^cus_new_/);
+  assert.equal(session.get("customer_update[shipping]"), "auto");
+  assert.equal(session.get("customer_email"), null);
+  assert.equal(session.get("subscription_data[trial_period_days]"), "14"); // a pre-made customer still gets the trial
+  assert.equal((await doc(`billing/${uid}`)).customerId, session.get("customer"));
+
+  // Next checkout updates the same customer instead of making a new one.
+  stripe.calls.length = 0;
+  await call("/checkout", { token: idToken(uid) });
+  assert.equal(stripe.calls.filter((c) => c.path === "/v1/customers").length, 0);
+  assert.ok(stripe.calls.some((c) => c.path.startsWith("/v1/customers/cus_new_")));
+});
+

@@ -501,3 +501,100 @@ class Subscription {
 
   bool get isActive => expiresAt.isAfter(DateTime.now());
 }
+
+/// A shop's official details: for invoices, the data processing agreement and
+/// posting the starter kit. Private (`businessDetails/{ownerUid}`, owner only);
+/// clients never see them.
+class BusinessDetails {
+  const BusinessDetails({
+    required this.legalName,
+    required this.street,
+    required this.postcode,
+    required this.city,
+    required this.country,
+    required this.companyNumber,
+    this.vatNumber = '',
+    this.phone = '',
+  });
+
+  /// Countries Loyi serves (and posts kits to): ISO codes.
+  static const countries = ['BE', 'NL', 'LU', 'FR', 'DE'];
+
+  final String legalName;
+  final String street;
+  final String postcode;
+  final String city;
+  final String country;
+  final String companyNumber;
+  final String vatNumber;
+  final String phone;
+
+  factory BusinessDetails.fromMap(Map<String, dynamic> d) => BusinessDetails(
+    legalName: d['legalName'] as String? ?? '',
+    street: d['street'] as String? ?? '',
+    postcode: d['postcode'] as String? ?? '',
+    city: d['city'] as String? ?? '',
+    country: d['country'] as String? ?? 'BE',
+    companyNumber: d['companyNumber'] as String? ?? '',
+    vatNumber: d['vatNumber'] as String? ?? '',
+    phone: d['phone'] as String? ?? '',
+  );
+
+  Map<String, Object> toMap() => {
+    'legalName': legalName,
+    'street': street,
+    'postcode': postcode,
+    'city': city,
+    'country': country,
+    'companyNumber': companyNumber,
+    'vatNumber': vatNumber,
+    'phone': phone,
+  };
+
+  /// Everything required is there and valid (older shops may still miss it).
+  bool get complete =>
+      legalName.isNotEmpty &&
+      street.isNotEmpty &&
+      city.isNotEmpty &&
+      countries.contains(country) &&
+      validPostcode(country, postcode) &&
+      normalizeCompanyNumber(country, companyNumber) != null &&
+      (vatNumber.isEmpty || normalizeVat(country, vatNumber, companyNumber) != null);
+
+  static String _digits(String s) => s.replaceAll(RegExp(r'\D'), '');
+
+  /// Belgian enterprise numbers (KBO/BCE) as 0123.456.749, checked with their
+  /// mod-97 check digits; other countries' numbers trimmed. Null when invalid.
+  static String? normalizeCompanyNumber(String country, String input) {
+    final value = input.trim();
+    if (country != 'BE') return value.isEmpty || value.length > 30 ? null : value;
+    var d = _digits(value.toUpperCase().startsWith('BE') ? value.substring(2) : value);
+    if (d.length == 9) d = '0$d';
+    if (d.length != 10 || !(d.startsWith('0') || d.startsWith('1'))) return null;
+    final check = 97 - int.parse(d.substring(0, 8)) % 97;
+    if (check != int.parse(d.substring(8))) return null;
+    return '${d.substring(0, 4)}.${d.substring(4, 7)}.${d.substring(7)}';
+  }
+
+  /// EU VAT number as BE0123456749. In Belgium it is BE + the company number.
+  static String? normalizeVat(String country, String input, String companyNumber) {
+    final v = input.toUpperCase().replaceAll(RegExp(r'[\s.\-]'), '');
+    if (!RegExp(r'^[A-Z]{2}[0-9A-Z]{2,13}$').hasMatch(v)) return null;
+    if (country == 'BE') {
+      final company = normalizeCompanyNumber('BE', companyNumber);
+      if (company == null || v != 'BE${_digits(company)}') return null;
+    }
+    return v;
+  }
+
+  static bool validPostcode(String country, String postcode) {
+    final p = postcode.trim().toUpperCase();
+    return switch (country) {
+      'BE' => RegExp(r'^\d{4}$').hasMatch(p),
+      'NL' => RegExp(r'^\d{4} ?[A-Z]{2}$').hasMatch(p),
+      'LU' => RegExp(r'^(L-)?\d{4}$').hasMatch(p),
+      'FR' || 'DE' => RegExp(r'^\d{5}$').hasMatch(p),
+      _ => false,
+    };
+  }
+}

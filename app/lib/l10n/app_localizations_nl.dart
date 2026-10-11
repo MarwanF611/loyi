@@ -1070,7 +1070,7 @@ class L10nNl extends L10n {
 
   @override
   String get signUpSteps =>
-      'Drie stappen: je account, je kleuren, je abonnement. Daarna staat je dashboard klaar.';
+      'Vier stappen: je account, je kleuren, de gegevens van je zaak, je abonnement. Daarna staat je dashboard klaar.';
 
   @override
   String get signInSub => 'Log in om je klantenkaarten te beheren.';
@@ -1956,4 +1956,79 @@ class L10nNl extends L10n {
 
   @override
   String get demoForShops => 'Wil je dit voor je zaak?';
+
+  @override
+  String get businessDetailsTitle => 'Gegevens van je zaak';
+
+  @override
+  String get businessDetailsSub =>
+      'Voor je facturen, de verwerkersovereenkomst en het opsturen van je twee Loyi-tags. Klanten zien dit nooit.';
+
+  @override
+  String get legalName => 'Officiële naam';
+
+  @override
+  String get legalNameHint => 'Bedrijfsnaam, of je eigen naam als eenmanszaak';
+
+  @override
+  String get streetAndNumber => 'Straat en nummer';
+
+  @override
+  String get postcode => 'Postcode';
+
+  @override
+  String get city => 'Gemeente';
+
+  @override
+  String get country => 'Land';
+
+  @override
+  String get companyNumber => 'Ondernemingsnummer';
+
+  @override
+  String get companyNumberHintBE => 'Je KBO-nummer, ook voor eenmanszaken';
+
+  @override
+  String get vatNumberOptional => 'Btw-nummer';
+
+  @override
+  String get phoneOptional => 'Telefoon (optioneel)';
+
+  @override
+  String get detailsPrivate => 'Alleen jij en Loyi zien deze gegevens.';
+
+  @override
+  String get fieldRequired => 'Vul dit in.';
+
+  @override
+  String get invalidPostcode => 'Controleer de postcode.';
+
+  @override
+  String get invalidCompanyNumber =>
+      'Dit is geen geldig Belgisch ondernemingsnummer.';
+
+  @override
+  String get invalidVat => 'Controleer het btw-nummer, bv. NL123456789B01.';
+
+  @override
+  String get vatMustMatchBE =>
+      'In België is het btw-nummer BE gevolgd door je ondernemingsnummer.';
+
+  @override
+  String get countryBE => 'België';
+
+  @override
+  String get countryNL => 'Nederland';
+
+  @override
+  String get countryLU => 'Luxemburg';
+
+  @override
+  String get countryFR => 'Frankrijk';
+
+  @override
+  String get countryDE => 'Duitsland';
+
+  @override
+  String get vatHelper => 'Alleen als je btw-plichtig bent';
 }

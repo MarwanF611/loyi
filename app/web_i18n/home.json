@@ -707,10 +707,6 @@
     "nl": "Pilootproject",
     "fr": "Projet pilote"
   },
-  "Be one of our first 20 shops": {
-    "nl": "Word een van onze eerste 20 zaken",
-    "fr": "Faites partie de nos 20 premiers commerces"
-  },
   "Pilot shops get three months free in exchange for honest feedback. If Loyi works for you, we'd love a short quote and a photo for this page.": {
     "nl": "Pilootzaken krijgen drie maanden gratis in ruil voor eerlijke feedback. Werkt Loyi voor jou, dan krijgen we graag een korte quote en een foto voor deze pagina.",
     "fr": "Les commerces pilotes reçoivent trois mois gratuits en échange d'un avis honnête. Si Loyi vous convient, nous aimerions une courte citation et une photo pour cette page."
@@ -782,5 +778,9 @@
   "A shop's message on the client's card": {
     "nl": "Een bericht van een zaak op de kaart van de klant",
     "fr": "Le message d'un commerce sur la carte du client"
+  },
+  "Be one of our first 10 shops": {
+    "nl": "Word een van onze eerste 10 zaken",
+    "fr": "Faites partie de nos 10 premiers commerces"
   }
 }

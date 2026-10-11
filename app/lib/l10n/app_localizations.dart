@@ -1866,7 +1866,7 @@ abstract class L10n {
   /// No description provided for @signUpSteps.
   ///
   /// In en, this message translates to:
-  /// **'Three steps: your account, your colours, your subscription. Then your dashboard is ready.'**
+  /// **'Four steps: your account, your colours, your business details, your subscription. Then your dashboard is ready.'**
   String get signUpSteps;
 
   /// No description provided for @signInSub.
@@ -3314,6 +3314,150 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'Want this for your shop?'**
   String get demoForShops;
+
+  /// No description provided for @businessDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Business details'**
+  String get businessDetailsTitle;
+
+  /// No description provided for @businessDetailsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'For your invoices, the data processing agreement and posting your two Loyi tags. Clients never see this.'**
+  String get businessDetailsSub;
+
+  /// No description provided for @legalName.
+  ///
+  /// In en, this message translates to:
+  /// **'Official name'**
+  String get legalName;
+
+  /// No description provided for @legalNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Company name, or your own name if you\'re a sole trader'**
+  String get legalNameHint;
+
+  /// No description provided for @streetAndNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Street and number'**
+  String get streetAndNumber;
+
+  /// No description provided for @postcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Postcode'**
+  String get postcode;
+
+  /// No description provided for @city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get city;
+
+  /// No description provided for @country.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get country;
+
+  /// No description provided for @companyNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Company number'**
+  String get companyNumber;
+
+  /// No description provided for @companyNumberHintBE.
+  ///
+  /// In en, this message translates to:
+  /// **'Your KBO number, also for sole traders'**
+  String get companyNumberHintBE;
+
+  /// No description provided for @vatNumberOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'VAT number'**
+  String get vatNumberOptional;
+
+  /// No description provided for @phoneOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone (optional)'**
+  String get phoneOptional;
+
+  /// No description provided for @detailsPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you and Loyi see these details.'**
+  String get detailsPrivate;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill this in.'**
+  String get fieldRequired;
+
+  /// No description provided for @invalidPostcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the postcode.'**
+  String get invalidPostcode;
+
+  /// No description provided for @invalidCompanyNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'This isn\'t a valid Belgian company number.'**
+  String get invalidCompanyNumber;
+
+  /// No description provided for @invalidVat.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the VAT number, e.g. NL123456789B01.'**
+  String get invalidVat;
+
+  /// No description provided for @vatMustMatchBE.
+  ///
+  /// In en, this message translates to:
+  /// **'In Belgium the VAT number is BE followed by your company number.'**
+  String get vatMustMatchBE;
+
+  /// No description provided for @countryBE.
+  ///
+  /// In en, this message translates to:
+  /// **'Belgium'**
+  String get countryBE;
+
+  /// No description provided for @countryNL.
+  ///
+  /// In en, this message translates to:
+  /// **'Netherlands'**
+  String get countryNL;
+
+  /// No description provided for @countryLU.
+  ///
+  /// In en, this message translates to:
+  /// **'Luxembourg'**
+  String get countryLU;
+
+  /// No description provided for @countryFR.
+  ///
+  /// In en, this message translates to:
+  /// **'France'**
+  String get countryFR;
+
+  /// No description provided for @countryDE.
+  ///
+  /// In en, this message translates to:
+  /// **'Germany'**
+  String get countryDE;
+
+  /// No description provided for @vatHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Only if you\'re VAT-registered'**
+  String get vatHelper;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

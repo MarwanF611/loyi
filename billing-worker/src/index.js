@@ -131,6 +131,9 @@ export async function createCheckout(user, returnTo, env, locale = "auto") {
   const current = await readDoc(`subscriptions/${user.uid}`, env);
   if (current && new Date(current.expiresAt) > new Date()) throw new HttpError(409, "You're already subscribed.");
   const billing = await readDoc(`billing/${user.uid}`, env);
+  // The shop's official details (sign-up step 3) fill in Checkout: name, address, VAT and the kit's address.
+  const details = await readDoc(`businessDetails/${user.uid}`, env);
+  const customerId = details ? await saveCustomer(billing?.customerId, user, details, env) : billing?.customerId;
   // One free trial per shop: not for a shop that has had a subscription before.
   const trialDays = billing?.subscriptionId ? 0 : Number(env.TRIAL_DAYS ?? 0);
   const countries = (env.SHIPPING_COUNTRIES || "").split(",").map((c) => c.trim()).filter(Boolean);
@@ -153,14 +156,39 @@ export async function createCheckout(user, returnTo, env, locale = "auto") {
     allow_promotion_codes: true,
     locale,
   };
-  if (billing?.customerId) {
-    params.customer = billing.customerId;
-    params.customer_update = { name: "auto", address: "auto" };
+  if (customerId) {
+    params.customer = customerId;
+    params.customer_update = { name: "auto", address: "auto", ...(countries.length ? { shipping: "auto" } : {}) };
   } else if (user.email) {
     params.customer_email = user.email;
   }
   const session = await stripe(env, "POST", "/v1/checkout/sessions", params);
   return { url: session.url };
+}
+
+/** Creates or updates the shop's Stripe customer from its official details. Returns the customer id. */
+async function saveCustomer(customerId, user, d, env) {
+  const address = { line1: d.street, postal_code: d.postcode, city: d.city, country: d.country };
+  const fields = {
+    name: d.legalName,
+    phone: d.phone || undefined,
+    address,
+    shipping: { name: d.legalName, phone: d.phone || undefined, address },
+    metadata: { firebase_uid: user.uid, company_number: d.companyNumber },
+  };
+  if (customerId) {
+    await stripe(env, "POST", `/v1/customers/${encodeURIComponent(customerId)}`, fields);
+    return customerId;
+  }
+  const customer = await stripe(env, "POST", "/v1/customers", { ...fields, email: user.email ?? undefined });
+  await writeDoc(`billing/${user.uid}`, { customerId: customer.id, updatedAt: new Date().toISOString() }, env);
+  if (d.vatNumber) {
+    // On the invoice; Stripe checks the format. A rejected number can still be added in Checkout.
+    await stripe(env, "POST", `/v1/customers/${customer.id}/tax_ids`, { type: "eu_vat", value: d.vatNumber }).catch((e) =>
+      console.warn(`VAT number not added: ${e.message}`),
+    );
+  }
+  return customer.id;
 }
 
 export async function createPortal(user, returnTo, env, locale = "auto") {

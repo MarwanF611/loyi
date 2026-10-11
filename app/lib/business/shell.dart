@@ -32,19 +32,22 @@ class BusinessShell extends StatelessWidget {
     builder: (context, business) {
       if (business == null) return const NameStep();
       if (business.colors.isEmpty) return ColorsStep(business: business);
-      return PlanBuilder(
-        builder: (context, status) => switch (status.state) {
-          PlanState.loading => const Scaffold(body: Center(child: CircularProgressIndicator())),
-          PlanState.active => _ShellFrame(
-            key: ValueKey(business.id),
-            business: business,
-            location: location,
-            child: child,
-          ),
-          PlanState.activating => const ActivatingStep(),
-          PlanState.none || PlanState.expired when checkoutDone => const ActivatingStep(),
-          PlanState.none || PlanState.expired => PayStep(status: status),
-        },
+      return DetailsGate(
+        business: business,
+        builder: (context) => PlanBuilder(
+          builder: (context, status) => switch (status.state) {
+            PlanState.loading => const Scaffold(body: Center(child: CircularProgressIndicator())),
+            PlanState.active => _ShellFrame(
+              key: ValueKey(business.id),
+              business: business,
+              location: location,
+              child: child,
+            ),
+            PlanState.activating => const ActivatingStep(),
+            PlanState.none || PlanState.expired when checkoutDone => const ActivatingStep(),
+            PlanState.none || PlanState.expired => PayStep(status: status),
+          },
+        ),
       );
     },
   );

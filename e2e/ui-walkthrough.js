@@ -196,9 +196,22 @@ try {
   await tap(biz, "Create account");
   await see(biz, "Your colours");
 
-  step("pick colours; the subscription comes from the billing webhook");
+  step("pick colours");
   await tap(biz, "Continue");
-  await see(biz, "Step 3 of 3");
+  await see(biz, "Step 3 of 4");
+
+  step("official details: checked, then saved; the subscription comes from the billing webhook");
+  await see(biz, "Business details");
+  await fill(biz, "Official name", "Testbakker BV");
+  await fill(biz, "Street and number", "Kerkstraat 1");
+  await fill(biz, "Postcode", "9000");
+  await fill(biz, "City", "Gent");
+  await fill(biz, "Company number", "0123.456.748"); // wrong check digits
+  await tap(biz, "Continue");
+  await see(biz, "This isn't a valid Belgian company number.");
+  await fill(biz, "Company number", "0123.456.749");
+  await tap(biz, "Continue");
+  await see(biz, "Step 4 of 4");
   const ownerUid = await inPage(biz, () => window.firebase_auth.getAuth(window.firebase_core.getApp()).currentUser.uid);
   await admin.doc(`subscriptions/${ownerUid}`).set({ expiresAt: Timestamp.fromMillis(Date.now() + 30 * 86400_000) });
   await see(biz, "Testbakker");

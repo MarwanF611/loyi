@@ -43,8 +43,10 @@ Future<Uint8List> exportMyData() async {
     final businesses = await all('businesses', 'ownerUid');
     if (businesses.isNotEmpty) {
       final subscription = await db.doc('subscriptions/$uid').get();
+      final details = await db.doc('businessDetails/$uid').get();
       data['business'] = {
         'shops': businesses,
+        'officialDetails': details.exists ? _plain(details.data()) : null,
         'loyaltyCards': await all('programs', 'ownerUid'),
         'nfcTags': await all('tags', 'ownerUid'),
         'subscription': subscription.exists ? _plain(subscription.data()) : null,

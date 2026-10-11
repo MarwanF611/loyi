@@ -1074,7 +1074,7 @@ class L10nFr extends L10n {
 
   @override
   String get signUpSteps =>
-      'Trois étapes : votre compte, vos couleurs, votre abonnement. Ensuite, votre tableau de bord est prêt.';
+      'Quatre étapes : votre compte, vos couleurs, vos coordonnées, votre abonnement. Ensuite, votre tableau de bord est prêt.';
 
   @override
   String get signInSub => 'Connectez-vous pour gérer vos cartes de fidélité.';
@@ -1967,4 +1967,81 @@ class L10nFr extends L10n {
 
   @override
   String get demoForShops => 'Vous voulez ceci pour votre commerce ?';
+
+  @override
+  String get businessDetailsTitle => 'Coordonnées de votre commerce';
+
+  @override
+  String get businessDetailsSub =>
+      'Pour vos factures, l\'accord de traitement des données et l\'envoi de vos deux tags Loyi. Les clients ne voient jamais ces informations.';
+
+  @override
+  String get legalName => 'Nom officiel';
+
+  @override
+  String get legalNameHint =>
+      'Nom de la société, ou votre propre nom si vous êtes indépendant';
+
+  @override
+  String get streetAndNumber => 'Rue et numéro';
+
+  @override
+  String get postcode => 'Code postal';
+
+  @override
+  String get city => 'Commune';
+
+  @override
+  String get country => 'Pays';
+
+  @override
+  String get companyNumber => 'Numéro d\'entreprise';
+
+  @override
+  String get companyNumberHintBE =>
+      'Votre numéro BCE, aussi pour les indépendants';
+
+  @override
+  String get vatNumberOptional => 'Numéro de TVA';
+
+  @override
+  String get phoneOptional => 'Téléphone (facultatif)';
+
+  @override
+  String get detailsPrivate => 'Seuls vous et Loyi voyez ces informations.';
+
+  @override
+  String get fieldRequired => 'Champ obligatoire.';
+
+  @override
+  String get invalidPostcode => 'Vérifiez le code postal.';
+
+  @override
+  String get invalidCompanyNumber =>
+      'Ce numéro d\'entreprise belge n\'est pas valide.';
+
+  @override
+  String get invalidVat => 'Vérifiez le numéro de TVA, p. ex. FR12345678901.';
+
+  @override
+  String get vatMustMatchBE =>
+      'En Belgique, le numéro de TVA est BE suivi de votre numéro d\'entreprise.';
+
+  @override
+  String get countryBE => 'Belgique';
+
+  @override
+  String get countryNL => 'Pays-Bas';
+
+  @override
+  String get countryLU => 'Luxembourg';
+
+  @override
+  String get countryFR => 'France';
+
+  @override
+  String get countryDE => 'Allemagne';
+
+  @override
+  String get vatHelper => 'Uniquement si vous êtes assujetti à la TVA';
 }
