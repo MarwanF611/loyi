@@ -144,7 +144,7 @@ page with "Authorize" / "Fail" buttons.
   subscription (no `billing/{uid}` with a subscription yet), so cancelling and coming back gives no second trial.
   Stripe asks for the card at the start and charges after the trial. During the trial `subscriptions/{uid}` has
   `trial: true` and the app says "Free trial until …". Set `TRIAL_DAYS = "0"` to stop offering it.
-- **Starter kit address**: Checkout asks for a shipping address in `SHIPPING_COUNTRIES`. See docs/KIT.md §4.
+- **Starter kit address**: Checkout asks for a shipping address in `SHIPPING_COUNTRIES`. See docs/KIT.md §5.
 - **Pilot shops** (the home page offers "3 months free for the first 10 shops"): Stripe → Product catalogue →
   Coupons → **New**: 100 % off, duration **3 months**, then **Create promotion code**, e.g. `PILOOT`, max.
   redemptions **10**, first-time order only. Checkout already shows "Add promotion code". Give the code to pilot

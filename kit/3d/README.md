@@ -4,16 +4,17 @@ Two printable objects, as editable OpenSCAD files (`brew install --cask openscad
 
 - **`loyi-card.scad`**: the stamp card, bank-card size (85.6 × 54 mm, 2 mm thick + 0.6 mm raised logo), with the
   NFC tag sealed inside. The shop holds it out after a purchase.
-- **`loyi-stand.scad`**: the counter stand. A front plate (96 × 120 × 6 mm) with the join tag sealed inside and
-  the shop's name, leaning back 15° in a base (104 × 76 × 18 mm) that has a slot behind the plate for the
-  stamp card.
+- **`loyi-stand.scad`**: the counter stand. A front plate (96 × 120 × 6 mm) with the join tag sealed inside,
+  leaning back 15° in a base (104 × 76 × 18 mm) that has a slot behind the plate for the stamp card.
+
+Both are the same for every shop: nothing on them names the shop, so you can print a stock of them.
 
 Sizes, texts and the tag size are at the top of each file. `loyi-common.scad` holds the shared ones.
 
-Export everything (the shop's name goes on the stand):
+Export everything:
 
 ```bash
-./export.sh "Bakkerij Peeters"
+./export.sh
 ```
 
 ## Printing
@@ -24,7 +25,7 @@ it blocks NFC.
 | Part | Orientation | Pause to insert the tag | Colour change (optional) |
 | --- | --- | --- | --- |
 | Card (`loyi-card-card.stl`) | flat, logo up | at **1.2 mm** | at **2.0 mm** |
-| Stand plate (`loyi-stand-plate-….stl`) | flat, text up | at **5.0 mm** | at **6.0 mm** |
+| Stand plate (`loyi-stand-plate.stl`) | flat, text up | at **5.0 mm** | at **6.0 mm** |
 | Stand base (`loyi-stand-base.stl`) | as it stands | no | no |
 
 The pause height is also printed in OpenSCAD's console. In the slicer, add a pause (Bambu/Orca: right-click the

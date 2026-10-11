@@ -1,4 +1,4 @@
-// Loyi counter stand: a front plate with the join tag inside, on a base that holds
+// Loyi counter stand, the same for every shop: a front plate with the join tag inside, on a base that holds
 // the plate at 15° and has a slot behind it for the stamp card.
 //
 // Two parts, both printed flat without supports (PLA or PETG, 0.2 mm layers, 15–20 % infill):
@@ -10,7 +10,6 @@
 include <loyi-common.scad>
 
 part = "both";
-shop = "Bakkerij Peeters";   // shop name on the plate; "" for none
 line1 = "Spaar hier";
 line2 = "je stempels";
 line3 = "Tik met je telefoon · Touchez · Tap";
@@ -44,9 +43,8 @@ module plate_body() {
 module plate_relief() {
   translate([0, 0, plate_t]) linear_extrude(relief) {
     top = plate_h / 2;
-    if (shop != "") translate([0, top - 13]) text(shop, size = 5, font = font, halign = "center");
-    translate([0, top - 25]) text(line1, size = 8.5, font = font, halign = "center");
-    translate([0, top - 36]) text(line2, size = 8.5, font = font, halign = "center");
+    translate([0, top - 20]) text(line1, size = 8.5, font = font, halign = "center");
+    translate([0, top - 31]) text(line2, size = 8.5, font = font, halign = "center");
     // Dashed ring around the tag: "tap here".
     translate([0, tag_y]) {
       for (i = [0 : 23]) rotate(i * 15) arc(r = 17, width = 1.4, half_angle = 4.5);

@@ -1,0 +1,73 @@
+<!doctype html>
+<!--
+  Instruction card for the starter kit: A6 landscape, one page per language (nl, fr, en).
+  The kit is the same for every shop; the shop links the two tags itself with these steps.
+  Print: open in Chrome → Print → paper A6 (or "Fit to page" on A4 and cut), margins none, background graphics on.
+  After buying a domain, change the address below (and in app/web_i18n/site.json).
+-->
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Loyi starterkit: instructiekaart</title>
+<style>
+  @page { size: 148mm 105mm; margin: 0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e7e3de; font-family: "Plus Jakarta Sans", "Helvetica Neue", Arial, sans-serif; color: #17161c; }
+  .card { width: 148mm; height: 105mm; margin: 8mm auto; padding: 7mm 8mm; background: #fff; display: flex; flex-direction: column; gap: 3.2mm; page-break-after: always; break-after: page; }
+  @media print { body { background: #fff; } .card { margin: 0; } }
+  header { display: flex; justify-content: space-between; align-items: baseline; }
+  .logo { font-size: 7mm; font-weight: 800; letter-spacing: -0.03em; }
+  .logo span, .accent { color: #ff5a3c; }
+  .tag { font-size: 2.4mm; letter-spacing: 0.12em; text-transform: uppercase; color: #6e6a73; }
+  h1 { margin: 0; font-size: 5.4mm; line-height: 1.15; letter-spacing: -0.01em; }
+  ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2.2mm; counter-reset: step; }
+  li { display: flex; gap: 3mm; align-items: flex-start; font-size: 3.1mm; line-height: 1.35; counter-increment: step; }
+  li::before { content: counter(step); flex: none; width: 5.4mm; height: 5.4mm; border-radius: 50%; background: #17161c; color: #fff; font-weight: 800; font-size: 2.9mm; display: flex; align-items: center; justify-content: center; }
+  li b { font-weight: 700; }
+  footer { margin-top: auto; display: flex; justify-content: space-between; gap: 4mm; font-size: 2.6mm; color: #6e6a73; border-top: 0.3mm solid #e7e3de; padding-top: 2.4mm; }
+  footer b { color: #17161c; }
+</style>
+</head>
+<body>
+
+<section class="card" lang="nl">
+  <header><div class="logo">loyi<span>.</span></div><div class="tag">Je starterkit</div></header>
+  <h1>Zo zet je Loyi in 2 minuten klaar</h1>
+  <ol>
+    <li><span>Maak je klantenkaart op <b>loyi-b530b.web.app</b> als dat nog niet gebeurd is (Kaarten → Nieuwe kaart).</span></li>
+    <li><span>Log op je telefoon in met je zaak. Zet NFC aan als je een Android-telefoon hebt.</span></li>
+    <li><span>Hou je telefoon tegen de <b>standaard</b>. Kies je kaart, kies <b>Aanmelden</b> en tik op <b>Tag koppelen</b>.</span></li>
+    <li><span>Hou je telefoon tegen de <b>stempelkaart</b>. Kies je kaart, kies <b>Stempel</b> en tik op <b>Tag koppelen</b>.</span></li>
+    <li><span>Klaar. Zet de standaard op de toog en hou de stempelkaart achter de toog: één tik na een aankoop is één stempel.</span></li>
+  </ol>
+  <footer><span>Kwijt of verkeerd gekoppeld? Zet de tag uit onder Kaarten.</span><span>Vragen? <b>marwan.fikri20@gmail.com</b></span></footer>
+</section>
+
+<section class="card" lang="fr">
+  <header><div class="logo">loyi<span>.</span></div><div class="tag">Votre kit de démarrage</div></header>
+  <h1>Loyi prêt en 2 minutes</h1>
+  <ol>
+    <li><span>Créez votre carte de fidélité sur <b>loyi-b530b.web.app</b> si ce n'est pas encore fait (Cartes → Nouvelle carte).</span></li>
+    <li><span>Connectez-vous avec votre commerce sur votre téléphone. Activez le NFC si vous avez un téléphone Android.</span></li>
+    <li><span>Approchez votre téléphone du <b>présentoir</b>. Choisissez votre carte, puis <b>Inscription</b>, puis <b>Associer le tag</b>.</span></li>
+    <li><span>Approchez votre téléphone de la <b>carte tampon</b>. Choisissez votre carte, puis <b>Tampon</b>, puis <b>Associer le tag</b>.</span></li>
+    <li><span>C'est fait. Le présentoir va sur le comptoir, la carte tampon derrière : une touche après un achat, c'est un tampon.</span></li>
+  </ol>
+  <footer><span>Perdu ou mal associé ? Désactivez le tag dans Cartes.</span><span>Des questions ? <b>marwan.fikri20@gmail.com</b></span></footer>
+</section>
+
+<section class="card" lang="en">
+  <header><div class="logo">loyi<span>.</span></div><div class="tag">Your starter kit</div></header>
+  <h1>Set up Loyi in 2 minutes</h1>
+  <ol>
+    <li><span>Make your loyalty card on <b>loyi-b530b.web.app</b> if you haven't yet (Cards → New card).</span></li>
+    <li><span>Sign in with your shop on your phone. Turn on NFC if you have an Android phone.</span></li>
+    <li><span>Hold your phone to the <b>stand</b>. Choose your card, choose <b>Join</b> and tap <b>Link tag</b>.</span></li>
+    <li><span>Hold your phone to the <b>stamp card</b>. Choose your card, choose <b>Stamp</b> and tap <b>Link tag</b>.</span></li>
+    <li><span>Done. The stand goes on the counter, the stamp card behind it: one tap after a purchase is one stamp.</span></li>
+  </ol>
+  <footer><span>Lost or linked wrongly? Switch the tag off under Cards.</span><span>Questions? <b>marwan.fikri20@gmail.com</b></span></footer>
+</section>
+
+</body>
+</html>

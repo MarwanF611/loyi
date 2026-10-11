@@ -22,7 +22,6 @@ const env = {
   SHIPPING_COUNTRIES: "BE,NL",
   SDM_META_KEY: "11".repeat(16),
   SDM_FILE_KEY: "22".repeat(16),
-  ADMIN_EMAILS: "boss@loyi.test",
 };
 const run = Date.now();
 const DAY = 86_400;
@@ -32,10 +31,7 @@ const now = () => Math.floor(Date.now() / 1000);
 const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
 const jwk = { ...publicKey.export({ format: "jwk" }), kid: "test-kid", alg: "RS256", use: "sig" };
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
-function idToken(
-  uid,
-  { provider = "password", project = PROJECT, exp = now() + 3600, key = privateKey, email = `${uid}@shop.test`, verified = false } = {},
-) {
+function idToken(uid, { provider = "password", project = PROJECT, exp = now() + 3600, key = privateKey } = {}) {
   const head = b64({ alg: "RS256", kid: "test-kid", typ: "JWT" });
   const body = b64({
     iss: `https://securetoken.google.com/${project}`,
@@ -43,8 +39,7 @@ function idToken(
     sub: uid,
     iat: now() - 10,
     exp,
-    email,
-    email_verified: verified,
+    email: `${uid}@shop.test`,
     firebase: { sign_in_provider: provider },
   });
   const sig = createSign("RSA-SHA256").update(`${head}.${body}`).sign(key).toString("base64url");
@@ -348,12 +343,12 @@ test("secure tags: link once, then one-time links with a stamp ticket", async ()
 
   // A client tapping a new tag: not linked yet, and clients can't link.
   let res = await call("/kit-tap", { token: idToken(client, { provider: "anonymous" }), body: await tap(tagUid, 1) });
-  assert.deepEqual(await res.json(), { status: "unlinked", canLink: false, admin: false });
+  assert.deepEqual(await res.json(), { status: "unlinked", canLink: false });
 
   // The shop taps it (newer counter) and links it as a stamp tag of its card.
   const shopTap = await tap(tagUid, 2);
   res = await call("/kit-tap", { token: idToken(owner), body: shopTap });
-  assert.deepEqual(await res.json(), { status: "unlinked", canLink: true, admin: false });
+  assert.deepEqual(await res.json(), { status: "unlinked", canLink: true });
   // Someone else's card can't be chosen, and only the shop that tapped may link.
   res = await call("/kit-link", { token: idToken(`other-${run}`), body: { ...shopTap, programId: `kitprog-${run}`, type: "stamp", label: "Counter" } });
   assert.equal(res.status, 409);
@@ -445,60 +440,5 @@ test("checkout is filled in with the shop's official details", async () => {
   await call("/checkout", { token: idToken(uid) });
   assert.equal(stripe.calls.filter((c) => c.path === "/v1/customers").length, 0);
   assert.ok(stripe.calls.some((c) => c.path.startsWith("/v1/customers/cus_new_")));
-});
-
-test("admin: only verified Loyi emails; lists shops and links kit tags to any shop", async () => {
-  const boss = (uid = `boss-${run}`) => idToken(uid, { email: "boss@loyi.test", verified: true, provider: "google.com" });
-  // Not an admin, or the right email but not verified: refused.
-  assert.equal((await call("/admin/shops", { token: idToken(`shop-${run}`) })).status, 403);
-  assert.equal((await call("/admin/shops", { token: idToken(`fake-${run}`, { email: "boss@loyi.test" }) })).status, 403);
-
-  const owner = `adminshop-${run}`;
-  await seed(`businesses/adminbiz-${run}`, { ownerUid: owner, name: `Bakkerij Admin ${run}` });
-  await seed(`businessDetails/${owner}`, { ownerUid: owner, legalName: "Admin BV", street: "Kerkstraat 1", postcode: "9000", city: "Gent", country: "BE", phone: "+32 470 00 00 00" });
-  await seed(`programs/adminprog-${run}`, { ownerUid: owner, businessId: `adminbiz-${run}`, name: "Broodjeskaart" });
-  const list = await (await call("/admin/shops", { token: boss() })).json();
-  const shop = list.shops.find((x) => x.businessId === `adminbiz-${run}`);
-  assert.deepEqual(
-    { legalName: shop.legalName, city: shop.city, programs: shop.programs, secureTags: shop.secureTags, subscribed: shop.subscribed },
-    { legalName: "Admin BV", city: "Gent", programs: [{ id: `adminprog-${run}`, name: "Broodjeskaart" }], secureTags: 0, subscribed: false },
-  );
-  assert.equal(shop.address, "Kerkstraat 1, 9000 Gent, BE");
-
-  // The admin taps a new tag: it says so, and links it to the shop's card (the tag belongs to the shop).
-  const uid1 = `06${String(run).slice(-12)}`;
-  const t1 = await tap(uid1, 1);
-  assert.deepEqual(await (await call("/kit-tap", { token: boss(), body: t1 })).json(), { status: "unlinked", canLink: true, admin: true });
-  let res = await call("/admin/kit-link", { token: boss(), body: { ...t1, programId: `adminprog-${run}`, type: "stamp", label: "Toog" } });
-  assert.equal(res.status, 200);
-  const { tagId } = await res.json();
-  const tag = await doc(`tags/${tagId}`);
-  assert.equal(tag.ownerUid, owner);
-  assert.equal(tag.businessId, `adminbiz-${run}`);
-  assert.equal(tag.secure, true);
-  // A shop can't use the admin route.
-  const t2 = await tap(`07${String(run).slice(-12)}`, 1);
-  await call("/kit-tap", { token: idToken(owner), body: t2 });
-  assert.equal((await call("/admin/kit-link", { token: idToken(owner), body: { ...t2, programId: `adminprog-${run}`, type: "join", label: "x" } })).status, 403);
-
-  // A shop without a card yet: the admin creates its first card while linking.
-  const uid3 = `08${String(run).slice(-12)}`;
-  const t3 = await tap(uid3, 1);
-  await call("/kit-tap", { token: boss(), body: t3 });
-  res = await call("/admin/kit-link", {
-    token: boss(),
-    body: { ...t3, type: "join", label: "Deur", newCard: { businessId: `adminbiz-${run}`, name: "Koffiekaart", stampsRequired: 8, reward: "Gratis koffie" } },
-  });
-  const made = await res.json();
-  const program = await doc(`programs/${made.programId}`);
-  assert.equal(program.name, "Koffiekaart");
-  assert.equal(program.stampsRequired, "8");
-  assert.equal(program.ownerUid, owner);
-  assert.equal(program.active, true);
-  assert.equal(program.rewards.values[0].mapValue.fields.title.stringValue, "Gratis koffie");
-  assert.equal((await doc(`tags/${made.tagId}`)).programId, made.programId);
-  const after = (await (await call("/admin/shops", { token: boss() })).json()).shops.find((x) => x.businessId === `adminbiz-${run}`);
-  assert.equal(after.secureTags, 2);
-  assert.equal(after.programs.length, 2);
 });
 

@@ -1,9 +1,10 @@
 # Starter kit: secure Loyi tags
 
-Every new shop gets two secure tags in the post. They solve two problems at once:
+Every new shop gets the same starter kit in the post: a counter stand and a stamp card, each with a secure tag inside.
+The tags solve two problems at once:
 
-- **No setup work for the shop.** The shop sticks the tags on, holds a signed-in phone to each one and picks a card
-  and a role (join or stamp). No NFC Tools, no links to copy.
+- **Little setup work for the shop.** Every shop gets the same box. The shop holds a signed-in phone to each tag and
+  picks a card and a role (join or stamp). No NFC Tools, no links to copy.
 - **No stamping from home.** A plain sticker always holds the same link, so a client can save it and stamp again after
   the waiting time. A secure tag (NXP **NTAG 424 DNA**) writes a new link at every tap, with an encrypted tap
   counter and a signature. The billing Worker checks it and refuses any link it has seen before, and firestore.rules
@@ -77,31 +78,31 @@ cd billing-worker && SDM_META_KEY=… SDM_FILE_KEY=… node tools/check-tag.mjs 
 `✓ Genuine tap` means the tag is ready. Tap twice: the counter must go up. Program all tags of a batch the same way;
 each tag is told apart by its UID, so nothing in the link is shop-specific and any kit can go to any shop.
 
-## 4. Prepare a kit for a shop (admin)
+## 4. The kit: the same box for every shop
 
-Kits arrive linked, so the shop only has to put them on the counter. Your verified sign-in email must be in
-`ADMIN_EMAILS` (`billing-worker/wrangler.toml`; Google sign-in counts as verified).
+Nothing in the kit belongs to a shop until the shop links it, so you can program, print and pack a stock of kits
+ahead of time. Each box holds:
 
-1. On your phone, sign in on the website (Shop sign in, with Google). You don't need a shop of your own.
-2. Tap a programmed tag. Instead of the shop's screen you get **Prepare a kit**.
-3. Search the shop (name, official name or city) and pick it. The list shows its subscription (trial/active)
-   and how many Loyi tags it has.
-4. Choose its card, or **New card for this shop** if it hasn't made one yet (name, stamps, reward: the shop
-   can change all of it later). Choose **Stamp** or **Join** and where it goes, then **Link**.
-5. The screen shows the shop's official name, address and phone: the shipping label. Tap the next tag.
+- the **counter stand** with a tag sealed in the plate (`kit/3d/loyi-stand.scad`): the shop links it as **Join**;
+- the **stamp card** with a tag inside (`kit/3d/loyi-card.scad`): the shop links it as **Stamp**;
+- the **instruction card** (`kit/instructions.html`, A6, one page each in Dutch, French and English: print the shop's
+  language, or all three).
 
-Test each linked tag once with a phone that isn't signed in as admin: a join tag adds the card, a stamp tag
-gives a stamp (on a test card you can delete afterwards).
+Before it goes in the box: program both tags (§3), check each with `check-tag.mjs`, and tap each once with a phone
+that isn't signed in: it must say the tag isn't linked yet.
+
+The shop does the rest with the instruction card: sign in on the phone, tap the stand, choose the card and **Join**,
+tap the stamp card, choose the card and **Stamp**. The app explains it too (Cards → the card → *Tags from your starter
+kit*). A tag can only be linked by a signed-in shop, and only right after it was tapped.
 
 ## 5. Send kits
 
 Stripe Checkout asks new shops for a shipping address (countries in `SHIPPING_COUNTRIES`, wrangler.toml). Turn on
 Stripe's email for new customers (Settings → Team and security → Email notifications → *Successful payments* and
-*New customers*), then post two tags with a short card: "Hold your phone to each tag while signed in to Loyi; choose
-*Stamp* for the one behind the counter." The address is in Stripe → Customers → the shop → Shipping.
+*New customers*). The address is in Stripe → Customers → the shop → Shipping. Take a kit from the stock and post it.
 
-Trial cost: two tags + postage is about €8 per shop, also for shops that cancel during the trial. Send kits after the
-first payment instead if that becomes a problem (filter Stripe customers on status `active`).
+Trial cost: the kit + postage, also for shops that cancel during the trial. Send kits after the first payment instead
+if that becomes a problem (filter Stripe customers on status `active`).
 
 ## 6. Support
 

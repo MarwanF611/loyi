@@ -243,8 +243,9 @@ from the running app with demo data (`npm run all`). See `marketing/README.md`.
 
 ## Programming NFC tags
 
-New shops get two **secure tags** (NTAG 424 DNA) in the post: they link them by tapping them with a signed-in
-phone, and every tap writes a one-time link the server checks, so a saved stamp link can't be reused. How to make
+Every new shop gets the same starter kit in the post: a counter stand and a stamp card, each with a **secure tag**
+(NTAG 424 DNA) inside. The shop links them itself by tapping them with a signed-in phone (`kit/instructions.html`),
+and every tap writes a one-time link the server checks, so a saved stamp link can't be reused. How to make
 and send them: docs/KIT.md.
 
 Shops can also use their own NTAG213/215 stickers. In the dashboard, open a card, add a join tag and a

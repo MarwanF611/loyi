@@ -67,8 +67,6 @@ Privacy Framework and standard contractual clauses. The database itself is in Be
 - HTTPS everywhere; secrets (Stripe, service account) only in the billing server's environment, never in the app or git.
 - Access: only the owner has access to the Firebase, Stripe and Cloudflare consoles; use two-factor authentication on
   all three.
-- Kit admin (`/admin/*` on the billing Worker): only verified emails in `ADMIN_EMAILS`; it shows shops' official
-  details to prepare and post kits, nothing about clients.
 
 ## 4. Legitimate interest assessment: follow-up messages
 
