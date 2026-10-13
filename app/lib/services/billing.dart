@@ -28,6 +28,12 @@ class Billing {
   /// Stripe's customer portal: change card, download invoices, cancel.
   Future<void> openPortal() async => _go(await _post('/portal'));
 
+  /// A pilot code from Loyi: free access without a card. Returns when it ends.
+  Future<DateTime> redeemPilot(String code) async {
+    final body = await _post('/pilot', {'code': code});
+    return DateTime.parse(body['expiresAt'] as String).toLocal();
+  }
+
   /// Checks a secure tag's one-time link (the `e` and `c` it wrote for this tap).
   Future<KitTap> kitTap(String e, String c) async {
     final body = await _post('/kit-tap', {'e': e, 'c': c});
@@ -82,6 +88,14 @@ class Billing {
           'expired' => l10n.kitTapAgain,
           'unavailable' => l10n.kitUnavailable,
           _ when res.statusCode == 401 => l10n.signInAgain,
+          _ => l10n.somethingWentWrong,
+        },
+        (_, '/pilot') when body['code'] != null => switch (body['code']) {
+          'invalid' => l10n.pilotCodeInvalid,
+          'used' => l10n.pilotNotForYou,
+          'full' => l10n.pilotFull,
+          'subscribed' => l10n.alreadySubscribed,
+          'unavailable' => l10n.pilotNotRunning,
           _ => l10n.somethingWentWrong,
         },
         (401, _) => l10n.signInAgain,

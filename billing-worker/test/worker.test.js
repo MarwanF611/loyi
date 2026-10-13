@@ -442,3 +442,79 @@ test("checkout is filled in with the shop's official details", async () => {
   assert.ok(stripe.calls.some((c) => c.path.startsWith("/v1/customers/cus_new_")));
 });
 
+
+// ── Pilot shops ──────────────────────────────────────────────────────────────
+
+test("pilot code: new shops get free access without a card, up to the limit", async () => {
+  const pilot = (uid, code, opts = {}) => call("/pilot", { token: idToken(uid, opts), body: { code } });
+  env.PILOT_CODE = `PILOT-${run}`;
+  env.PILOT_LIMIT = "2";
+  env.PILOT_DAYS = "90";
+  try {
+    // Shop accounts only, and only the right code.
+    assert.equal((await pilot(`pilotanon-${run}`, env.PILOT_CODE, { provider: "anonymous" })).status, 403);
+    let res = await pilot(`pilot1-${run}`, "WRONG");
+    assert.equal(res.status, 400);
+    assert.equal((await res.json()).code, "invalid");
+
+    // Typed in lower case with spaces still counts.
+    stripe.calls.length = 0;
+    res = await pilot(`pilot1-${run}`, ` pilot-${run} `.toLowerCase());
+    assert.equal(res.status, 200);
+    assert.equal((await res.json()).slot, 1);
+    assert.equal(stripe.calls.length, 0); // no Stripe at all
+    const s = await doc(`subscriptions/pilot1-${run}`);
+    assert.deepEqual([s.source, s.environment, s.willRenew], ["grant", "PILOT", false]);
+    const days = (new Date(s.expiresAt) - Date.now()) / (DAY * 1000);
+    assert.ok(days > 89.9 && days <= 90);
+
+    // Once per shop.
+    res = await pilot(`pilot1-${run}`, env.PILOT_CODE);
+    assert.equal((await res.json()).code, "subscribed");
+
+    // Not for a shop that subscribed before.
+    await webhook("customer.subscription.deleted", subscription(`sub_pilotold_${run}`, `pilotold-${run}`, { status: "canceled", ended_at: now() - DAY }));
+    res = await pilot(`pilotold-${run}`, env.PILOT_CODE);
+    assert.equal(res.status, 409);
+    assert.equal((await res.json()).code, "used");
+
+    // Two places: the second shop gets the last one, the third is told it's full.
+    assert.equal((await (await pilot(`pilot2-${run}`, env.PILOT_CODE)).json()).slot, 2);
+    res = await pilot(`pilot3-${run}`, env.PILOT_CODE);
+    assert.equal(res.status, 410);
+    assert.equal((await res.json()).code, "full");
+    assert.equal(await doc(`subscriptions/pilot3-${run}`), null);
+    assert.equal(await doc(`pilots/pilot3-${run}`), null);
+
+    // A new code is a new round of places.
+    env.PILOT_CODE = `PILOT2-${run}`;
+    assert.equal((await (await pilot(`pilot3-${run}`, env.PILOT_CODE)).json()).slot, 1);
+
+    // No code set: no pilot.
+    delete env.PILOT_CODE;
+    assert.equal((await pilot(`pilot4-${run}`, "anything")).status, 503);
+  } finally {
+    delete env.PILOT_CODE;
+  }
+});
+
+test("after the pilot, a shop subscribes without a second free trial", async () => {
+  env.PILOT_CODE = `PILOTEND-${run}`;
+  try {
+    const uid = `pilotend-${run}`;
+    assert.equal((await call("/pilot", { token: idToken(uid), body: { code: env.PILOT_CODE } })).status, 200);
+    // The pilot runs: no checkout yet.
+    assert.equal((await call("/checkout", { token: idToken(uid) })).status, 409);
+    // Pilot over (stands in for 90 days passing).
+    const ended = new Date(Date.now() - 1000).toISOString();
+    await realFetch(`http://127.0.0.1:8085/v1/projects/${PROJECT}/databases/(default)/documents/subscriptions/${uid}`, {
+      method: "PATCH",
+      headers: { Authorization: "Bearer owner", "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: { expiresAt: { timestampValue: ended }, source: { stringValue: "grant" } } }),
+    });
+    assert.equal((await call("/checkout", { token: idToken(uid) })).status, 200);
+    assert.equal(stripe.calls.at(-1).params.get("subscription_data[trial_period_days]"), null);
+  } finally {
+    delete env.PILOT_CODE;
+  }
+});

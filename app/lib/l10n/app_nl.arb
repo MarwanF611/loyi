@@ -559,5 +559,15 @@
   "countryLU": "Luxemburg",
   "countryFR": "Frankrijk",
   "countryDE": "Duitsland",
-  "vatHelper": "Alleen als je btw-plichtig bent"
+  "vatHelper": "Alleen als je btw-plichtig bent",
+  "havePilotCode": "Ik heb een pilootcode",
+  "pilotCodeTitle": "Pilootcode",
+  "pilotCodeSub": "Vul de code in die je van Loyi kreeg. Je gratis toegang start meteen, zonder kaart.",
+  "pilotCodeLabel": "Code",
+  "activatePilot": "Activeren",
+  "pilotActive": "Pilot actief: gratis tot {date}.",
+  "pilotCodeInvalid": "Die code klopt niet. Controleer hem en probeer opnieuw.",
+  "pilotNotForYou": "De pilot is alleen voor nieuwe zaken.",
+  "pilotFull": "Alle pilotplaatsen zijn ingenomen. Je kunt nog altijd de gratis proefperiode starten.",
+  "pilotNotRunning": "Er loopt momenteel geen pilot."
 }

@@ -450,6 +450,14 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Pilot shops: who used the pilot code and which of the limited places they took. Server only.
+    match /pilots/{ownerUid} {
+      allow read, write: if false;
+    }
+    match /pilotSlots/{slotId} {
+      allow read, write: if false;
+    }
+
     // Secure tags: the server's record per physical tag (UID → tag, last tap counter). Server only.
     match /kitTags/{tagUid} {
       allow read, write: if false;

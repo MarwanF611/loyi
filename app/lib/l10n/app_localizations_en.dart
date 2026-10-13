@@ -2023,4 +2023,39 @@ class L10nEn extends L10n {
 
   @override
   String get vatHelper => 'Only if you\'re VAT-registered';
+
+  @override
+  String get havePilotCode => 'I have a pilot code';
+
+  @override
+  String get pilotCodeTitle => 'Pilot code';
+
+  @override
+  String get pilotCodeSub =>
+      'Enter the code you got from Loyi. Your free access starts straight away, no card needed.';
+
+  @override
+  String get pilotCodeLabel => 'Code';
+
+  @override
+  String get activatePilot => 'Activate';
+
+  @override
+  String pilotActive(String date) {
+    return 'Pilot active: free until $date.';
+  }
+
+  @override
+  String get pilotCodeInvalid =>
+      'That code isn\'t right. Check it and try again.';
+
+  @override
+  String get pilotNotForYou => 'The pilot is only for new shops.';
+
+  @override
+  String get pilotFull =>
+      'All pilot places are taken. You can still start the free trial.';
+
+  @override
+  String get pilotNotRunning => 'There\'s no pilot running right now.';
 }

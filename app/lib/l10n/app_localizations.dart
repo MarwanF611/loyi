@@ -3458,6 +3458,66 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'Only if you\'re VAT-registered'**
   String get vatHelper;
+
+  /// No description provided for @havePilotCode.
+  ///
+  /// In en, this message translates to:
+  /// **'I have a pilot code'**
+  String get havePilotCode;
+
+  /// No description provided for @pilotCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot code'**
+  String get pilotCodeTitle;
+
+  /// No description provided for @pilotCodeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code you got from Loyi. Your free access starts straight away, no card needed.'**
+  String get pilotCodeSub;
+
+  /// No description provided for @pilotCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get pilotCodeLabel;
+
+  /// No description provided for @activatePilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get activatePilot;
+
+  /// No description provided for @pilotActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot active: free until {date}.'**
+  String pilotActive(String date);
+
+  /// No description provided for @pilotCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That code isn\'t right. Check it and try again.'**
+  String get pilotCodeInvalid;
+
+  /// No description provided for @pilotNotForYou.
+  ///
+  /// In en, this message translates to:
+  /// **'The pilot is only for new shops.'**
+  String get pilotNotForYou;
+
+  /// No description provided for @pilotFull.
+  ///
+  /// In en, this message translates to:
+  /// **'All pilot places are taken. You can still start the free trial.'**
+  String get pilotFull;
+
+  /// No description provided for @pilotNotRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s no pilot running right now.'**
+  String get pilotNotRunning;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

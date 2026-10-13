@@ -2044,4 +2044,40 @@ class L10nFr extends L10n {
 
   @override
   String get vatHelper => 'Uniquement si vous êtes assujetti à la TVA';
+
+  @override
+  String get havePilotCode => 'J\'ai un code pilote';
+
+  @override
+  String get pilotCodeTitle => 'Code pilote';
+
+  @override
+  String get pilotCodeSub =>
+      'Saisissez le code reçu de Loyi. Votre accès gratuit démarre tout de suite, sans carte.';
+
+  @override
+  String get pilotCodeLabel => 'Code';
+
+  @override
+  String get activatePilot => 'Activer';
+
+  @override
+  String pilotActive(String date) {
+    return 'Projet pilote activé : gratuit jusqu\'au $date.';
+  }
+
+  @override
+  String get pilotCodeInvalid =>
+      'Ce code n\'est pas correct. Vérifiez-le et réessayez.';
+
+  @override
+  String get pilotNotForYou =>
+      'Le projet pilote est réservé aux nouveaux commerces.';
+
+  @override
+  String get pilotFull =>
+      'Toutes les places du projet pilote sont prises. Vous pouvez toujours commencer l\'essai gratuit.';
+
+  @override
+  String get pilotNotRunning => 'Aucun projet pilote n\'est en cours.';
 }

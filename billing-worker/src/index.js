@@ -15,6 +15,7 @@ import { verifySun } from "./sun.js";
 //   POST /kit-tap         any signed-in user → checks a secure tag's one-time link (e, c) and
 //                         returns its tag id, plus a stamp ticket for stamp tags
 //   POST /kit-link        signed-in shop → links a new secure tag (just tapped) to one of its cards
+//   POST /pilot           signed-in shop → a pilot code gives a new shop free access (no card, no Stripe)
 //   POST /stripe          Stripe webhook (signature-checked)
 // All but /stripe need `Authorization: Bearer <Firebase ID token>`.
 //
@@ -26,8 +27,9 @@ import { verifySun } from "./sun.js";
 //   STRIPE_WEBHOOK_SECRET      whsec_… from the webhook endpoint
 //   FIREBASE_SERVICE_ACCOUNT   service account JSON with the "Cloud Datastore User" role
 //   SDM_META_KEY, SDM_FILE_KEY the two AES keys (32 hex) written onto secure tags (docs/KIT.md)
+//   PILOT_CODE                 the code pilot shops type in (letters, digits and dashes); unset = no pilot
 // Vars (wrangler.toml): FIREBASE_PROJECT_ID, STRIPE_PRICE_ID, APP_URL, ALLOWED_ORIGINS, TRIAL_DAYS,
-//   SHIPPING_COUNTRIES
+//   SHIPPING_COUNTRIES, PILOT_LIMIT, PILOT_DAYS
 
 const STRIPE_VERSION = "2024-06-20"; // pinned so response shapes don't change under us
 const DAY = 86_400_000;
@@ -58,6 +60,8 @@ export default {
           return json(await kitTap(await requireUser(request, env), await request.json(), env), 200, cors);
         case "/kit-link":
           return json(await kitLink(await requireShop(request, env), await request.json(), env), 200, cors);
+        case "/pilot":
+          return json(await redeemPilot(await requireShop(request, env), await request.json(), env), 200, cors);
         default:
           return json({ error: "Not found" }, 404, cors);
       }
@@ -134,8 +138,9 @@ export async function createCheckout(user, returnTo, env, locale = "auto") {
   // The shop's official details (sign-up step 3) fill in Checkout: name, address, VAT and the kit's address.
   const details = await readDoc(`businessDetails/${user.uid}`, env);
   const customerId = details ? await saveCustomer(billing?.customerId, user, details, env) : billing?.customerId;
-  // One free trial per shop: not for a shop that has had a subscription before.
-  const trialDays = billing?.subscriptionId ? 0 : Number(env.TRIAL_DAYS ?? 0);
+  // One free trial per shop: not for a shop that has had a subscription or a pilot before.
+  const pilot = await readDoc(`pilots/${user.uid}`, env);
+  const trialDays = billing?.subscriptionId || pilot ? 0 : Number(env.TRIAL_DAYS ?? 0);
   const countries = (env.SHIPPING_COUNTRIES || "").split(",").map((c) => c.trim()).filter(Boolean);
 
   const params = {
@@ -217,6 +222,47 @@ export async function deleteAccount(user, env) {
   await deleteDoc(`billing/${user.uid}`, env);
   await deleteDoc(`subscriptions/${user.uid}`, env);
   return { ok: true, cancelled };
+}
+
+// ── Pilot shops ──────────────────────────────────────────────────────────────
+//
+// The first PILOT_LIMIT new shops with PILOT_CODE get PILOT_DAYS free, without a card, as a grant
+// (Stripe never shortens it). Afterwards they subscribe like everyone else, without a second trial.
+// pilots/{uid}: {slot, createdAt}, one per shop. pilotSlots/{code}_{n}: {uid}, n = 1..PILOT_LIMIT, so two
+// shops can't take the same place; a new code starts a new round of places. Both are server only.
+
+const pilotCode = (s) => String(s ?? "").toUpperCase().replace(/[^A-Z0-9-]/g, "");
+
+export async function redeemPilot(user, body, env, now = Date.now()) {
+  const expected = pilotCode(env.PILOT_CODE);
+  if (!expected) throw new HttpError(503, "There's no pilot running.", "unavailable");
+  if (!safeEqual(pilotCode(body?.code), expected)) throw new HttpError(400, "That pilot code isn't right.", "invalid");
+
+  const current = await readDoc(`subscriptions/${user.uid}`, env);
+  if (current && new Date(current.expiresAt) > new Date(now)) throw new HttpError(409, "You're already subscribed.", "subscribed");
+  const billing = await readDoc(`billing/${user.uid}`, env);
+  const used = () => new HttpError(409, "The pilot is for new shops.", "used");
+  if (current || billing?.subscriptionId) throw used();
+
+  const createdAt = new Date(now).toISOString();
+  if (!(await writeDoc(`pilots/${user.uid}`, { createdAt }, env, { mustNotExist: true }))) throw used();
+  let slot = 0;
+  for (let n = 1; n <= Number(env.PILOT_LIMIT ?? 10) && !slot; n++) {
+    if (await writeDoc(`pilotSlots/${expected}_${n}`, { uid: user.uid, createdAt }, env, { mustNotExist: true })) slot = n;
+  }
+  if (!slot) {
+    await deleteDoc(`pilots/${user.uid}`, env);
+    throw new HttpError(410, "All pilot places are taken.", "full");
+  }
+  await writeDoc(`pilots/${user.uid}`, { slot, createdAt }, env);
+
+  const expiresAt = new Date(now + Number(env.PILOT_DAYS ?? 90) * DAY).toISOString();
+  await writeDoc(
+    `subscriptions/${user.uid}`,
+    { expiresAt, source: "grant", environment: "PILOT", willRenew: false, updatedAt: createdAt },
+    env,
+  );
+  return { expiresAt, slot };
 }
 
 // ── Secure tags (starter kit) ────────────────────────────────────────────────

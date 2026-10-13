@@ -559,5 +559,15 @@
   "countryLU": "Luxembourg",
   "countryFR": "France",
   "countryDE": "Allemagne",
-  "vatHelper": "Uniquement si vous êtes assujetti à la TVA"
+  "vatHelper": "Uniquement si vous êtes assujetti à la TVA",
+  "havePilotCode": "J'ai un code pilote",
+  "pilotCodeTitle": "Code pilote",
+  "pilotCodeSub": "Saisissez le code reçu de Loyi. Votre accès gratuit démarre tout de suite, sans carte.",
+  "pilotCodeLabel": "Code",
+  "activatePilot": "Activer",
+  "pilotActive": "Projet pilote activé : gratuit jusqu'au {date}.",
+  "pilotCodeInvalid": "Ce code n'est pas correct. Vérifiez-le et réessayez.",
+  "pilotNotForYou": "Le projet pilote est réservé aux nouveaux commerces.",
+  "pilotFull": "Toutes les places du projet pilote sont prises. Vous pouvez toujours commencer l'essai gratuit.",
+  "pilotNotRunning": "Aucun projet pilote n'est en cours."
 }

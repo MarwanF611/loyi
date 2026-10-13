@@ -95,7 +95,8 @@ cd billing-worker
 GOOGLE_SERVICE_ACCOUNT=~/loyi-billing-key.json node grant-access.js <uid> 365
 ```
 
-A grant is never shortened by Stripe; run it with `0` days to end it.
+A grant is never shortened by Stripe; run it with `0` days to end it. Pilot shops don't need this: they type
+the pilot code themselves at the pay step (docs/STRIPE.md §6).
 
 ## 7. Build and submit
 

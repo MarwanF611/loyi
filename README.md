@@ -53,8 +53,8 @@ dashboard to open and for tags to work (`firestore.rules` checks it on every joi
 always use rewards they already earned). Only `billing-worker/` writes that document (a service account).
 It creates Stripe Checkout and customer-portal sessions for signed-in shops (it verifies their Firebase ID
 token), and on every Stripe webhook it reads the subscription back from Stripe's API and mirrors it. Deleting
-a shop's account cancels its Stripe subscription. Pilot shops and the App Review demo account get access with
-`billing-worker/grant-access.js`. Local tests: `cd billing-worker && npm test` (emulators running).
+a shop's account cancels its Stripe subscription. Pilot shops type a pilot code at the pay step (90 days free, no
+card, first 10 shops; docs/STRIPE.md §6); the App Review demo account gets access with `billing-worker/grant-access.js`. Local tests: `cd billing-worker && npm test` (emulators running).
 
 **The business app** has five tabs (a sidebar on wide screens, a bottom bar on phones), all fed by one
 live listener on the shop's cards (`app/lib/business/shell.dart`):

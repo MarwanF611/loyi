@@ -328,8 +328,81 @@ class _Offer extends StatelessWidget {
         Text(context.l10n.stripeNote, style: context.text.bodySmall, textAlign: TextAlign.center),
         const SizedBox(height: 4),
         const LegalLinks(),
+        // Pilot shops (new ones only) start without Stripe; the server checks the code and the places left.
+        if (trial) ...[
+          const SizedBox(height: 4),
+          TextButton(
+            onPressed: busy ? null : () => showDialog<void>(context: context, builder: (_) => const _PilotDialog()),
+            child: Text(context.l10n.havePilotCode),
+          ),
+        ],
       ],
     ),
+  );
+}
+
+class _PilotDialog extends StatefulWidget {
+  const _PilotDialog();
+
+  @override
+  State<_PilotDialog> createState() => _PilotDialogState();
+}
+
+class _PilotDialogState extends State<_PilotDialog> {
+  final _code = TextEditingController();
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _code.dispose();
+    super.dispose();
+  }
+
+  Future<void> _activate() async {
+    if (_code.text.trim().isEmpty) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final until = await billing.redeemPilot(_code.text);
+      if (!mounted) return;
+      // The subscription stream switches the dashboard on by itself.
+      final messenger = ScaffoldMessenger.of(context);
+      final message = context.l10n.pilotActive(_date(until));
+      Navigator.pop(context);
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    } catch (e) {
+      if (mounted) setState(() => _error = friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(context.l10n.pilotCodeTitle),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(context.l10n.pilotCodeSub, style: context.text.bodyMedium),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _code,
+          autofocus: true,
+          autocorrect: false,
+          textCapitalization: TextCapitalization.characters,
+          decoration: InputDecoration(labelText: context.l10n.pilotCodeLabel, errorText: _error, errorMaxLines: 3),
+          onSubmitted: (_) => _busy ? null : _activate(),
+        ),
+      ],
+    ),
+    actions: [
+      TextButton(onPressed: _busy ? null : () => Navigator.pop(context), child: Text(context.l10n.cancel)),
+      FilledButton(onPressed: _busy ? null : _activate, child: Text(context.l10n.activatePilot)),
+    ],
   );
 }
 

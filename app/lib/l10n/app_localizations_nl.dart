@@ -2031,4 +2031,39 @@ class L10nNl extends L10n {
 
   @override
   String get vatHelper => 'Alleen als je btw-plichtig bent';
+
+  @override
+  String get havePilotCode => 'Ik heb een pilootcode';
+
+  @override
+  String get pilotCodeTitle => 'Pilootcode';
+
+  @override
+  String get pilotCodeSub =>
+      'Vul de code in die je van Loyi kreeg. Je gratis toegang start meteen, zonder kaart.';
+
+  @override
+  String get pilotCodeLabel => 'Code';
+
+  @override
+  String get activatePilot => 'Activeren';
+
+  @override
+  String pilotActive(String date) {
+    return 'Pilot actief: gratis tot $date.';
+  }
+
+  @override
+  String get pilotCodeInvalid =>
+      'Die code klopt niet. Controleer hem en probeer opnieuw.';
+
+  @override
+  String get pilotNotForYou => 'De pilot is alleen voor nieuwe zaken.';
+
+  @override
+  String get pilotFull =>
+      'Alle pilotplaatsen zijn ingenomen. Je kunt nog altijd de gratis proefperiode starten.';
+
+  @override
+  String get pilotNotRunning => 'Er loopt momenteel geen pilot.';
 }

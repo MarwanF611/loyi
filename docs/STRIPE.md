@@ -145,11 +145,21 @@ page with "Authorize" / "Fail" buttons.
   Stripe asks for the card at the start and charges after the trial. During the trial `subscriptions/{uid}` has
   `trial: true` and the app says "Free trial until …". Set `TRIAL_DAYS = "0"` to stop offering it.
 - **Starter kit address**: Checkout asks for a shipping address in `SHIPPING_COUNTRIES`. See docs/KIT.md §5.
-- **Pilot shops** (the home page offers "3 months free for the first 10 shops"): Stripe → Product catalogue →
-  Coupons → **New**: 100 % off, duration **3 months**, then **Create promotion code**, e.g. `PILOOT`, max.
-  redemptions **10**, first-time order only. Checkout already shows "Add promotion code". Give the code to pilot
-  shops by email. Ask each one for feedback after a month and, if they agree, a quote for
-  `app/web_i18n/testimonials.json`.
+- **Pilot shops** (the home page offers "3 months free for the first 10 shops"): no Stripe and no card. Set the
+  code once:
+
+  ```bash
+  cd billing-worker
+  npx wrangler@4 secret put PILOT_CODE   # e.g. LOYI-PILOT: letters, digits and dashes
+  ```
+
+  The shop signs up as usual and, at the pay step, taps **"I have a pilot code"** ("Ik heb een pilootcode"). The
+  server gives it `PILOT_DAYS` (90) free as a grant, for the first `PILOT_LIMIT` (10) shops; both are in
+  `wrangler.toml`. Only new shops can use it (no earlier subscription, trial or pilot), once each. When the pilot
+  ends the app shows the normal pay step, without a second free trial. Who took a place: Firestore →
+  `pilotSlots` (`<CODE>_1` … `<CODE>_10`, each with the shop's uid) and `pilots/{uid}`. A new code starts a new
+  round of places; delete the secret to stop the pilot. Ask each shop for feedback after a month and, if they
+  agree, a quote for `app/web_i18n/testimonials.json`.
 
 ## 7. Later: real money
 
