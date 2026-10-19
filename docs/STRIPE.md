@@ -85,7 +85,7 @@ Create a free account at <https://dash.cloudflare.com/sign-up>. Then, in the rep
 | Phone A | Client 1 |
 | Phone B | Client 2, and programs the NFC tag (install **NFC Tools**, free) |
 
-Everything happens on <https://loyi-b530b.web.app>. Don't sign in as the shop on the
+Everything happens on <https://loyi.be>. Don't sign in as the shop on the
 phones' browsers: the phones play clients.
 
 1. **Sign up and pay (laptop).** Open the site → **I have a business** → Create account

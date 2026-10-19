@@ -37,7 +37,7 @@ legal advice: have them checked once.
 4. **App Privacy**: Email address, User ID, Purchase history, Photos (the logo), Other
    user content. All *linked to the user*, *not used for tracking*, purpose *App
    functionality*. This matches `ios/Runner/PrivacyInfo.xcprivacy`.
-5. **Privacy policy URL**: `https://loyi-b530b.web.app/privacy`.
+5. **Privacy policy URL**: `https://loyi.be/privacy`.
    **License agreement**: keep Apple's standard EULA (the terms link to it).
 6. **App Review information** → sign-in required: a demo business account with access
    (step 6). Notes for the reviewer, for example:
@@ -61,8 +61,8 @@ legal advice: have them checked once.
 3. Free app, **no in-app products**.
 4. **Data safety**: same data as the Apple list; data is encrypted in transit; users can
    request deletion.
-5. **Account deletion URL**: `https://loyi-b530b.web.app/delete-account`.
-   **Privacy policy**: `https://loyi-b530b.web.app/privacy`.
+5. **Account deletion URL**: `https://loyi.be/delete-account`.
+   **Privacy policy**: `https://loyi.be/privacy`.
 6. Upload a build to **closed testing** first (see the 12-tester rule above).
 
 ## 4. Payments

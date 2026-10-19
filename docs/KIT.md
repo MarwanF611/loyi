@@ -25,10 +25,8 @@ Code: `billing-worker/src/sun.js` (crypto, tested against RFC 4493 and NXP AN121
 
 ## 1. Before you program any tag: the domain
 
-The link is written into the tag for good. Program kits with the address you'll keep. Tags made now for
-`loyi-b530b.web.app` keep working after a move to loyi.be (Firebase keeps serving that address), but buying the domain
-first is cleaner. Change `url` in `app/web_i18n/site.json` and `APP_URL`/`ALLOWED_ORIGINS` in
-`billing-worker/wrangler.toml` when you do.
+The link is written into the tag for good, so program kits with **loyi.be** (live since 19 Oct 2026). Firebase keeps
+serving `loyi-b530b.web.app` too, so any tag already written with that address keeps working.
 
 ## 2. Keys (once)
 
@@ -60,7 +58,7 @@ by NXP** on an Android phone. Settings, all for the NDEF file (file 02):
 
 | Setting | Value |
 | --- | --- |
-| NDEF record | URI: `https://loyi-b530b.web.app/k?e=00000000000000000000000000000000&c=0000000000000000` |
+| NDEF record | URI: `https://loyi.be/k?e=00000000000000000000000000000000&c=0000000000000000` |
 | Secure Dynamic Messaging (SDM) | on |
 | UID mirror, SDM read counter mirror | on |
 | PICC data | **encrypted**, with key 1 (SDMMetaRead = 1); offset = the first `0` after `e=` |

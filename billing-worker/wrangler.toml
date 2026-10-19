@@ -11,8 +11,8 @@ FIREBASE_PROJECT_ID = "loyi-b530b"
 # The monthly price from Stripe → Product catalogue (price_…).
 STRIPE_PRICE_ID = "price_1UNAU5GX9uMphTPmmjOQsanm"
 # Where shops come back to after paying, and which sites may call this server.
-APP_URL = "https://loyi-b530b.web.app"
-ALLOWED_ORIGINS = "https://loyi-b530b.web.app,https://loyi-b530b.firebaseapp.com"
+APP_URL = "https://loyi.be"
+ALLOWED_ORIGINS = "https://loyi.be,https://loyi-b530b.web.app,https://loyi-b530b.firebaseapp.com"
 # Free days before the first payment (one trial per shop).
 TRIAL_DAYS = "14"
 # Checkout asks for a shipping address in these countries for the starter kit (two secure tags).

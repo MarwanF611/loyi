@@ -14,7 +14,7 @@ const _configuredBaseUrl = String.fromEnvironment('PUBLIC_BASE_URL');
 /// Base URL written onto NFC tags, e.g. `--dart-define=PUBLIC_BASE_URL=https://loyi.be`.
 /// Without it, web uses wherever the app is served from.
 String get publicBaseUrl =>
-    _configuredBaseUrl.isNotEmpty ? _configuredBaseUrl : (kIsWeb ? Uri.base.origin : 'https://loyi-b530b.web.app');
+    _configuredBaseUrl.isNotEmpty ? _configuredBaseUrl : (kIsWeb ? Uri.base.origin : 'https://loyi.be');
 
 String tagUrl(String tagId) => '$publicBaseUrl/t/$tagId';
 
@@ -37,7 +37,7 @@ const appCheckWebKey = String.fromEnvironment('APP_CHECK_WEB_KEY');
 
 /// Legal pages, served as static files from Firebase Hosting (app/web/*.html):
 /// Dutch at the root, French and English under /fr and /en.
-const legalBaseUrl = 'https://loyi-b530b.web.app';
+const legalBaseUrl = 'https://loyi.be';
 String get _legalLanguagePrefix => language.code == 'nl' ? '' : '/${language.code}';
 String get privacyUrl => '$legalBaseUrl$_legalLanguagePrefix/privacy';
 String get termsUrl => '$legalBaseUrl$_legalLanguagePrefix/terms';

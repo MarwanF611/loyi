@@ -192,8 +192,8 @@ Status (free Spark plan, no billing):
   (`firebase apps:sdkconfig ANDROID <appId>`)
 - [x] Secure tags (starter kit, NTAG 424 DNA): code, rules and tests are in; switch them on with docs/KIT.md
   (keys, programming, sending)
-- [x] Hosting: live at **https://loyi-b530b.web.app**. Deploy updates with `./scripts/deploy-web.sh` (builds production, deploys, then restores the local emulator build)
-- [ ] Custom domain (loyi.be) in Hosting and Auth's authorised domains; build with `--dart-define=PUBLIC_BASE_URL=https://loyi.be`
+- [x] Hosting: live at **https://loyi.be** (also still at loyi-b530b.web.app). Deploy updates with `./scripts/deploy-web.sh` (builds production, deploys, then restores the local emulator build)
+- [x] Custom domain: loyi.be (www redirects to it) in Hosting and Auth's authorised domains; DNS at Easyhost; `PUBLIC_BASE_URL` in `config/prod.json`
 
 Deploy rules after changing them: `firebase deploy --only firestore`. The emulators **don't
 enforce indexes**, so after adding or changing a query, add its index to
