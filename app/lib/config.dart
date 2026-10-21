@@ -41,4 +41,4 @@ const legalBaseUrl = 'https://loyi.be';
 String get _legalLanguagePrefix => language.code == 'nl' ? '' : '/${language.code}';
 String get privacyUrl => '$legalBaseUrl$_legalLanguagePrefix/privacy';
 String get termsUrl => '$legalBaseUrl$_legalLanguagePrefix/terms';
-const supportEmail = String.fromEnvironment('SUPPORT_EMAIL', defaultValue: 'marwan.fikri20@gmail.com');
+const supportEmail = String.fromEnvironment('SUPPORT_EMAIL', defaultValue: 'info@loyi.be');
