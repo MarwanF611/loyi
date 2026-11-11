@@ -49,14 +49,18 @@ class _CardPageState extends State<CardPage> {
         ),
       ),
     ),
+    // Straight from a tap, the card shows what the tap wrote until the first snapshot arrives.
     body: StreamBuilder<LoyaltyCard?>(
       stream: _card,
+      initialData: widget.tapResult?.card,
       builder: (context, snap) {
-        if (snap.connectionState == ConnectionState.waiting) return const _CardSkeleton();
+        if (snap.connectionState == ConnectionState.waiting && !snap.hasData) return const _CardSkeleton();
         final card = snap.data;
         if (card == null) return const _CardNotFound();
         return CardData(
           card: card,
+          initialProgram: widget.tapResult?.program,
+          initialBusiness: widget.tapResult?.business,
           placeholder: const _CardSkeleton(),
           builder: (context, program, business) =>
               _CardDetails(card: card, program: program, business: business, tapResult: widget.tapResult),

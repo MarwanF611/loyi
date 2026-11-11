@@ -1,4 +1,4 @@
-// Loads the Firebase JS SDK from a file, then starts Flutter.
+// Loads the Firebase JS SDK from a file and starts Flutter alongside it.
 //
 // FlutterFire normally injects the SDK with inline <script> tags, which the
 // Content-Security-Policy in firebase.json blocks (no 'unsafe-inline'). When
@@ -11,12 +11,16 @@
 const v = "12.19.0";
 const sdk = (name) => import(`./firebase/${v}/firebase-${name}.js`);
 
-// firebase-app first: the other bundles import it (see flutterfire#18436 for the Safari race).
-window.firebase_core = await sdk("app");
-const [auth, firestore, appCheck] = await Promise.all([sdk("auth"), sdk("firestore-pipelines"), sdk("app-check")]);
-window.firebase_auth = auth;
-window.firebase_firestore = firestore;
-window.firebase_app_check = appCheck;
+// The Flutter engine (the biggest download) loads in parallel with the SDK;
+// flutter_bootstrap.js waits for this promise before it runs the app.
+window.loyiFirebaseReady = (async () => {
+  // firebase-app first: the other bundles import it (see flutterfire#18436 for the Safari race).
+  window.firebase_core = await sdk("app");
+  const [auth, firestore, appCheck] = await Promise.all([sdk("auth"), sdk("firestore-pipelines"), sdk("app-check")]);
+  window.firebase_auth = auth;
+  window.firebase_firestore = firestore;
+  window.firebase_app_check = appCheck;
+})();
 
 const bootstrap = document.createElement("script");
 bootstrap.src = "flutter_bootstrap.js";

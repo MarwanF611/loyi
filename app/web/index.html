@@ -15,6 +15,8 @@
 
   <title>Loyi</title>
   <link rel="manifest" href="manifest.json">
+  <!-- The app code starts downloading with the page instead of after the loader scripts. -->
+  <link rel="preload" href="main.dart.js" as="script">
   <!-- Light/dark choice shared with the website (localStorage), applied before Flutter loads. -->
   <script src="site/theme.js"></script>
   <style>
@@ -37,7 +39,7 @@
     <div class="logo">loyi<span>.</span></div>
     <div class="dots"><span></span><span></span><span></span></div>
   </div>
-  <!-- Loads the Firebase SDK, then flutter_bootstrap.js (see the file for why). -->
+  <!-- Loads the Firebase SDK and flutter_bootstrap.js side by side (see the file for why). -->
   <script type="module" src="firebase_sdk.js"></script>
 </body>
 </html>

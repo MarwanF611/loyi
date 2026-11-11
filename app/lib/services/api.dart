@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models.dart';
 import 'auth_service.dart';
 import 'language.dart';
-import 'repo.dart';
 import 'stamping.dart';
 
 enum TapOutcome { joined, alreadyMember, stamped, cooldown }
@@ -16,6 +15,9 @@ class TapResult {
     required this.retryAfter,
     required this.stamps,
     required this.stampsRequired,
+    this.card,
+    this.program,
+    this.business,
   });
 
   final String cardId;
@@ -24,6 +26,11 @@ class TapResult {
   final Duration retryAfter;
   final int stamps;
   final int stampsRequired;
+
+  /// What the tap read and wrote, so the card shows at once; the live listeners take over after.
+  final LoyaltyCard? card;
+  final Program? program;
+  final Business? business;
 }
 
 class RedeemResult {
@@ -54,41 +61,58 @@ class Api {
 
   /// One tap on a tag. A secure tag's stamp also spends the server's [ticketId]
   /// for this tap (see Billing.kitTap); firestore.rules require it.
+  ///
+  /// Everything is read inside the transaction: those are plain requests, so a
+  /// tap never waits for the realtime channel to open, and after the tag the
+  /// other documents load in parallel.
   Future<TapResult> tap(String tagId, {String? ticketId}) async {
     final uid = auth.user!.uid;
     final tagRef = _db.doc('tags/$tagId');
-
-    final DocumentSnapshot<Map<String, dynamic>> tagSnap;
-    try {
-      tagSnap = await tagRef.get();
-    } on FirebaseException {
-      throw LoyiException(l10n.tagNotActive);
-    }
-    if (!tagSnap.exists || tagSnap.get('active') != true) throw LoyiException(l10n.tagNotActive);
-    final tag = LoyiTag.fromDoc(tagSnap);
-
-    final programSnap = await _db.doc('programs/${tag.programId}').get();
-    if (!programSnap.exists) throw LoyiException(l10n.tagNotActive);
-    final program = Program.fromDoc(programSnap);
-    if (!program.active) throw LoyiException(l10n.cardPaused);
-    if (!await repo.isSubscribed(program.ownerUid)) {
-      throw LoyiException(l10n.shopNotActive);
+    LoyiTag? tag;
+    Program? program;
+    // Set instead of thrown: on the web an exception thrown inside the
+    // transaction comes back out as a generic error.
+    LoyiException? refusal;
+    TapResult? refuse(String message) {
+      refusal = LoyiException(message);
+      return null;
     }
 
-    final cardId = '${program.id}_$uid';
-    final cardRef = _db.doc('cards/$cardId');
     try {
-      return await _db.runTransaction((tx) async {
-        final cardSnap = await tx.get(cardRef);
+      final result = await _db.runTransaction<TapResult?>((tx) async {
+        final DocumentSnapshot<Map<String, dynamic>> tagSnap;
+        try {
+          tagSnap = await tx.get(tagRef);
+        } on FirebaseException {
+          return refuse(l10n.tagNotActive);
+        }
+        if (!tagSnap.exists || tagSnap.get('active') != true) return refuse(l10n.tagNotActive);
+        final t = tag = LoyiTag.fromDoc(tagSnap);
+
+        final cardId = '${t.programId}_$uid';
+        final cardRef = _db.doc('cards/$cardId');
+        final (programSnap, subscriptionSnap, businessSnap, cardSnap) = await (
+          tx.get(_db.doc('programs/${t.programId}')),
+          tx.get(_db.doc('subscriptions/${tagSnap.get('ownerUid')}')),
+          tx.get(_db.doc('businesses/${tagSnap.get('businessId')}')),
+          tx.get(cardRef),
+        ).wait;
+        if (!programSnap.exists || !businessSnap.exists) return refuse(l10n.tagNotActive);
+        final p = program = Program.fromDoc(programSnap);
+        if (!p.active) return refuse(l10n.cardPaused);
+        if (!subscriptionSnap.exists || !Subscription.fromDoc(subscriptionSnap).isActive) {
+          return refuse(l10n.shopNotActive);
+        }
+        final business = Business.fromDoc(businessSnap);
         final existing = cardSnap.exists ? LoyaltyCard.fromDoc(cardSnap) : null;
         final now = FieldValue.serverTimestamp();
 
-        if (tag.type == TagType.join) {
+        if (t.type == TagType.join) {
           if (existing != null) {
-            return _result(cardId, TapOutcome.alreadyMember, existing.stamps, program);
+            return _result(TapOutcome.alreadyMember, existing, p, business);
           }
           tx.set(cardRef, {
-            ..._cardBase(uid, program),
+            ..._cardBase(uid, p),
             'stamps': 0,
             'rewardsAvailable': 0,
             'totalStamps': 0,
@@ -99,15 +123,15 @@ class Api {
             'updatedAt': now,
           });
           tx.update(tagRef, {'tapCount': FieldValue.increment(1), 'lastTapAt': now});
-          return _result(cardId, TapOutcome.joined, 0, program);
+          return _result(TapOutcome.joined, _newCard(cardId, uid, p), p, business);
         }
 
         // Stamp tag. The rules enforce the cooldown with server time; this is the friendly pre-check.
-        final wait = cooldownRemaining(existing?.lastStampAt, program.stampCooldownMinutes, DateTime.now());
+        final wait = cooldownRemaining(existing?.lastStampAt, p.stampCooldownMinutes, DateTime.now());
         if (wait > Duration.zero) {
-          return _result(cardId, TapOutcome.cooldown, existing!.stamps, program, retryAfter: wait);
+          return _result(TapOutcome.cooldown, existing!, p, business, retryAfter: wait);
         }
-        final next = addStamp(existing?.stamps ?? 0, existing?.rewardsAvailable ?? 0, program.stampsRequired);
+        final next = addStamp(existing?.stamps ?? 0, existing?.rewardsAvailable ?? 0, p.stampsRequired);
         final totalStamps = (existing?.totalStamps ?? 0) + 1;
         final stamp = {
           'stamps': next.stamps,
@@ -120,37 +144,75 @@ class Api {
         };
         if (ticketId != null) tx.delete(_db.doc('stampTickets/$ticketId'));
         if (existing == null) {
-          tx.set(cardRef, {..._cardBase(uid, program), ...stamp, 'totalRedeemed': 0, 'createdAt': now});
+          tx.set(cardRef, {..._cardBase(uid, p), ...stamp, 'totalRedeemed': 0, 'createdAt': now});
         } else {
           tx.update(cardRef, stamp);
         }
         tx.set(_db.doc('stampEvents/${cardId}_$totalStamps'), {
-          'businessId': program.businessId,
-          'ownerUid': program.ownerUid,
-          'programId': program.id,
+          'businessId': p.businessId,
+          'ownerUid': p.ownerUid,
+          'programId': p.id,
           'cardId': cardId,
           'clientUid': uid,
           'tagId': tagId,
           'createdAt': now,
         });
         tx.update(tagRef, {'tapCount': FieldValue.increment(1), 'lastTapAt': now});
+        final stampedAt = DateTime.now();
+        final base = existing ?? _newCard(cardId, uid, p);
         return _result(
-          cardId,
-          existing == null ? TapOutcome.joined : TapOutcome.stamped,
-          next.stamps,
-          program,
+          // A first tap on a stamp tag both joins and stamps; show it as a stamp.
+          TapOutcome.stamped,
+          LoyaltyCard(
+            id: cardId,
+            clientUid: uid,
+            businessId: p.businessId,
+            programId: p.id,
+            ownerUid: p.ownerUid,
+            stamps: next.stamps,
+            rewardsAvailable: next.rewards,
+            totalStamps: totalStamps,
+            totalRedeemed: base.totalRedeemed,
+            lastStampAt: stampedAt,
+            createdAt: base.createdAt,
+            updatedAt: stampedAt,
+          ),
+          p,
+          business,
           completedCard: next.rewards > (existing?.rewardsAvailable ?? 0),
-          stampedOnJoin: existing == null,
         );
       });
+      if (refusal case final r?) throw r;
+      return result!;
     } on FirebaseException catch (e) {
       // The rules refused, most likely the cooldown by server clock (device clock differs).
-      if (e.code == 'permission-denied' && tag.type == TagType.stamp) {
-        return _result(cardId, TapOutcome.cooldown, 0, program, retryAfter: Duration.zero);
+      final p = program;
+      if (e.code == 'permission-denied' && tag?.type == TagType.stamp && p != null) {
+        return TapResult(
+          cardId: '${p.id}_$uid',
+          outcome: TapOutcome.cooldown,
+          completedCard: false,
+          retryAfter: Duration.zero,
+          stamps: 0,
+          stampsRequired: p.stampsRequired,
+        );
       }
       rethrow;
     }
   }
+
+  LoyaltyCard _newCard(String cardId, String uid, Program program) => LoyaltyCard(
+    id: cardId,
+    clientUid: uid,
+    businessId: program.businessId,
+    programId: program.id,
+    ownerUid: program.ownerUid,
+    stamps: 0,
+    rewardsAvailable: 0,
+    totalStamps: 0,
+    totalRedeemed: 0,
+    createdAt: DateTime.now(),
+  );
 
   Map<String, dynamic> _cardBase(String uid, Program program) => {
     'clientUid': uid,
@@ -160,21 +222,22 @@ class Api {
   };
 
   TapResult _result(
-    String cardId,
     TapOutcome outcome,
-    int stamps,
-    Program program, {
+    LoyaltyCard card,
+    Program program,
+    Business business, {
     bool completedCard = false,
-    bool stampedOnJoin = false,
     Duration retryAfter = Duration.zero,
   }) => TapResult(
-    cardId: cardId,
-    // A first tap on a stamp tag both joins and stamps; show it as a stamp.
-    outcome: stampedOnJoin ? TapOutcome.stamped : outcome,
+    cardId: card.id,
+    outcome: outcome,
     completedCard: completedCard,
     retryAfter: retryAfter,
-    stamps: stamps,
+    stamps: card.stamps,
     stampsRequired: program.stampsRequired,
+    card: card,
+    program: program,
+    business: business,
   );
 
   /// Spends one banked full card on an active reward of the client's choice.

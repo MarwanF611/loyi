@@ -8,11 +8,20 @@ import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 
 /// Streams the program and business behind a card and hands them to [builder]
-/// once both are available.
+/// once both are available ([initialProgram] and [initialBusiness] count until then).
 class CardData extends StatefulWidget {
-  const CardData({super.key, required this.card, required this.builder, this.placeholder});
+  const CardData({
+    super.key,
+    required this.card,
+    required this.builder,
+    this.placeholder,
+    this.initialProgram,
+    this.initialBusiness,
+  });
 
   final LoyaltyCard card;
+  final Program? initialProgram;
+  final Business? initialBusiness;
   final Widget Function(BuildContext context, Program program, Business business) builder;
   final Widget? placeholder;
 
@@ -44,8 +53,10 @@ class _CardDataState extends State<CardData> {
   @override
   Widget build(BuildContext context) => StreamBuilder<Program?>(
     stream: _program,
+    initialData: widget.initialProgram,
     builder: (context, programSnap) => StreamBuilder<Business?>(
       stream: _business,
+      initialData: widget.initialBusiness,
       builder: (context, businessSnap) {
         final program = programSnap.data;
         final business = businessSnap.data;

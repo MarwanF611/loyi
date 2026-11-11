@@ -8,7 +8,8 @@ const engineConfig = { fontFallbackBaseUrl: "/fallback-fonts/" };
 _flutter.loader.load({
   config: engineConfig,
   onEntrypointLoaded: async function (engineInitializer) {
-    const appRunner = await engineInitializer.initializeEngine(engineConfig);
+    // The Firebase SDK loads alongside the engine (firebase_sdk.js); the app needs both.
+    const [appRunner] = await Promise.all([engineInitializer.initializeEngine(engineConfig), window.loyiFirebaseReady]);
     document.getElementById('loader')?.remove();
     await appRunner.runApp();
   },
