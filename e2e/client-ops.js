@@ -110,6 +110,7 @@ export async function mergeCard(db, sourceId, anonUid, me) {
         totalStamps: t.totalStamps + src.totalStamps,
         totalRedeemed: t.totalRedeemed + src.totalRedeemed,
         mergedFrom: anonUid,
+        merges: (t.merges ?? 0) + (src.merges ?? 0) + 1,
         updatedAt: now,
       });
     } else {
@@ -124,6 +125,7 @@ export async function mergeCard(db, sourceId, anonUid, me) {
         totalRedeemed: src.totalRedeemed,
         lastStampAt: src.lastStampAt ?? null,
         mergedFrom: anonUid,
+        merges: (src.merges ?? 0) + 1,
         createdAt: now,
         updatedAt: now,
       });

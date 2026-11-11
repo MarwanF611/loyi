@@ -21,9 +21,10 @@ The app writes stamps and rewards itself, and `firestore.rules` is the server-si
 referee. A write is only accepted if it's exactly what the app would do:
 
 - +1 stamp from an active stamp tag of that card, only after the cooldown (checked with server time)
-- one log entry per stamp
+- exactly one log entry per stamp, written together with it
 - a reward only when one is banked, and only an active reward of that card
-- account merges only via a hand-off written by the anonymous device session
+- account merges only via a hand-off written by the anonymous device session, and at most three
+  per card (`merges`), so throwaway accounts can't be pooled to skip the cooldown
 
 `e2e/flow.test.js` performs these writes and a list of cheating attempts against the emulators.
 

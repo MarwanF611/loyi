@@ -387,6 +387,68 @@ test("Loyi rules: full flow and abuse attempts", async (t) => {
     await denied(setDoc(doc(dave.db, "transfers", phone.uid()), { toUid: daveUid, createdAt: serverTimestamp() }));
   });
 
+  await t.test("abuse: throwaway accounts can't be merged into one card to skip the cooldown", async () => {
+    // Each throwaway anonymous account stamps once and hands its card to Erin.
+    const erin = client("erin");
+    await signInAnonymously(erin.auth);
+    const erinUid = erin.uid();
+    await tap(erin.db, erinUid, stampTag.id);
+    const throwaway = async (i) => {
+      const s = client(`throwaway-${i}`);
+      await signInAnonymously(s.auth);
+      await tap(s.db, s.uid(), stampTag.id);
+      return s;
+    };
+    const handTo = async (s, toUid, db) => {
+      await writeTransfer(s.db, s.uid(), toUid);
+      return mergeCard(db, `${programRef.id}_${s.uid()}`, s.uid(), toUid);
+    };
+    // A client with a few devices: up to three merges into one card.
+    for (let i = 0; i < 3; i++) await handTo(await throwaway(i), erinUid, erin.db);
+    const card = (await getDoc(doc(erin.db, "cards", `${programRef.id}_${erinUid}`))).data();
+    assert.deepEqual([card.totalStamps, card.merges], [4, 3]);
+    // The fourth is refused, and the source card stays where it was.
+    const fourth = await throwaway(3);
+    await denied(handTo(fourth, erinUid, erin.db));
+    assert.equal((await getDoc(doc(fourth.db, "cards", `${programRef.id}_${fourth.uid()}`))).exists(), true);
+    // Passing the full card on to a fresh account doesn't reset the count.
+    const fresh = client("erin-fresh");
+    await signInAnonymously(fresh.auth);
+    await tap(fresh.db, fresh.uid(), stampTag.id);
+    await denied(handTo(erin, fresh.uid(), fresh.db));
+    // Nor can a merge claim a lower count than the cards it combines.
+    await writeTransfer(fourth.db, fourth.uid(), fresh.uid());
+    const now = serverTimestamp();
+    const src = (await getDoc(doc(fourth.db, "cards", `${programRef.id}_${fourth.uid()}`))).data();
+    const forged = writeBatch(fresh.db);
+    forged.update(doc(fresh.db, "cards", `${programRef.id}_${fresh.uid()}`), {
+      stamps: 2,
+      totalStamps: 2,
+      totalRedeemed: src.totalRedeemed,
+      rewardsAvailable: 0,
+      mergedFrom: fourth.uid(),
+      merges: 0,
+      updatedAt: now,
+    });
+    forged.delete(doc(fresh.db, "cards", `${programRef.id}_${fourth.uid()}`));
+    await denied(forged.commit());
+  });
+
+  await t.test("abuse: a stamp without its log entry is refused", async () => {
+    const frank = client("frank");
+    await signInAnonymously(frank.auth);
+    const cardRef = doc(frank.db, "cards", `${programRef.id}_${frank.uid()}`);
+    const now = serverTimestamp();
+    const base = { clientUid: frank.uid(), businessId: bizRef.id, ownerUid: owner.uid, programId: programRef.id };
+    const stamp = { stamps: 1, rewardsAvailable: 0, totalStamps: 1, lastStampAt: now, lastTagId: stampTag.id, updatedAt: now };
+    // First tap on a stamp tag (creates the card) without the log entry.
+    await denied(setDoc(cardRef, { ...base, ...stamp, totalRedeemed: 0, createdAt: now }));
+    // A later stamp without the log entry.
+    await tap(frank.db, frank.uid(), stampTag.id);
+    await denied(updateDoc(cardRef, { ...stamp, stamps: 2, totalStamps: 2 }));
+    assert.equal((await getDoc(cardRef)).get("totalStamps"), 1);
+  });
+
   await t.test("card design validation", async () => {
     const design = { background: 0xff6d4c41, background2: null, style: "pattern", stampColor: 0xffffffff, stampIcon: "coffee" };
     await updateDoc(programRef, { design });

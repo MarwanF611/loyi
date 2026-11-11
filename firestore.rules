@@ -206,7 +206,20 @@ service cloud.firestore {
 
     function cardKeys() {
       return ['clientUid', 'businessId', 'ownerUid', 'programId', 'stamps', 'rewardsAvailable', 'totalStamps',
-              'totalRedeemed', 'lastStampAt', 'lastTagId', 'lastTicketId', 'mergedFrom', 'createdAt', 'updatedAt'];
+              'totalRedeemed', 'lastStampAt', 'lastTagId', 'lastTicketId', 'mergedFrom', 'merges', 'createdAt', 'updatedAt'];
+    }
+
+    // Every stamp writes its log entry (stampEvents/<cardId>_<totalStamps>) in the same write,
+    // so the shop's overview and insights always see it.
+    function stampLogged(cardId, d) {
+      return existsAfter(/databases/$(database)/documents/stampEvents/$(cardId + '_' + string(d.totalStamps)));
+    }
+
+    // How many other accounts' cards a card may take in, counting the ones folded into those
+    // (a client with a few devices). Without a limit, throwaway anonymous accounts that each
+    // stamp once could be merged into one card to skip the cooldown.
+    function mergeCountOk(d, count) {
+      return d.merges == count && d.merges <= 3;
     }
 
     // A stamp from a secure tag (starter kit, NTAG 424 DNA) must spend a ticket the server issued
@@ -229,6 +242,7 @@ service cloud.firestore {
       let p = programOf(d.programId);
       return d.keys().hasOnly(cardKeys())
         && !('mergedFrom' in d)
+        && !('merges' in d)
         && d.clientUid == uid()
         && cardId == d.programId + '_' + uid()
         && tag.active && tag.programId == d.programId
@@ -242,11 +256,12 @@ service cloud.firestore {
               && d.stamps == 1 % p.stampsRequired
               && d.rewardsAvailable == math.floor(1 / p.stampsRequired)
               && d.lastStampAt == request.time
-              && ticketOk(tag, d));
+              && ticketOk(tag, d)
+              && stampLogged(cardId, d));
     }
 
     // Exactly one stamp from an active stamp tag of this card, after the cooldown.
-    function validStamp() {
+    function validStamp(cardId) {
       let old = resource.data;
       let d = request.resource.data;
       let tag = tagOf(d.lastTagId);
@@ -264,7 +279,8 @@ service cloud.firestore {
         && d.stamps == next % p.stampsRequired
         && d.rewardsAvailable == old.rewardsAvailable + math.floor(next / p.stampsRequired)
         && d.lastStampAt == request.time
-        && d.updatedAt == request.time;
+        && d.updatedAt == request.time
+        && stampLogged(cardId, d);
     }
 
     // One banked full card spent, always together with its redemption record.
@@ -294,6 +310,7 @@ service cloud.firestore {
         && d.stamps == src.stamps && d.rewardsAvailable == src.rewardsAvailable
         && d.totalStamps == src.totalStamps && d.totalRedeemed == src.totalRedeemed
         && d.lastStampAt == src.lastStampAt
+        && mergeCountOk(d, src.get('merges', 0) + 1)
         && !('lastTagId' in d)
         && d.createdAt == request.time && d.updatedAt == request.time;
     }
@@ -305,9 +322,10 @@ service cloud.firestore {
       let src = get(srcPath).data;
       let p = programOf(old.programId);
       let sum = old.stamps + src.stamps;
-      return d.diff(old).affectedKeys().hasOnly(['stamps', 'rewardsAvailable', 'totalStamps', 'totalRedeemed', 'mergedFrom', 'updatedAt'])
+      return d.diff(old).affectedKeys().hasOnly(['stamps', 'rewardsAvailable', 'totalStamps', 'totalRedeemed', 'mergedFrom', 'merges', 'updatedAt'])
         && transferredToMe(d.mergedFrom)
         && !existsAfter(srcPath)
+        && mergeCountOk(d, old.get('merges', 0) + src.get('merges', 0) + 1)
         && d.stamps == sum % p.stampsRequired
         && d.rewardsAvailable == old.rewardsAvailable + src.rewardsAvailable + math.floor(sum / p.stampsRequired)
         && d.totalStamps == old.totalStamps + src.totalStamps
@@ -330,7 +348,7 @@ service cloud.firestore {
       allow update: if signedIn()
         && resource.data.clientUid == uid()
         && request.resource.data.clientUid == uid()
-        && (validStamp()
+        && (validStamp(cardId)
             || validRedeem(cardId)
             || ('mergedFrom' in request.resource.data && validMergeUpdate()));
       allow delete: if signedIn()
