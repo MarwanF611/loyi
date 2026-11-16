@@ -543,9 +543,9 @@
     "nl": "Wat gebeurt er met de stempels van mijn klanten als ik stop?",
     "fr": "Que deviennent les tampons de mes clients si j'arrête ?"
   },
-  "When your subscription ends, your tags pause: clients can't collect new stamps, but they keep the stamps they have and can still use rewards they earned. Subscribe again and everything continues where it was.": {
-    "nl": "Als je abonnement afloopt, pauzeren je tags: klanten kunnen geen nieuwe stempels sparen, maar houden wat ze hebben en kunnen verdiende beloningen nog gebruiken. Neem opnieuw een abonnement en alles gaat verder waar het was.",
-    "fr": "Quand votre abonnement se termine, vos tags se mettent en pause : les clients ne peuvent plus collecter de tampons, mais gardent ceux qu'ils ont et peuvent toujours utiliser leurs récompenses. Réabonnez-vous et tout reprend là où c'en était."
+  "When your subscription ends, your tag pauses: clients can't collect new stamps, but they keep the stamps they have and can still use rewards they earned. Subscribe again and everything continues where it was.": {
+    "nl": "Als je abonnement afloopt, pauzeert je tag: klanten kunnen geen nieuwe stempels sparen, maar houden wat ze hebben en kunnen verdiende beloningen nog gebruiken. Neem opnieuw een abonnement en alles gaat verder waar het was.",
+    "fr": "Quand votre abonnement se termine, votre tag se met en pause : les clients ne peuvent plus collecter de tampons, mais gardent ceux qu'ils ont et peuvent toujours utiliser leurs récompenses. Réabonnez-vous et tout reprend là où c'en était."
   },
   "Is it GDPR compliant?": {
     "nl": "Is het GDPR-conform?",
@@ -571,9 +571,9 @@
     "nl": "vandaag",
     "fr": "aujourd'hui"
   },
-  "Create your account, design your card and stick your tags. Your regulars will thank you.": {
-    "nl": "Maak je account, ontwerp je kaart en kleef je tags. Je vaste klanten zullen je dankbaar zijn.",
-    "fr": "Créez votre compte, concevez votre carte et collez vos tags. Vos habitués vous remercieront."
+  "Create your account, design your card and put your tag on the counter. Your regulars will thank you.": {
+    "nl": "Maak je account, ontwerp je kaart en zet je tag op de toog. Je vaste klanten zullen je dankbaar zijn.",
+    "fr": "Créez votre compte, concevez votre carte et posez votre tag sur le comptoir. Vos habitués vous remercieront."
   },
   "Digital stamp cards for local shops.": {
     "nl": "Digitale stempelkaarten voor lokale zaken.",
@@ -659,17 +659,17 @@
     "nl": "Probeer de demokaart",
     "fr": "Essayez la carte de démo"
   },
-  "No hardware to rent and no cash register to connect. Two small tags in the post and a browser.": {
-    "nl": "Geen toestel om te huren en geen kassa om te koppelen. Twee kleine tags in de bus en een browser.",
-    "fr": "Aucun appareil à louer, aucune caisse à connecter. Deux petits tags par la poste et un navigateur."
+  "No hardware to rent and no cash register to connect. One small tag and a browser.": {
+    "nl": "Geen toestel om te huren en geen kassa om te koppelen. Eén kleine tag en een browser.",
+    "fr": "Aucun appareil à louer, aucune caisse à connecter. Un petit tag et un navigateur."
   },
-  "Stick on your two tags": {
-    "nl": "Plak je twee tags",
-    "fr": "Collez vos deux tags"
+  "Put your tag on the counter": {
+    "nl": "Zet je tag op de toog",
+    "fr": "Posez votre tag sur le comptoir"
   },
-  "We post you two secure tags; hold your phone to each one to link it. A join tag where clients can see it, and a stamp tag behind the counter that you hold out after each purchase.": {
-    "nl": "We sturen je twee beveiligde tags op; hou je telefoon ertegen om ze te koppelen. Een aanmeldtag waar klanten hem zien, en een stempeltag achter de toog die je na elke aankoop voorhoudt.",
-    "fr": "Nous vous envoyons deux tags sécurisés ; approchez votre téléphone de chacun pour l'associer. Un tag d'inscription bien visible, et un tag tampon derrière le comptoir, que vous présentez après chaque achat."
+  "You get one secure Loyi tag; hold your phone to it once to link it to your card. A client's first tap adds the card with a first stamp, every tap after that gives a stamp.": {
+    "nl": "Je krijgt één beveiligde Loyi-tag; hou je telefoon er één keer tegen om hem aan je kaart te koppelen. De eerste tik van een klant voegt de kaart toe met een eerste stempel, elke volgende tik geeft een stempel.",
+    "fr": "Vous recevez un tag Loyi sécurisé ; approchez-en votre téléphone une fois pour l'associer à votre carte. Le premier contact d'un client ajoute la carte avec un premier tampon, chaque contact suivant donne un tampon."
   },
   "Every tap on a Loyi tag makes a new one-time code that our server checks, so a saved or shared link doesn't work. You also choose the time between two stamps.": {
     "nl": "Elke tik op een Loyi-tag maakt een nieuwe eenmalige code die onze server controleert, dus een opgeslagen of gedeelde link werkt niet. Je kiest ook de wachttijd tussen twee stempels.",
@@ -679,9 +679,9 @@
     "nl": "Eerste 14 dagen gratis, daarna maandelijks gefactureerd. Altijd opzegbaar.",
     "fr": "14 premiers jours gratuits, puis facturation mensuelle. Résiliable à tout moment."
   },
-  "Two secure Loyi tags, sent by post": {
-    "nl": "Twee beveiligde Loyi-tags, per post",
-    "fr": "Deux tags Loyi sécurisés, envoyés par la poste"
+  "One secure Loyi tag for your counter": {
+    "nl": "Eén beveiligde Loyi-tag voor je toog",
+    "fr": "Un tag Loyi sécurisé pour votre comptoir"
   },
   "Start your free trial": {
     "nl": "Start je gratis proefperiode",
@@ -699,9 +699,9 @@
     "nl": "Tags",
     "fr": "Tags"
   },
-  "Two secure Loyi tags come in the post, ready to use: hold your phone to each one to link it. Want more join tags? Any NTAG213 sticker works for joining.": {
-    "nl": "Twee beveiligde Loyi-tags komen klaar voor gebruik in de bus: hou je telefoon ertegen om ze te koppelen. Meer aanmeldtags nodig? Elke NTAG213-sticker werkt om aan te melden.",
-    "fr": "Deux tags Loyi sécurisés arrivent par la poste, prêts à l'emploi : approchez votre téléphone de chacun pour l'associer. Besoin de plus de tags d'inscription ? N'importe quel autocollant NTAG213 convient pour l'inscription."
+  "You get one secure Loyi tag, ready to use: hold your phone to it to link it. It adds the card for new clients and gives the stamps. Want extra tags for joining? Any NTAG213 sticker works.": {
+    "nl": "Je krijgt één beveiligde Loyi-tag, klaar voor gebruik: hou je telefoon ertegen om hem te koppelen. Hij voegt de kaart toe voor nieuwe klanten en geeft de stempels. Extra tags om aan te melden nodig? Elke NTAG213-sticker werkt.",
+    "fr": "Vous recevez un tag Loyi sécurisé, prêt à l'emploi : approchez-en votre téléphone pour l'associer. Il ajoute la carte pour les nouveaux clients et donne les tampons. Besoin de tags supplémentaires pour l'inscription ? N'importe quel autocollant NTAG213 convient."
   },
   "Pilot": {
     "nl": "Pilootproject",
@@ -719,13 +719,13 @@
     "nl": "Waar haal ik de tags?",
     "fr": "Où trouver les tags ?"
   },
-  "Two secure tags come in the post when you start. Extra join tags can be any NTAG213 or NTAG215 sticker, written with a free app like NFC Tools; your dashboard shows how.": {
-    "nl": "Je krijgt twee beveiligde tags in de bus als je start. Extra aanmeldtags mogen gewone NTAG213- of NTAG215-stickers zijn, beschreven met een gratis app zoals NFC Tools; je dashboard toont hoe.",
-    "fr": "Vous recevez deux tags sécurisés par la poste au démarrage. Des tags d'inscription supplémentaires peuvent être n'importe quel autocollant NTAG213 ou NTAG215, programmé avec une app gratuite comme NFC Tools ; votre tableau de bord vous montre comment."
+  "You get one secure Loyi tag when you start; it does everything. Extra tags for joining can be any NTAG213 or NTAG215 sticker, written with a free app like NFC Tools; your dashboard shows how.": {
+    "nl": "Je krijgt één beveiligde Loyi-tag als je start; die doet alles. Extra tags om aan te melden mogen gewone NTAG213- of NTAG215-stickers zijn, beschreven met een gratis app zoals NFC Tools; je dashboard toont hoe.",
+    "fr": "Vous recevez un tag Loyi sécurisé au démarrage ; il fait tout. Des tags supplémentaires pour l'inscription peuvent être n'importe quel autocollant NTAG213 ou NTAG215, programmé avec une app gratuite comme NFC Tools ; votre tableau de bord vous montre comment."
   },
-  "The stamp tag stays behind your counter, so a stamp needs you. Each tap on a Loyi tag makes a new one-time code, so a saved or shared link doesn't work from home. You also choose a minimum time between two stamps, and you can switch a tag off from your dashboard at any moment.": {
-    "nl": "De stempeltag blijft achter je toog, dus voor een stempel is er jou nodig. Elke tik op een Loyi-tag maakt een nieuwe eenmalige code, dus een opgeslagen of gedeelde link werkt niet van thuis uit. Je kiest ook een minimale tijd tussen twee stempels, en je zet een tag op elk moment uit vanuit je dashboard.",
-    "fr": "Le tag tampon reste derrière votre comptoir : un tampon passe donc par vous. Chaque contact avec un tag Loyi crée un nouveau code à usage unique, si bien qu'un lien enregistré ou partagé ne fonctionne pas depuis chez soi. Vous choisissez aussi un délai minimum entre deux tampons, et vous pouvez désactiver un tag à tout moment depuis votre tableau de bord."
+  "Each tap on your Loyi tag makes a new one-time code, so a saved or shared link doesn't work from home: a stamp needs a real tap at your counter. You also choose a minimum time between two stamps, and you can switch the tag off from your dashboard at any moment.": {
+    "nl": "Elke tik op je Loyi-tag maakt een nieuwe eenmalige code, dus een opgeslagen of gedeelde link werkt niet van thuis uit: voor een stempel is een echte tik aan je toog nodig. Je kiest ook een minimale tijd tussen twee stempels, en je zet de tag op elk moment uit vanuit je dashboard.",
+    "fr": "Chaque contact avec votre tag Loyi crée un nouveau code à usage unique, si bien qu'un lien enregistré ou partagé ne fonctionne pas depuis chez soi : un tampon demande un vrai contact à votre comptoir. Vous choisissez aussi un délai minimum entre deux tampons, et vous pouvez désactiver le tag à tout moment depuis votre tableau de bord."
   },
   "What if a client clears their browser or loses their phone?": {
     "nl": "Wat als een klant zijn browser wist of zijn telefoon verliest?",

@@ -129,7 +129,8 @@ class _Message extends StatelessWidget {
   }
 }
 
-/// The shop links a new kit tag: which card, join or stamp, and where it goes.
+/// The shop links a new Loyi tag to a card. A shop has one tag: a client's first
+/// tap adds the card with a first stamp, every next tap gives a stamp (a stamp tag).
 class _LinkForm extends StatefulWidget {
   const _LinkForm({required this.e, required this.c});
 
@@ -145,27 +146,9 @@ class _LinkFormState extends State<_LinkForm> {
       .businessForOwner(auth.user!.uid)
       .asyncExpand((b) => b == null ? Stream.value(const <Program>[]) : repo.programsForBusiness(b.id));
   String? _programId;
-  TagType _type = TagType.stamp;
-  final _label = TextEditingController(text: l10n.defaultStampTagLabel);
   bool _busy = false;
   String? _error;
   String? _linkedProgramId;
-
-  @override
-  void dispose() {
-    _label.dispose();
-    super.dispose();
-  }
-
-  void _setType(TagType type) {
-    final defaults = {l10n.defaultJoinTagLabel, l10n.defaultStampTagLabel, ''};
-    setState(() {
-      _type = type;
-      if (defaults.contains(_label.text.trim())) {
-        _label.text = type == TagType.join ? l10n.defaultJoinTagLabel : l10n.defaultStampTagLabel;
-      }
-    });
-  }
 
   Future<void> _link(String programId) async {
     setState(() {
@@ -173,13 +156,12 @@ class _LinkFormState extends State<_LinkForm> {
       _error = null;
     });
     try {
-      final label = _label.text.trim();
       await billing.kitLink(
         e: widget.e,
         c: widget.c,
         programId: programId,
-        type: _type.name,
-        label: label.isEmpty ? (_type == TagType.join ? l10n.defaultJoinTagLabel : l10n.defaultStampTagLabel) : label,
+        type: TagType.stamp.name,
+        label: l10n.defaultStampTagLabel,
       );
       if (mounted) setState(() => _linkedProgramId = programId);
     } on FirebaseAuthException catch (_) {
@@ -238,29 +220,16 @@ class _LinkFormState extends State<_LinkForm> {
             const SizedBox(height: 6),
             Text(l.kitNewTagShop, style: context.text.bodyMedium, textAlign: TextAlign.center),
             const SizedBox(height: 24),
-            DropdownButtonFormField<String>(
-              initialValue: programId,
-              decoration: InputDecoration(labelText: l.kitCard),
-              items: [for (final x in programs) DropdownMenuItem(value: x.id, child: Text(x.name))],
-              onChanged: (v) => setState(() => _programId = v),
-            ),
-            const SizedBox(height: 16),
-            SegmentedButton<TagType>(
-              showSelectedIcon: false,
-              segments: [
-                ButtonSegment(value: TagType.stamp, icon: const Icon(LoyiIcons.stamp), label: Text(l.tagTypeStamp)),
-                ButtonSegment(value: TagType.join, icon: const Icon(LoyiIcons.userPlus), label: Text(l.tagTypeJoin)),
-              ],
-              selected: {_type},
-              onSelectionChanged: (s) => _setType(s.first),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _label,
-              maxLength: 40,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(labelText: l.whereIsTag, counterText: ''),
-            ),
+            // Most shops have one card: nothing to choose then.
+            if (programs.length > 1)
+              DropdownButtonFormField<String>(
+                initialValue: programId,
+                decoration: InputDecoration(labelText: l.kitCard),
+                items: [for (final x in programs) DropdownMenuItem(value: x.id, child: Text(x.name))],
+                onChanged: (v) => setState(() => _programId = v),
+              )
+            else
+              Text(l.kitLinkTo(programs.first.name), style: context.text.titleMedium, textAlign: TextAlign.center),
             if (_error != null) ...[
               const SizedBox(height: 12),
               Text(_error!, style: context.text.labelMedium?.copyWith(color: Theme.of(context).colorScheme.error)),

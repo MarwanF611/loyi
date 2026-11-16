@@ -27,8 +27,7 @@ class AuthService {
   Stream<User?> get userChanges => _auth.userChanges();
   bool get isBusinessUser => user != null && !user!.isAnonymous;
 
-  Future<User> ensureClientSession() async =>
-      user ?? (await _auth.signInAnonymously()).user!;
+  Future<User> ensureClientSession() async => user ?? (await _auth.signInAnonymously()).user!;
 
   // ── Business ──────────────────────────────────────────────────────────────
 
@@ -37,24 +36,12 @@ class AuthService {
 
   /// Step 1 of business sign-up: the account plus the shop's name. If creating
   /// the shop fails, the dashboard asks for the name again.
-  Future<void> businessSignUp(
-    String email,
-    String password,
-    String businessName,
-  ) async {
-    final credential = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+  Future<void> businessSignUp(String email, String password, String businessName) async {
+    final credential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
     try {
-      await repo.createBusiness(
-        ownerUid: credential.user!.uid,
-        name: businessName,
-      );
+      await repo.createBusiness(ownerUid: credential.user!.uid, name: businessName);
     } catch (e) {
-      debugPrint(
-        'Creating the business failed, the dashboard will ask again: $e',
-      );
+      debugPrint('Creating the business failed, the dashboard will ask again: $e');
     }
   }
 
@@ -65,8 +52,7 @@ class AuthService {
   Future<void> signOut() => _auth.signOut();
 
   /// Email with a link to choose a new password (Spark: 150 emails/day).
-  Future<void> sendPasswordReset(String email) =>
-      _auth.sendPasswordResetEmail(email: email);
+  Future<void> sendPasswordReset(String email) => _auth.sendPasswordResetEmail(email: email);
 
   // ── Client: keep cards beyond this browser ─────────────────────────────────
 
@@ -77,12 +63,10 @@ class AuthService {
 
   /// Google asks which account to use every time, so a shop on a shared
   /// computer doesn't land in someone else's Google account by accident.
-  GoogleAuthProvider _google() =>
-      GoogleAuthProvider()..setCustomParameters({'prompt': 'select_account'});
+  GoogleAuthProvider _google() => GoogleAuthProvider()..setCustomParameters({'prompt': 'select_account'});
 
-  Future<UserCredential> _signInWith(AuthProvider provider) => kIsWeb
-      ? _auth.signInWithPopup(provider)
-      : _auth.signInWithProvider(provider);
+  Future<UserCredential> _signInWith(AuthProvider provider) =>
+      kIsWeb ? _auth.signInWithPopup(provider) : _auth.signInWithProvider(provider);
 
   Future<void> _saveWith(AuthProvider provider) async {
     final current = user;
@@ -91,9 +75,7 @@ class AuthService {
       return;
     }
     try {
-      await (kIsWeb
-          ? current.linkWithPopup(provider)
-          : current.linkWithProvider(provider));
+      await (kIsWeb ? current.linkWithPopup(provider) : current.linkWithProvider(provider));
     } on FirebaseAuthException catch (e) {
       final credential = e.credential;
       if (e.code != 'credential-already-in-use' || credential == null) rethrow;
@@ -106,21 +88,15 @@ class AuthService {
   Future<void> createClientAccount(String email, String password) async {
     final current = user;
     if (current != null && current.isAnonymous) {
-      await current.linkWithCredential(
-        EmailAuthProvider.credential(email: email, password: password),
-      );
+      await current.linkWithCredential(EmailAuthProvider.credential(email: email, password: password));
     } else {
-      await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      await _auth.createUserWithEmailAndPassword(email: email, password: password);
     }
   }
 
   /// Signs into an existing client account and brings this device's cards along.
-  Future<void> clientSignIn(String email, String password) => _signInAndMerge(
-    (a) => a.signInWithEmailAndPassword(email: email, password: password),
-  );
+  Future<void> clientSignIn(String email, String password) =>
+      _signInAndMerge((a) => a.signInWithEmailAndPassword(email: email, password: password));
 
   /// Signs in with [signIn] and moves this device's anonymous cards into that
   /// account. firestore.rules check every step:
@@ -129,20 +105,13 @@ class AuthService {
   ///  2. the anonymous session writes `transfers/{anonUid} = {toUid}`,
   ///  3. after signing in, each source card is merged into the target card and
   ///     deleted in one transaction.
-  Future<void> _signInAndMerge(
-    Future<UserCredential> Function(FirebaseAuth auth) signIn,
-  ) async {
+  Future<void> _signInAndMerge(Future<UserCredential> Function(FirebaseAuth auth) signIn) async {
     final anon = user;
     if (anon == null || !anon.isAnonymous) {
       await signIn(_auth);
       return;
     }
-    final cards =
-        (await _db
-                .collection('cards')
-                .where('clientUid', isEqualTo: anon.uid)
-                .get())
-            .docs;
+    final cards = (await _db.collection('cards').where('clientUid', isEqualTo: anon.uid).get()).docs;
     if (cards.isEmpty) {
       await signIn(_auth);
       return;
@@ -158,10 +127,7 @@ class AuthService {
       final toUid = (await signIn(helperAuth)).user!.uid;
       await helperAuth.signOut();
       if (toUid == anon.uid) return;
-      await _db.doc('transfers/${anon.uid}').set({
-        'toUid': toUid,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      await _db.doc('transfers/${anon.uid}').set({'toUid': toUid, 'createdAt': FieldValue.serverTimestamp()});
     } finally {
       await helper.delete();
     }
@@ -170,9 +136,7 @@ class AuthService {
     final me = user!.uid;
     for (final source in cards) {
       final programId = source.get('programId') as String;
-      final program = Program.fromDoc(
-        await _db.doc('programs/$programId').get(),
-      );
+      final program = Program.fromDoc(await _db.doc('programs/$programId').get());
       final targetRef = _db.doc('cards/${programId}_$me');
       try {
         await _mergeCard(source.reference, targetRef, program, anon.uid, me);
@@ -237,20 +201,14 @@ class AuthService {
   // ── Account settings ──────────────────────────────────────────────────────
 
   /// True for accounts with a Loyi password (not only Google).
-  bool get hasPassword =>
-      user?.providerData.any((p) => p.providerId == 'password') ?? false;
+  bool get hasPassword => user?.providerData.any((p) => p.providerId == 'password') ?? false;
 
   Future<void> _reauthenticate(String password) {
     final u = user!;
-    return u.reauthenticateWithCredential(
-      EmailAuthProvider.credential(email: u.email!, password: password),
-    );
+    return u.reauthenticateWithCredential(EmailAuthProvider.credential(email: u.email!, password: password));
   }
 
-  Future<void> changePassword(
-    String currentPassword,
-    String newPassword,
-  ) async {
+  Future<void> changePassword(String currentPassword, String newPassword) async {
     await _reauthenticate(currentPassword);
     await user!.updatePassword(newPassword);
   }

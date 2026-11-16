@@ -93,7 +93,7 @@ account and data (art. 17). `/delete-account` explains the same for Google Play.
 - `businessDetails/{ownerUid}`: the shop's official name, address, country, company number (Belgian KBO checked with its mod-97 digits), optional VAT number and phone. Owner only; sign-up step 3 and Settings; the billing server copies it into the Stripe customer so Checkout is filled in
 - `logos/{businessId}`: the logo image itself (max 200 KB, 256 px), public
 - `programs/{id}`: a loyalty card: `stampsRequired`, `rewards[]` (each can be switched on or off), `stampCooldownMinutes`, `active`, and `design` (card colour, optional second colour, style `solid | gradient | pattern`, stamp colour, stamp icon). Designs are limited to colours, an icon and the logo, so the same design can later become an Apple/Google Wallet pass
-- `tags/{id}`: `type: join | stamp`, linked to one program. The tag's URL is `/t/<id>`. `secure: true` for starter kit tags (created only by the billing server), whose URL is `/k?e=…&c=…`
+- `tags/{id}`: `type: join | stamp`, linked to one program. A shop works with one secure stamp tag (`secure: true`, created only by the billing server, URL `/k?e=…&c=…`): a client's first tap creates the card with a first stamp, every next tap adds a stamp. Plain tags (`/t/<id>`, join or stamp) are optional extras
 - `kitTags/{UID}`, `stampTickets/{UID}_{counter}`: the server's record per secure tag and the one-time ticket a stamp from it spends (docs/KIT.md)
 - `cards/{programId_clientUid}`: a client's progress: `stamps`, `rewardsAvailable` (banked full cards)
 - `stampEvents/{cardId}_{n}`, `redemptions/{cardId}_r{n}`: the log behind the business dashboard, deleted after 2 years
@@ -244,8 +244,8 @@ from the running app with demo data (`npm run all`). See `marketing/README.md`.
 
 ## Programming NFC tags
 
-Every new shop gets the same starter kit in the post: a counter stand and a stamp card, each with a **secure tag**
-(NTAG 424 DNA) inside. The shop links them itself by tapping them with a signed-in phone (`kit/instructions.html`),
+Every shop gets **one secure tag** (NTAG 424 DNA) for its counter. A client's first tap adds the card with a first
+stamp; every next tap gives a stamp. The shop links the tag itself by tapping it with a signed-in phone (`kit/instructions.html`),
 and every tap writes a one-time link the server checks, so a saved stamp link can't be reused. How to make
 and send them: docs/KIT.md.
 

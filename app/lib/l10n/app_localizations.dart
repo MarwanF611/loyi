@@ -1686,13 +1686,13 @@ abstract class L10n {
   /// No description provided for @howTagsWork.
   ///
   /// In en, this message translates to:
-  /// **'How the tags work'**
+  /// **'How the tag works'**
   String get howTagsWork;
 
   /// No description provided for @howTagsWorkBody.
   ///
   /// In en, this message translates to:
-  /// **'A join tag at the entrance lets clients pick up the card. The stamp tag at the counter gives one stamp per tap, with the waiting time you set. Pause a tag any time.'**
+  /// **'One Loyi tag on your counter does it all: a client\'s first tap adds the card with a first stamp, every next tap gives one stamp, with the waiting time you set. Pause the tag any time.'**
   String get howTagsWorkBody;
 
   /// No description provided for @createFirstCard.
@@ -2088,7 +2088,7 @@ abstract class L10n {
   /// No description provided for @perkTags.
   ///
   /// In en, this message translates to:
-  /// **'Your NFC join and stamp tags, switched on'**
+  /// **'Your Loyi tag, switched on'**
   String get perkTags;
 
   /// No description provided for @perkUnlimited.
@@ -2418,13 +2418,13 @@ abstract class L10n {
   /// No description provided for @nfcTagsSub.
   ///
   /// In en, this message translates to:
-  /// **'Every tag is a link. Write it onto an NFC sticker.'**
+  /// **'One tag on your counter: it adds the card and gives the stamps.'**
   String get nfcTagsSub;
 
   /// No description provided for @noTagsYet.
   ///
   /// In en, this message translates to:
-  /// **'No tags yet. Create one join tag and one stamp tag to get started.'**
+  /// **'No tag linked yet. Hold your signed-in phone to your Loyi tag to link it.'**
   String get noTagsYet;
 
   /// No description provided for @addJoinTag.
@@ -3150,7 +3150,7 @@ abstract class L10n {
   /// No description provided for @kitNewTagShop.
   ///
   /// In en, this message translates to:
-  /// **'Choose the card and what this tag does. You can switch it off later under Cards.'**
+  /// **'Link this tag to your card. A client\'s first tap adds the card with a first stamp; every tap after that gives a stamp.'**
   String get kitNewTagShop;
 
   /// No description provided for @kitNewTagClient.
@@ -3192,7 +3192,7 @@ abstract class L10n {
   /// No description provided for @kitLinkedSub.
   ///
   /// In en, this message translates to:
-  /// **'Clients can tap it now. Every tap makes a new one-time code, so a saved link doesn\'t work twice.'**
+  /// **'Clients can tap it now: the first tap adds the card with a first stamp, every next tap gives a stamp. Each tap makes a new one-time code, so a saved link doesn\'t work twice.'**
   String get kitLinkedSub;
 
   /// No description provided for @kitOpenCard.
@@ -3228,13 +3228,13 @@ abstract class L10n {
   /// No description provided for @kitHowTo.
   ///
   /// In en, this message translates to:
-  /// **'Starter kit tags'**
+  /// **'Your Loyi tag'**
   String get kitHowTo;
 
   /// No description provided for @kitHowToSub.
   ///
   /// In en, this message translates to:
-  /// **'Sign in on your phone, hold it to a kit tag and choose this card. Nothing to program.'**
+  /// **'Sign in on your phone, hold it to your Loyi tag and tap Link tag. Nothing to program. A client\'s first tap adds the card with a first stamp; every next tap gives a stamp.'**
   String get kitHowToSub;
 
   /// No description provided for @ownStickers.
@@ -3246,7 +3246,7 @@ abstract class L10n {
   /// No description provided for @ownStickersSub.
   ///
   /// In en, this message translates to:
-  /// **'Any NTAG213/215 sticker works with the links below, but a stamp link written on a plain sticker can be saved and reused after the waiting time. Use a kit tag for stamps.'**
+  /// **'Any NTAG213/215 sticker works with the links below, but a stamp link written on a plain sticker can be saved and reused after the waiting time. Use your Loyi tag for stamps.'**
   String get ownStickersSub;
 
   /// No description provided for @trialBadge.
@@ -3518,6 +3518,24 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'There\'s no pilot running right now.'**
   String get pilotNotRunning;
+
+  /// No description provided for @welcomeFirstStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Your card is added, with your first stamp. Tap the tag again after your next purchase.'**
+  String get welcomeFirstStamp;
+
+  /// No description provided for @moreTagOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'More options: your own stickers or a QR code'**
+  String get moreTagOptions;
+
+  /// No description provided for @kitLinkTo.
+  ///
+  /// In en, this message translates to:
+  /// **'This tag will be linked to {card}.'**
+  String kitLinkTo(String card);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

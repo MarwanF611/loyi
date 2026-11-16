@@ -49,8 +49,6 @@ class _TagsSectionState extends State<TagsSection> {
       children: [
         SectionHeader(title: context.l10n.nfcTags, subtitle: context.l10n.nfcTagsSub),
         const _KitHowTo(),
-        const SizedBox(height: 12),
-        const _HowTo(),
         const SizedBox(height: 16),
         StreamBuilder<List<LoyiTag>>(
           stream: _tags,
@@ -69,21 +67,35 @@ class _TagsSectionState extends State<TagsSection> {
             );
           },
         ),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            OutlinedButton.icon(
-              onPressed: () => _addTag(TagType.join),
-              icon: const Icon(LoyiIcons.userPlus),
-              label: Text(context.l10n.addJoinTag),
-            ),
-            OutlinedButton.icon(
-              onPressed: () => _addTag(TagType.stamp),
-              icon: const Icon(LoyiIcons.stamp),
-              label: Text(context.l10n.addStampTag),
-            ),
-          ],
+        // A shop works with its one Loyi tag; plain stickers and a join QR code are extras.
+        Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(top: 8, bottom: 4),
+            expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+            title: Text(context.l10n.moreTagOptions, style: context.text.titleSmall),
+            children: [
+              const _HowTo(),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: () => _addTag(TagType.join),
+                    icon: const Icon(LoyiIcons.userPlus),
+                    label: Text(context.l10n.addJoinTag),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => _addTag(TagType.stamp),
+                    icon: const Icon(LoyiIcons.stamp),
+                    label: Text(context.l10n.addStampTag),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
     );

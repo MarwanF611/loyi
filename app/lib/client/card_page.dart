@@ -172,6 +172,10 @@ class _CardDetailsState extends State<_CardDetails> {
     final rewards = program.activeRewards;
     final tap = widget.tapResult;
     final hasReward = progress.rewards > 0;
+    final anonymous = auth.user?.isAnonymous ?? false;
+    // Right after a first tap, saving the card comes first: an unsaved card lives in this
+    // browser only, and Safari forgets a site it hasn't seen for about a week.
+    final saveFirst = anonymous && (tap?.newCard ?? false);
 
     return Stack(
       children: [
@@ -193,6 +197,7 @@ class _CardDetailsState extends State<_CardDetails> {
                     rewardsAvailable: progress.rewards,
                     animateLatestStamp: tap?.outcome == TapOutcome.stamped && !tap!.completedCard,
                   ),
+                  if (saveFirst) ...[const SizedBox(height: 14), const SaveCardsPrompt()],
                   _ShopMessages(card: widget.card, program: program, business: widget.business),
                   const SizedBox(height: 24),
                   if (hasReward)
@@ -284,7 +289,7 @@ class _CardDetailsState extends State<_CardDetails> {
                       ),
                     ],
                   ),
-                  if (auth.user?.isAnonymous ?? false) ...[const SizedBox(height: 14), const SaveCardsPrompt()],
+                  if (anonymous && !saveFirst) ...[const SizedBox(height: 14), const SaveCardsPrompt()],
                 ],
               ),
             ),
@@ -560,6 +565,14 @@ class _TapBanner extends StatelessWidget {
         l.cardFullSub,
         p.sunSoft,
         p.sun,
+      ),
+      // One tag does both: a client's first tap adds the card with its first stamp.
+      TapOutcome.stamped when result.newCard => (
+        LoyiIcons.hand,
+        l.welcome,
+        l.welcomeFirstStamp,
+        p.accentSoft,
+        p.accent,
       ),
       TapOutcome.stamped => (LoyiIcons.check, l.stampAdded, l.thanksForVisit, p.mintSoft, p.mint),
       TapOutcome.joined => (LoyiIcons.hand, l.welcome, l.welcomeSub, p.accentSoft, p.accent),

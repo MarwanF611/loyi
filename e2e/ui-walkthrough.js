@@ -230,7 +230,8 @@ try {
   await tap(biz, "Create card");
   await see(biz, "Edit loyalty card");
 
-  step("add a join tag and a stamp tag");
+  step("add a join tag and a stamp tag (extras, under More options)");
+  await tap(biz, "More options: your own stickers or a QR code");
   await tap(biz, "Add join tag");
   await tap(biz, "Create", { role: "button" });
   await see(biz, "Join tag · Entrance");
@@ -279,8 +280,9 @@ try {
 
   console.log("Client, phone 2 (new device)");
   const phone2 = await openApp(browser, PHONE, `/t/${tags.stamp}`);
-  step("collect a stamp before signing in");
-  await see(phone2, "Stamp added");
+  step("first tap on the stamp tag: the card is added with a first stamp");
+  await see(phone2, "Welcome!");
+  await see(phone2, "with your first stamp");
   step("sign in: the stamp moves into the saved account");
   await go(phone2, "/account");
   await tap(phone2, "I have an account");

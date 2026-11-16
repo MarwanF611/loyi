@@ -1,10 +1,10 @@
-# Starter kit: secure Loyi tags
+# The secure Loyi tag
 
-Every new shop gets the same starter kit in the post: a counter stand and a stamp card, each with a secure tag inside.
-The tags solve two problems at once:
+Every shop gets **one secure tag** for its counter. A client's first tap adds the card with a first stamp; every next
+tap gives a stamp. The tag solves two problems at once:
 
-- **Little setup work for the shop.** Every shop gets the same box. The shop holds a signed-in phone to each tag and
-  picks a card and a role (join or stamp). No NFC Tools, no links to copy.
+- **Little setup work for the shop.** Every shop gets the same tag. The shop holds a signed-in phone to it and taps
+  *Link tag* (it only picks a card when it has more than one). No NFC Tools, no links to copy.
 - **No stamping from home.** A plain sticker always holds the same link, so a client can save it and stamp again after
   the waiting time. A secure tag (NXP **NTAG 424 DNA**) writes a new link at every tap, with an encrypted tap
   counter and a signature. The billing Worker checks it and refuses any link it has seen before, and firestore.rules
@@ -15,9 +15,10 @@ How it fits together:
 ```
 tap → https://<site>/k?e=<encrypted UID + counter>&c=<MAC>
     → app (KitTapPage) → Worker POST /kit-tap  (checks MAC, counter must go up)
-        unknown tag + shop signed in → link form → POST /kit-link → tags/{id} with secure: true
-        join tag  → normal join
+        unknown tag + shop signed in → Link tag → POST /kit-link → tags/{id} with secure: true, type: stamp
         stamp tag → stampTickets/{UID}_{counter} → app stamps and spends (deletes) the ticket in one write
+                    (a first tap creates the card with that stamp)
+        join tag  → normal join (the server still supports it; the app links stamp tags only)
 ```
 
 Code: `billing-worker/src/sun.js` (crypto, tested against RFC 4493 and NXP AN12196), `billing-worker/src/index.js`
@@ -76,22 +77,22 @@ cd billing-worker && SDM_META_KEY=… SDM_FILE_KEY=… node tools/check-tag.mjs 
 `✓ Genuine tap` means the tag is ready. Tap twice: the counter must go up. Program all tags of a batch the same way;
 each tag is told apart by its UID, so nothing in the link is shop-specific and any kit can go to any shop.
 
-## 4. The kit: the same box for every shop
+## 4. One tag per shop, the same for every shop
 
-Nothing in the kit belongs to a shop until the shop links it, so you can program, print and pack a stock of kits
-ahead of time. Each box holds:
+Nothing on a tag belongs to a shop until the shop links it, so you can program a stock of tags ahead of time. A shop
+gets:
 
-- the **counter stand** with a tag sealed in the plate (`kit/3d/loyi-stand.scad`): the shop links it as **Join**;
-- the **stamp card** with a tag inside (`kit/3d/loyi-card.scad`): the shop links it as **Stamp**;
+- **one secure tag** for the counter, as a sticker or sealed in the counter stand (`kit/3d/loyi-stand.scad`; the
+  stamp card model `kit/3d/loyi-card.scad` is optional now);
 - the **instruction card** (`kit/instructions.html`, A6, one page each in Dutch, French and English: print the shop's
   language, or all three).
 
-Before it goes in the box: program both tags (§3), check each with `check-tag.mjs`, and tap each once with a phone
-that isn't signed in: it must say the tag isn't linked yet.
+Before you hand it over: program the tag (§3), check it with `check-tag.mjs`, and tap it once with a phone that isn't
+signed in: it must say the tag isn't linked yet.
 
-The shop does the rest with the instruction card: sign in on the phone, tap the stand, choose the card and **Join**,
-tap the stamp card, choose the card and **Stamp**. The app explains it too (Cards → the card → *Tags from your starter
-kit*). A tag can only be linked by a signed-in shop, and only right after it was tapped.
+The shop does the rest with the instruction card: sign in on the phone at loyi.be, tap the tag, tap **Link tag**. The
+app explains it too (Cards → the card → *Your Loyi tag*). A tag can only be linked by a signed-in shop, and only right
+after it was tapped. Pilot shops: you can do this together with the owner when you bring the tag.
 
 ## 5. Send kits
 
@@ -109,5 +110,5 @@ if that becomes a problem (filter Stripe customers on status `active`).
   linked by tapping it.
 - **Tag on the wrong card**: switch it off; to reuse the same sticker, delete the tag document in the Firebase console
   (`tags/{id}`), then tap and link it again.
-- Plain stickers keep working for joining. For stamping, a plain stamp tag can be saved and reused after the waiting
-  time; the dashboard says so.
+- Plain stickers keep working as extras (Cards → the card → *More options*). For stamping, a plain stamp tag can be
+  saved and reused after the waiting time; the dashboard says so.

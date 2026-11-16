@@ -963,11 +963,11 @@ class L10nFr extends L10n {
   String get newCard => 'Nouvelle carte';
 
   @override
-  String get howTagsWork => 'Comment fonctionnent les tags';
+  String get howTagsWork => 'Comment fonctionne le tag';
 
   @override
   String get howTagsWorkBody =>
-      'Le tag d\'inscription à l\'entrée permet aux clients de prendre la carte. Le tag tampon au comptoir donne un tampon par contact, avec le délai que vous choisissez. Vous pouvez mettre un tag en pause à tout moment.';
+      'Un seul tag Loyi sur votre comptoir fait tout : le premier contact d\'un client ajoute la carte avec un premier tampon, chaque contact suivant donne un tampon, avec le délai que vous choisissez. Vous pouvez mettre le tag en pause à tout moment.';
 
   @override
   String get createFirstCard => 'Créez votre première carte de fidélité';
@@ -1202,7 +1202,7 @@ class L10nFr extends L10n {
       'Des cartes de fidélité numériques que vos clients gardent vraiment.';
 
   @override
-  String get perkTags => 'Vos tags NFC d\'inscription et de tampon, activés';
+  String get perkTags => 'Votre tag Loyi, activé';
 
   @override
   String get perkUnlimited => 'Cartes de fidélité et récompenses illimitées';
@@ -1414,11 +1414,11 @@ class L10nFr extends L10n {
 
   @override
   String get nfcTagsSub =>
-      'Chaque tag est un lien. Écrivez-le sur un autocollant NFC.';
+      'Un seul tag sur votre comptoir : il ajoute la carte et donne les tampons.';
 
   @override
   String get noTagsYet =>
-      'Pas encore de tags. Créez un tag d\'inscription et un tag tampon pour commencer.';
+      'Aucun tag associé pour l\'instant. Approchez votre téléphone connecté de votre tag Loyi pour l\'associer.';
 
   @override
   String get addJoinTag => 'Ajouter un tag d\'inscription';
@@ -1868,7 +1868,7 @@ class L10nFr extends L10n {
 
   @override
   String get kitNewTagShop =>
-      'Choisissez la carte et le rôle de ce tag. Vous pourrez le désactiver plus tard sous Cartes.';
+      'Associez ce tag à votre carte. Le premier contact d\'un client ajoute la carte avec un premier tampon ; chaque contact suivant donne un tampon.';
 
   @override
   String get kitNewTagClient =>
@@ -1893,7 +1893,7 @@ class L10nFr extends L10n {
 
   @override
   String get kitLinkedSub =>
-      'Vos clients peuvent le toucher dès maintenant. Chaque contact crée un nouveau code à usage unique : un lien enregistré ne fonctionne pas deux fois.';
+      'Vos clients peuvent le toucher dès maintenant : le premier contact ajoute la carte avec un premier tampon, chaque contact suivant donne un tampon. Chaque contact crée un nouveau code à usage unique : un lien enregistré ne fonctionne pas deux fois.';
 
   @override
   String get kitOpenCard => 'Ouvrir la carte';
@@ -1912,18 +1912,18 @@ class L10nFr extends L10n {
       'Un nouveau code unique à chaque contact : un lien enregistré ou partagé ne fonctionne pas.';
 
   @override
-  String get kitHowTo => 'Tags de votre kit de démarrage';
+  String get kitHowTo => 'Votre tag Loyi';
 
   @override
   String get kitHowToSub =>
-      'Connectez-vous sur votre téléphone, approchez-le d\'un tag du kit et choisissez cette carte. Rien à programmer.';
+      'Connectez-vous sur votre téléphone, approchez-le de votre tag Loyi et touchez Associer le tag. Rien à programmer. Le premier contact d\'un client ajoute la carte avec un premier tampon ; chaque contact suivant donne un tampon.';
 
   @override
   String get ownStickers => 'Vos propres autocollants';
 
   @override
   String get ownStickersSub =>
-      'Tout autocollant NTAG213/215 fonctionne avec les liens ci-dessous, mais un lien tampon sur un autocollant ordinaire peut être enregistré et réutilisé après le délai d\'attente. Utilisez un tag du kit pour les tampons.';
+      'Tout autocollant NTAG213/215 fonctionne avec les liens ci-dessous, mais un lien tampon sur un autocollant ordinaire peut être enregistré et réutilisé après le délai d\'attente. Utilisez votre tag Loyi pour les tampons.';
 
   @override
   String trialBadge(int days) {
@@ -2080,4 +2080,17 @@ class L10nFr extends L10n {
 
   @override
   String get pilotNotRunning => 'Aucun projet pilote n\'est en cours.';
+
+  @override
+  String get welcomeFirstStamp =>
+      'Votre carte est ajoutée, avec votre premier tampon. Touchez à nouveau le tag après votre prochain achat.';
+
+  @override
+  String get moreTagOptions =>
+      'Plus d\'options : vos propres autocollants ou un QR code';
+
+  @override
+  String kitLinkTo(String card) {
+    return 'Ce tag sera associé à $card.';
+  }
 }

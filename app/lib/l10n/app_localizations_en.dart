@@ -956,11 +956,11 @@ class L10nEn extends L10n {
   String get newCard => 'New card';
 
   @override
-  String get howTagsWork => 'How the tags work';
+  String get howTagsWork => 'How the tag works';
 
   @override
   String get howTagsWorkBody =>
-      'A join tag at the entrance lets clients pick up the card. The stamp tag at the counter gives one stamp per tap, with the waiting time you set. Pause a tag any time.';
+      'One Loyi tag on your counter does it all: a client\'s first tap adds the card with a first stamp, every next tap gives one stamp, with the waiting time you set. Pause the tag any time.';
 
   @override
   String get createFirstCard => 'Create your first loyalty card';
@@ -1191,7 +1191,7 @@ class L10nEn extends L10n {
   String get planTagline => 'Digital stamp cards your clients actually keep.';
 
   @override
-  String get perkTags => 'Your NFC join and stamp tags, switched on';
+  String get perkTags => 'Your Loyi tag, switched on';
 
   @override
   String get perkUnlimited => 'Unlimited loyalty cards and rewards';
@@ -1399,11 +1399,12 @@ class L10nEn extends L10n {
   String get nfcTags => 'NFC tags';
 
   @override
-  String get nfcTagsSub => 'Every tag is a link. Write it onto an NFC sticker.';
+  String get nfcTagsSub =>
+      'One tag on your counter: it adds the card and gives the stamps.';
 
   @override
   String get noTagsYet =>
-      'No tags yet. Create one join tag and one stamp tag to get started.';
+      'No tag linked yet. Hold your signed-in phone to your Loyi tag to link it.';
 
   @override
   String get addJoinTag => 'Add join tag';
@@ -1848,7 +1849,7 @@ class L10nEn extends L10n {
 
   @override
   String get kitNewTagShop =>
-      'Choose the card and what this tag does. You can switch it off later under Cards.';
+      'Link this tag to your card. A client\'s first tap adds the card with a first stamp; every tap after that gives a stamp.';
 
   @override
   String get kitNewTagClient =>
@@ -1873,7 +1874,7 @@ class L10nEn extends L10n {
 
   @override
   String get kitLinkedSub =>
-      'Clients can tap it now. Every tap makes a new one-time code, so a saved link doesn\'t work twice.';
+      'Clients can tap it now: the first tap adds the card with a first stamp, every next tap gives a stamp. Each tap makes a new one-time code, so a saved link doesn\'t work twice.';
 
   @override
   String get kitOpenCard => 'Open the card';
@@ -1892,18 +1893,18 @@ class L10nEn extends L10n {
       'A new one-time code at every tap: a saved or shared link doesn\'t work.';
 
   @override
-  String get kitHowTo => 'Starter kit tags';
+  String get kitHowTo => 'Your Loyi tag';
 
   @override
   String get kitHowToSub =>
-      'Sign in on your phone, hold it to a kit tag and choose this card. Nothing to program.';
+      'Sign in on your phone, hold it to your Loyi tag and tap Link tag. Nothing to program. A client\'s first tap adds the card with a first stamp; every next tap gives a stamp.';
 
   @override
   String get ownStickers => 'Your own stickers';
 
   @override
   String get ownStickersSub =>
-      'Any NTAG213/215 sticker works with the links below, but a stamp link written on a plain sticker can be saved and reused after the waiting time. Use a kit tag for stamps.';
+      'Any NTAG213/215 sticker works with the links below, but a stamp link written on a plain sticker can be saved and reused after the waiting time. Use your Loyi tag for stamps.';
 
   @override
   String trialBadge(int days) {
@@ -2058,4 +2059,16 @@ class L10nEn extends L10n {
 
   @override
   String get pilotNotRunning => 'There\'s no pilot running right now.';
+
+  @override
+  String get welcomeFirstStamp =>
+      'Your card is added, with your first stamp. Tap the tag again after your next purchase.';
+
+  @override
+  String get moreTagOptions => 'More options: your own stickers or a QR code';
+
+  @override
+  String kitLinkTo(String card) {
+    return 'This tag will be linked to $card.';
+  }
 }

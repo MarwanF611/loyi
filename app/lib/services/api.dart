@@ -15,6 +15,7 @@ class TapResult {
     required this.retryAfter,
     required this.stamps,
     required this.stampsRequired,
+    this.newCard = false,
     this.card,
     this.program,
     this.business,
@@ -26,6 +27,9 @@ class TapResult {
   final Duration retryAfter;
   final int stamps;
   final int stampsRequired;
+
+  /// This tap created the card (a first tap on a stamp tag also gives the first stamp).
+  final bool newCard;
 
   /// What the tap read and wrote, so the card shows at once; the live listeners take over after.
   final LoyaltyCard? card;
@@ -123,7 +127,7 @@ class Api {
             'updatedAt': now,
           });
           tx.update(tagRef, {'tapCount': FieldValue.increment(1), 'lastTapAt': now});
-          return _result(TapOutcome.joined, _newCard(cardId, uid, p), p, business);
+          return _result(TapOutcome.joined, _newCard(cardId, uid, p), p, business, newCard: true);
         }
 
         // Stamp tag. The rules enforce the cooldown with server time; this is the friendly pre-check.
@@ -180,6 +184,7 @@ class Api {
           p,
           business,
           completedCard: next.rewards > (existing?.rewardsAvailable ?? 0),
+          newCard: existing == null,
         );
       });
       if (refusal case final r?) throw r;
@@ -227,11 +232,13 @@ class Api {
     Program program,
     Business business, {
     bool completedCard = false,
+    bool newCard = false,
     Duration retryAfter = Duration.zero,
   }) => TapResult(
     cardId: card.id,
     outcome: outcome,
     completedCard: completedCard,
+    newCard: newCard,
     retryAfter: retryAfter,
     stamps: card.stamps,
     stampsRequired: program.stampsRequired,

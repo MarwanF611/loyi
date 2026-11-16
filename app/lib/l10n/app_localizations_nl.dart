@@ -959,11 +959,11 @@ class L10nNl extends L10n {
   String get newCard => 'Nieuwe kaart';
 
   @override
-  String get howTagsWork => 'Zo werken de tags';
+  String get howTagsWork => 'Zo werkt de tag';
 
   @override
   String get howTagsWorkBody =>
-      'Via de aanmeldtag aan de ingang krijgen klanten de kaart. De stempeltag aan de toog geeft één stempel per tik, met de wachttijd die jij kiest. Je kunt een tag altijd pauzeren.';
+      'Eén Loyi-tag op je toog doet alles: de eerste tik van een klant voegt de kaart toe met een eerste stempel, elke volgende tik geeft één stempel, met de wachttijd die jij kiest. Je kunt de tag altijd pauzeren.';
 
   @override
   String get createFirstCard => 'Maak je eerste klantenkaart';
@@ -1198,7 +1198,7 @@ class L10nNl extends L10n {
       'Digitale stempelkaarten die je klanten echt bijhouden.';
 
   @override
-  String get perkTags => 'Je NFC-tags om aan te melden en te stempelen, actief';
+  String get perkTags => 'Je Loyi-tag, actief';
 
   @override
   String get perkUnlimited => 'Onbeperkt klantenkaarten en beloningen';
@@ -1407,11 +1407,11 @@ class L10nNl extends L10n {
 
   @override
   String get nfcTagsSub =>
-      'Elke tag is een link. Schrijf hem op een NFC-sticker.';
+      'Eén tag op je toog: hij voegt de kaart toe en geeft de stempels.';
 
   @override
   String get noTagsYet =>
-      'Nog geen tags. Maak één aanmeldtag en één stempeltag om te beginnen.';
+      'Nog geen tag gekoppeld. Hou je ingelogde telefoon tegen je Loyi-tag om hem te koppelen.';
 
   @override
   String get addJoinTag => 'Aanmeldtag toevoegen';
@@ -1857,7 +1857,7 @@ class L10nNl extends L10n {
 
   @override
   String get kitNewTagShop =>
-      'Kies de kaart en wat deze tag doet. Je kunt hem later uitzetten onder Kaarten.';
+      'Koppel deze tag aan je kaart. De eerste tik van een klant voegt de kaart toe met een eerste stempel; elke volgende tik geeft een stempel.';
 
   @override
   String get kitNewTagClient =>
@@ -1882,7 +1882,7 @@ class L10nNl extends L10n {
 
   @override
   String get kitLinkedSub =>
-      'Klanten kunnen er nu op tikken. Elke tik maakt een nieuwe eenmalige code, dus een opgeslagen link werkt geen tweede keer.';
+      'Klanten kunnen er nu op tikken: de eerste tik voegt de kaart toe met een eerste stempel, elke volgende tik geeft een stempel. Elke tik maakt een nieuwe eenmalige code, dus een opgeslagen link werkt geen tweede keer.';
 
   @override
   String get kitOpenCard => 'Kaart openen';
@@ -1901,18 +1901,18 @@ class L10nNl extends L10n {
       'Bij elke tik een nieuwe eenmalige code: een opgeslagen of gedeelde link werkt niet.';
 
   @override
-  String get kitHowTo => 'Tags uit je starterkit';
+  String get kitHowTo => 'Je Loyi-tag';
 
   @override
   String get kitHowToSub =>
-      'Log in op je telefoon, hou hem tegen een kit-tag en kies deze kaart. Niets te programmeren.';
+      'Log in op je telefoon, hou hem tegen je Loyi-tag en tik op Tag koppelen. Niets te programmeren. De eerste tik van een klant voegt de kaart toe met een eerste stempel; elke volgende tik geeft een stempel.';
 
   @override
   String get ownStickers => 'Je eigen stickers';
 
   @override
   String get ownStickersSub =>
-      'Elke NTAG213/215-sticker werkt met de links hieronder, maar een stempellink op een gewone sticker kan worden opgeslagen en na de wachttijd opnieuw gebruikt. Gebruik een kit-tag om te stempelen.';
+      'Elke NTAG213/215-sticker werkt met de links hieronder, maar een stempellink op een gewone sticker kan worden opgeslagen en na de wachttijd opnieuw gebruikt. Gebruik je Loyi-tag om te stempelen.';
 
   @override
   String trialBadge(int days) {
@@ -2066,4 +2066,16 @@ class L10nNl extends L10n {
 
   @override
   String get pilotNotRunning => 'Er loopt momenteel geen pilot.';
+
+  @override
+  String get welcomeFirstStamp =>
+      'Je kaart is toegevoegd, met je eerste stempel. Tik na je volgende aankoop opnieuw op de tag.';
+
+  @override
+  String get moreTagOptions => 'Meer opties: je eigen stickers of een QR-code';
+
+  @override
+  String kitLinkTo(String card) {
+    return 'Deze tag wordt gekoppeld aan $card.';
+  }
 }
