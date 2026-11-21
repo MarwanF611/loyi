@@ -575,13 +575,8 @@
   "kitLinkTo": "Deze tag wordt gekoppeld aan {card}.",
   "giveStamp": "Stempel uitdelen",
   "giveStampHint": "Laat je klant deze code scannen met de camera van zijn telefoon.",
-  "codeValidFor": "Nog {seconds} s geldig",
-  "codeExpiredTitle": "Code verlopen",
-  "codeExpiredSub": "Een code werkt één minuut. Maak een nieuwe voor je klant.",
-  "newCode": "Nieuwe code",
   "stampGiven": "Stempel gegeven",
   "stampGivenSub": "De stempel staat op de kaart van je klant.",
-  "nextCustomer": "Volgende klant",
   "chooseCardToStamp": "Welke kaart?",
   "qrCodeUsed": "Deze code is al gebruikt. Vraag aan de toog een nieuwe.",
   "qrCodeExpired": "Deze code is verlopen. Vraag aan de toog een nieuwe.",
@@ -593,5 +588,6 @@
   "homeScreenAndroidMenu": "Tik in Chrome op het menu (drie puntjes)",
   "homeScreenAndroidAdd": "Kies „Toevoegen aan startscherm” of „App installeren”",
   "homeScreenInstall": "Installeren",
-  "notNow": "Niet nu"
+  "notNow": "Niet nu",
+  "giveStampChanges": "De code verandert elke 15 seconden."
 }

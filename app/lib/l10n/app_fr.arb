@@ -575,13 +575,8 @@
   "kitLinkTo": "Ce tag sera associé à {card}.",
   "giveStamp": "Donner un tampon",
   "giveStampHint": "Faites scanner ce code par votre client avec l'appareil photo de son téléphone.",
-  "codeValidFor": "Valable encore {seconds} s",
-  "codeExpiredTitle": "Code expiré",
-  "codeExpiredSub": "Un code fonctionne une minute. Créez-en un nouveau pour votre client.",
-  "newCode": "Nouveau code",
   "stampGiven": "Tampon donné",
   "stampGivenSub": "Le tampon est sur la carte de votre client.",
-  "nextCustomer": "Client suivant",
   "chooseCardToStamp": "Quelle carte ?",
   "qrCodeUsed": "Ce code a déjà été utilisé. Demandez-en un nouveau au comptoir.",
   "qrCodeExpired": "Ce code a expiré. Demandez-en un nouveau au comptoir.",
@@ -593,5 +588,6 @@
   "homeScreenAndroidMenu": "Dans Chrome, touchez le menu (trois points)",
   "homeScreenAndroidAdd": "Choisissez « Ajouter à l'écran d'accueil » ou « Installer l'application »",
   "homeScreenInstall": "Installer",
-  "notNow": "Pas maintenant"
+  "notNow": "Pas maintenant",
+  "giveStampChanges": "Le code change toutes les 15 secondes."
 }

@@ -1443,13 +1443,37 @@
   "ownStickersSub": "Any NTAG213/215 sticker works with the links below, but a stamp link written on a plain sticker can be saved and reused after the waiting time. Use your Loyi tag for stamps.",
   "@ownStickersSub": {},
   "trialBadge": "First {days} days free",
-  "@trialBadge": {"placeholders": {"days": {"type": "int"}}},
+  "@trialBadge": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "startTrial": "Start free trial",
   "@startTrial": {},
   "trialNote": "You pay nothing today. After {days} days your subscription starts at {price} a month, unless you cancel before then. We also post you your secure Loyi tag; Stripe asks for the address.",
-  "@trialNote": {"placeholders": {"days": {"type": "int"}, "price": {"type": "String"}}},
+  "@trialNote": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "trialUntil": "Free trial until {date}. Then {price} a month, unless you cancel.",
-  "@trialUntil": {"placeholders": {"date": {"type": "String"}, "price": {"type": "String"}}},
+  "@trialUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "demoTitle": "Try a Loyi card",
   "@demoTitle": {},
   "demoSub": "This is what your clients see after tapping your tag. Here a button stands in for the tag.",
@@ -1457,7 +1481,13 @@
   "demoStamp": "Tap the stamp tag",
   "@demoStamp": {},
   "demoStamped": "Stamp added. {left} to go.",
-  "@demoStamped": {"placeholders": {"left": {"type": "int"}}},
+  "@demoStamped": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      }
+    }
+  },
   "demoFull": "Card full! The reward is waiting on the client's card.",
   "@demoFull": {},
   "demoAgain": "Start over",
@@ -1523,7 +1553,13 @@
   "activatePilot": "Activate",
   "@activatePilot": {},
   "pilotActive": "Pilot active: free until {date}.",
-  "@pilotActive": {"placeholders": {"date": {"type": "String"}}},
+  "@pilotActive": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "pilotCodeInvalid": "That code isn't right. Check it and try again.",
   "@pilotCodeInvalid": {},
   "pilotNotForYou": "The pilot is only for new shops.",
@@ -1537,25 +1573,21 @@
   "moreTagOptions": "More options: your own stickers or a QR code",
   "@moreTagOptions": {},
   "kitLinkTo": "This tag will be linked to {card}.",
-  "@kitLinkTo": {"placeholders": {"card": {"type": "String"}}},
+  "@kitLinkTo": {
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
   "giveStamp": "Give a stamp",
   "@giveStamp": {},
   "giveStampHint": "Let your customer scan this code with their phone's camera.",
   "@giveStampHint": {},
-  "codeValidFor": "Valid for {seconds} s",
-  "@codeValidFor": {"placeholders": {"seconds": {"type": "int"}}},
-  "codeExpiredTitle": "Code expired",
-  "@codeExpiredTitle": {},
-  "codeExpiredSub": "A code works for one minute. Make a new one for your customer.",
-  "@codeExpiredSub": {},
-  "newCode": "New code",
-  "@newCode": {},
   "stampGiven": "Stamp given",
   "@stampGiven": {},
   "stampGivenSub": "The stamp is on your customer's card.",
   "@stampGivenSub": {},
-  "nextCustomer": "Next customer",
-  "@nextCustomer": {},
   "chooseCardToStamp": "Which card?",
   "@chooseCardToStamp": {},
   "qrCodeUsed": "This code was already used. Ask for a new one at the counter.",
@@ -1579,5 +1611,7 @@
   "homeScreenInstall": "Install",
   "@homeScreenInstall": {},
   "notNow": "Not now",
-  "@notNow": {}
+  "@notNow": {},
+  "giveStampChanges": "The code changes every 15 seconds.",
+  "@giveStampChanges": {}
 }

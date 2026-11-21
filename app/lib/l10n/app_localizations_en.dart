@@ -2080,28 +2080,10 @@ class L10nEn extends L10n {
       'Let your customer scan this code with their phone\'s camera.';
 
   @override
-  String codeValidFor(int seconds) {
-    return 'Valid for $seconds s';
-  }
-
-  @override
-  String get codeExpiredTitle => 'Code expired';
-
-  @override
-  String get codeExpiredSub =>
-      'A code works for one minute. Make a new one for your customer.';
-
-  @override
-  String get newCode => 'New code';
-
-  @override
   String get stampGiven => 'Stamp given';
 
   @override
   String get stampGivenSub => 'The stamp is on your customer\'s card.';
-
-  @override
-  String get nextCustomer => 'Next customer';
 
   @override
   String get chooseCardToStamp => 'Which card?';
@@ -2144,4 +2126,7 @@ class L10nEn extends L10n {
 
   @override
   String get notNow => 'Not now';
+
+  @override
+  String get giveStampChanges => 'The code changes every 15 seconds.';
 }

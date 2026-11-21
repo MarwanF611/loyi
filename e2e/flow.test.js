@@ -495,6 +495,15 @@ test("Loyi rules: full flow and abuse attempts", async (t) => {
     assert.deepEqual([card.stamps, card.totalStamps], [1, 1]);
     await denied(tap(scanner.db, scanner.uid(), qrTag.id, { ticketId: `qr-${run}` }));
 
+    // Used codes: only the shop may list and delete them (account deletion); clients never see them.
+    await admin.doc(`qrClaims/${programRef.id}_1_0`).set({ ownerUid: owner.uid, programId: programRef.id, createdAt: Timestamp.now() });
+    const claims = (db) => query(collection(db, "qrClaims"), where("ownerUid", "==", owner.uid));
+    assert.equal((await getDocs(claims(biz.db))).size, 1);
+    await denied(getDocs(claims(bob.db)));
+    await denied(getDoc(doc(bob.db, "qrClaims", `${programRef.id}_1_0`)));
+    await denied(setDoc(doc(scanner.db, "qrClaims", `${programRef.id}_1_1`), { ownerUid: owner.uid, programId: programRef.id }));
+    await deleteDoc(doc(biz.db, "qrClaims", `${programRef.id}_1_0`));
+
     // Account deletion: the shop removes its own offer.
     await deleteDoc(offerDoc(biz.db));
     assert.equal((await admin.doc(`stampOffers/${programRef.id}`).get()).exists, false);

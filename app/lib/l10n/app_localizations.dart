@@ -3549,30 +3549,6 @@ abstract class L10n {
   /// **'Let your customer scan this code with their phone\'s camera.'**
   String get giveStampHint;
 
-  /// No description provided for @codeValidFor.
-  ///
-  /// In en, this message translates to:
-  /// **'Valid for {seconds} s'**
-  String codeValidFor(int seconds);
-
-  /// No description provided for @codeExpiredTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Code expired'**
-  String get codeExpiredTitle;
-
-  /// No description provided for @codeExpiredSub.
-  ///
-  /// In en, this message translates to:
-  /// **'A code works for one minute. Make a new one for your customer.'**
-  String get codeExpiredSub;
-
-  /// No description provided for @newCode.
-  ///
-  /// In en, this message translates to:
-  /// **'New code'**
-  String get newCode;
-
   /// No description provided for @stampGiven.
   ///
   /// In en, this message translates to:
@@ -3584,12 +3560,6 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'The stamp is on your customer\'s card.'**
   String get stampGivenSub;
-
-  /// No description provided for @nextCustomer.
-  ///
-  /// In en, this message translates to:
-  /// **'Next customer'**
-  String get nextCustomer;
 
   /// No description provided for @chooseCardToStamp.
   ///
@@ -3662,6 +3632,12 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'Not now'**
   String get notNow;
+
+  /// No description provided for @giveStampChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'The code changes every 15 seconds.'**
+  String get giveStampChanges;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

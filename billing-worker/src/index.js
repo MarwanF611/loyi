@@ -16,8 +16,8 @@ import { verifySun } from "./sun.js";
 //                         returns its tag id, plus a stamp ticket for stamp tags
 //   POST /kit-link        signed-in shop → links a new secure tag (just tapped) to one of its cards
 //   POST /pilot           signed-in shop → a pilot code gives a new shop free access (no card, no Stripe)
-//   POST /qr-offer        signed-in shop → a one-time QR code for one stamp on one of its cards (60 s)
-//   POST /qr-claim        any signed-in user → spends that code: returns the shop's QR tag and a stamp ticket
+//   POST /qr-session      signed-in shop → the secret its counter screen makes QR codes with (a new one every 15 s)
+//   POST /qr-claim        any signed-in user → spends a scanned code: returns the shop's QR tag and a stamp ticket
 //   POST /stripe          Stripe webhook (signature-checked)
 // All but /stripe need `Authorization: Bearer <Firebase ID token>`.
 //
@@ -39,7 +39,8 @@ const PAST_DUE_GRACE = 7 * DAY; // Stripe retries a failed renewal; keep the sho
 const SIGNATURE_TOLERANCE_S = 300;
 const TICKET_TTL = 5 * 60_000; // a stamp ticket must be used right after the tap
 const LINK_TTL = 10 * 60_000; // time a shop has to link a tag it just tapped
-const OFFER_TTL = 60_000; // a QR code on the shop's screen is valid this long
+const QR_PERIOD = 15_000; // the QR code on the shop's screen changes this often
+const QR_GRACE = 2; // a code is accepted for this many periods after its own (≤ 45 s old in all)
 
 export default {
   async fetch(request, env) {
@@ -65,8 +66,8 @@ export default {
           return json(await kitLink(await requireShop(request, env), await request.json(), env), 200, cors);
         case "/pilot":
           return json(await redeemPilot(await requireShop(request, env), await request.json(), env), 200, cors);
-        case "/qr-offer":
-          return json(await qrOffer(await requireShop(request, env), await request.json(), env), 200, cors);
+        case "/qr-session":
+          return json(await qrSession(await requireShop(request, env), await request.json(), env), 200, cors);
         case "/qr-claim":
           return json(await qrClaim(await requireUser(request, env), await request.json(), env), 200, cors);
         default:
@@ -363,14 +364,23 @@ export async function kitLink(user, body, env, now = Date.now()) {
 
 // ── Stamp by QR code ─────────────────────────────────────────────────────────
 //
-// The shop presses "Stempel uitdelen": its screen shows https://<site>/q/{programId}/{token}, valid OFFER_TTL and
-// usable once. stampOffers/{programId}: {ownerUid, tagId, token, expiresAt, claimedAt, createdAt}, one per card,
-// replaced at every press (the shop's screen reads it to see the scan). The card's QR tag tags/qr-{programId} is a
-// secure stamp tag, so firestore.rules only accept a stamp from it with the ticket qrClaim issues (ticketOk).
+// "Stempel uitdelen": the shop's counter screen always shows https://<site>/q/{programId}/{w}-{n}-{sig} and makes a
+// new code every QR_PERIOD itself, so an idle screen costs no database traffic. w is the period number
+// (server time / QR_PERIOD), n counts the scans within that period, sig is the first 16 bytes of
+// HMAC-SHA256(secret, "programId:w:n") in base64url. stampOffers/{programId}: {ownerUid, tagId, secret, lastClaim,
+// createdAt, updatedAt}, readable by the shop only. qrClaims/{programId}_{w}_{n} makes every code single-use.
+// The card's QR tag tags/qr-{programId} is a secure stamp tag, so firestore.rules only accept a stamp from it with
+// the ticket qrClaim issues (ticketOk).
 
 const programIdOf = (body) => (typeof body?.programId === "string" && /^[A-Za-z0-9_-]{1,100}$/.test(body.programId) ? body.programId : "");
 
-export async function qrOffer(user, body, env, now = Date.now()) {
+export async function qrSignature(secret, programId, w, n) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const mac = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${programId}:${w}:${n}`)));
+  return base64url(mac.slice(0, 16));
+}
+
+export async function qrSession(user, body, env, now = Date.now()) {
   const programId = programIdOf(body);
   const program = programId ? await readDoc(`programs/${programId}`, env) : null;
   if (!program || program.ownerUid !== user.uid) throw new HttpError(403, "That card isn't yours.", "forbidden");
@@ -383,7 +393,7 @@ export async function qrOffer(user, body, env, now = Date.now()) {
   const tagId = `qr-${programId}`;
   const createdAt = new Date(now).toISOString();
   if (!(await readDoc(`tags/${tagId}`, env))) {
-    // false when two presses race to create it: the other one did.
+    // false when two screens race to create it: the other one did.
     await writeDoc(
       `tags/${tagId}`,
       {
@@ -402,30 +412,43 @@ export async function qrOffer(user, body, env, now = Date.now()) {
       { mustNotExist: true },
     );
   }
-  const token = randomId();
-  const expiresAt = new Date(now + OFFER_TTL).toISOString();
-  await writeDoc(`stampOffers/${programId}`, { ownerUid: user.uid, tagId, token, expiresAt, claimedAt: null, createdAt }, env);
-  return { token, expiresAt };
+
+  // One secret per card, kept: every screen of the shop shows the same codes.
+  let offer = await readDoc(`stampOffers/${programId}`, env);
+  if (!offer?.secret) {
+    const fresh = { ownerUid: user.uid, tagId, secret: randomId() + randomId(), lastClaim: null, createdAt, updatedAt: createdAt };
+    // An older offer without a secret (the one-code-per-press version) is replaced; a racing screen's secret is kept.
+    const written = offer
+      ? await writeDoc(`stampOffers/${programId}`, fresh, env)
+      : await writeDoc(`stampOffers/${programId}`, fresh, env, { mustNotExist: true });
+    offer = written ? fresh : await readDoc(`stampOffers/${programId}`, env);
+  }
+  return { secret: offer.secret, period: QR_PERIOD / 1000, serverTime: new Date(now).toISOString() };
 }
 
 export async function qrClaim(user, body, env, now = Date.now()) {
-  const programId = programIdOf(body);
-  const token = typeof body?.token === "string" ? body.token : "";
-  const version = programId && token ? await readDocVersion(`stampOffers/${programId}`, env) : { data: null };
-  const offer = version.data;
-  // Unknown, replaced by a newer code, or already scanned.
   const used = () => new HttpError(409, "This code was already used. Ask for a new one at the counter.", "used");
-  if (!offer || !safeEqual(token, String(offer.token ?? "")) || offer.claimedAt) throw used();
-  if (!(new Date(offer.expiresAt) > new Date(now))) throw new HttpError(410, "This code has expired. Ask for a new one.", "expired");
+  const programId = programIdOf(body);
+  const parts = /^(\d{1,12})-(\d{1,6})-([A-Za-z0-9_-]{22})$/.exec(typeof body?.token === "string" ? body.token : "");
+  if (!programId || !parts) throw used();
+  const [w, n, sig] = [Number(parts[1]), Number(parts[2]), parts[3]];
 
-  // Only one scan wins: the write fails if the offer changed since we read it.
-  const claimed = await writeDoc(`stampOffers/${programId}`, { ...offer, claimedAt: new Date(now).toISOString() }, env, {
-    updateTime: version.updateTime,
-  });
-  if (!claimed) throw used();
-  const ticketId = `qr-${programId}-${token}`;
+  const offer = await readDoc(`stampOffers/${programId}`, env);
+  if (!offer?.secret || !safeEqual(sig, await qrSignature(offer.secret, programId, w, n))) throw used();
+  const current = Math.floor(now / QR_PERIOD);
+  if (w > current) throw used();
+  if (w < current - QR_GRACE) throw new HttpError(410, "This code has expired. Ask for a new one.", "expired");
+
+  // Every code works once.
+  const claimedAt = new Date(now).toISOString();
+  if (!(await writeDoc(`qrClaims/${programId}_${w}_${n}`, { ownerUid: offer.ownerUid, programId, createdAt: claimedAt }, env, { mustNotExist: true }))) {
+    throw used();
+  }
+  const ticketId = `qr-${programId}-${w}-${n}`;
   const ticket = { tagId: offer.tagId, clientUid: user.uid, expiresAt: new Date(now + TICKET_TTL).toISOString() };
   if (!(await writeDoc(`stampTickets/${ticketId}`, ticket, env, { mustNotExist: true }))) throw used();
+  // The shop's screen sees the scan and moves on to the next code.
+  await writeDoc(`stampOffers/${programId}`, { ...offer, lastClaim: `${w}-${n}`, updatedAt: claimedAt }, env);
   return { tagId: offer.tagId, ticketId };
 }
 
@@ -623,7 +646,7 @@ function docUrl(path, env) {
   return `${root}/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/${encoded}`;
 }
 
-const TIMESTAMP_FIELDS = new Set(["expiresAt", "updatedAt", "createdAt", "linkUntil", "claimedAt"]);
+const TIMESTAMP_FIELDS = new Set(["expiresAt", "updatedAt", "createdAt", "linkUntil"]);
 
 /** A document as plain values (timestamps as ISO strings), or null. */
 async function readDoc(path, env) {

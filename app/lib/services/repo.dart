@@ -132,12 +132,10 @@ class Repo {
     'createdAt': FieldValue.serverTimestamp(),
   });
 
-  /// The QR code on the shop's screen ("Stempel uitdelen"): its token and when a customer scanned it.
-  /// Only exists after the first billing.qrOffer for this card.
-  Stream<({String token, bool claimed})?> stampOffer(String programId) => _db
-      .doc('stampOffers/$programId')
-      .snapshots()
-      .map((d) => d.exists ? (token: d.get('token') as String, claimed: d.data()!['claimedAt'] != null) : null);
+  /// The last scanned QR code of this card ("Stempel uitdelen"), as `<period>-<n>`; the counter screen moves on
+  /// to the next code when it sees its own. Only exists after the first billing.qrSession for this card.
+  Stream<String?> lastQrClaim(String programId) =>
+      _db.doc('stampOffers/$programId').snapshots().map((d) => d.data()?['lastClaim'] as String?);
 
   Future<void> setTagActive(LoyiTag tag, {required bool active}) => _tags.doc(tag.id).update({'active': active});
 
@@ -175,7 +173,16 @@ class Repo {
   /// logs, tags, cards (programs), logo and the business. The business goes
   /// last because the rules for the logo check who owns it.
   Future<void> deleteBusinessData(String ownerUid) async {
-    for (final c in ['stampEvents', 'redemptions', 'messages', 'cards', 'tags', 'stampOffers', 'programs']) {
+    for (final c in [
+      'stampEvents',
+      'redemptions',
+      'messages',
+      'cards',
+      'tags',
+      'stampOffers',
+      'qrClaims',
+      'programs',
+    ]) {
       await _deleteAll(_db.collection(c).where('ownerUid', isEqualTo: ownerUid));
     }
     await _db.doc('businessDetails/$ownerUid').delete();

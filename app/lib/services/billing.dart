@@ -57,10 +57,19 @@ class Billing {
     return body['tagId'] as String;
   }
 
-  /// "Stempel uitdelen": a one-time QR code, valid for a minute, for one stamp on [programId].
-  Future<({String token, DateTime expiresAt})> qrOffer(String programId) async {
-    final body = await _post('/qr-offer', {'programId': programId});
-    return (token: body['token'] as String, expiresAt: DateTime.parse(body['expiresAt'] as String).toLocal());
+  /// "Stempel uitdelen": the secret the counter screen makes its changing QR codes with for [programId], how often
+  /// they change, and how far this device's clock is from the server's (codes follow the server's clock).
+  Future<({String secret, Duration period, Duration clockOffset})> qrSession(String programId) async {
+    final sent = DateTime.now();
+    final body = await _post('/qr-session', {'programId': programId});
+    final received = DateTime.now();
+    final serverTime = DateTime.parse(body['serverTime'] as String);
+    final localMidpoint = sent.add(received.difference(sent) ~/ 2);
+    return (
+      secret: body['secret'] as String,
+      period: Duration(seconds: (body['period'] as num).toInt()),
+      clockOffset: serverTime.difference(localMidpoint),
+    );
   }
 
   /// Spends a QR code from a shop's screen: the card's QR tag and a ticket for one stamp.
@@ -102,7 +111,7 @@ class Billing {
           _ when res.statusCode == 401 => l10n.signInAgain,
           _ => l10n.somethingWentWrong,
         },
-        (_, '/qr-offer' || '/qr-claim') => switch (body['code']) {
+        (_, '/qr-session' || '/qr-claim') => switch (body['code']) {
           'used' => l10n.qrCodeUsed,
           'expired' => l10n.qrCodeExpired,
           'paused' => l10n.cardPaused,

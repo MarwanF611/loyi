@@ -2087,28 +2087,10 @@ class L10nNl extends L10n {
       'Laat je klant deze code scannen met de camera van zijn telefoon.';
 
   @override
-  String codeValidFor(int seconds) {
-    return 'Nog $seconds s geldig';
-  }
-
-  @override
-  String get codeExpiredTitle => 'Code verlopen';
-
-  @override
-  String get codeExpiredSub =>
-      'Een code werkt één minuut. Maak een nieuwe voor je klant.';
-
-  @override
-  String get newCode => 'Nieuwe code';
-
-  @override
   String get stampGiven => 'Stempel gegeven';
 
   @override
   String get stampGivenSub => 'De stempel staat op de kaart van je klant.';
-
-  @override
-  String get nextCustomer => 'Volgende klant';
 
   @override
   String get chooseCardToStamp => 'Welke kaart?';
@@ -2153,4 +2135,7 @@ class L10nNl extends L10n {
 
   @override
   String get notNow => 'Niet nu';
+
+  @override
+  String get giveStampChanges => 'De code verandert elke 15 seconden.';
 }

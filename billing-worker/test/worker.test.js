@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHmac, createSign, createVerify, generateKeyPairSync } from "node:crypto";
-import worker, { accessToken, formEncode, qrClaim, resetCachesForTests, subscriptionStatus } from "../src/index.js";
+import worker, { accessToken, formEncode, qrClaim, qrSignature, resetCachesForTests, subscriptionStatus } from "../src/index.js";
 import { makeSun } from "../src/sun.js";
 
 const PROJECT = "demo-loyi";
@@ -538,23 +538,26 @@ async function qrShop(name, { active = true, subscribed = true } = {}) {
   if (subscribed) await seedFields(`subscriptions/${owner}`, { expiresAt: { timestampValue: new Date(Date.now() + DAY * 1000).toISOString() } });
   return { owner, programId };
 }
-const offer = (owner, programId) => call("/qr-offer", { token: idToken(owner), body: { programId } });
+const session = (owner, programId) => call("/qr-session", { token: idToken(owner), body: { programId } });
 const claim = (client, programId, token) =>
   call("/qr-claim", { token: idToken(client, { provider: "anonymous" }), body: { programId, token } });
+const qrToken = async (secret, programId, w, n) => `${w}-${n}-${await qrSignature(secret, programId, w, n)}`;
+const period = () => Math.floor(Date.now() / 15_000);
 
-test("QR codes: only for the shop's own active card while it is subscribed", async () => {
+test("QR codes: a session only for the shop's own active card while it is subscribed; the secret stays", async () => {
   const { owner, programId } = await qrShop("qr1");
-  // Not the shop's card, an anonymous client, no sign-in: refused.
-  assert.equal((await offer(`qr1-other-${run}`, programId)).status, 403);
-  assert.equal((await call("/qr-offer", { token: idToken(owner, { provider: "anonymous" }), body: { programId } })).status, 403);
-  assert.equal((await call("/qr-offer", { body: { programId } })).status, 401);
-  assert.equal((await offer(owner, "../programs/x")).status, 403);
+  // Not the shop's card, an anonymous client, no sign-in, a made-up id: refused.
+  assert.equal((await session(`qr1-other-${run}`, programId)).status, 403);
+  assert.equal((await call("/qr-session", { token: idToken(owner, { provider: "anonymous" }), body: { programId } })).status, 403);
+  assert.equal((await call("/qr-session", { body: { programId } })).status, 401);
+  assert.equal((await session(owner, "../programs/x")).status, 403);
 
-  const res = await offer(owner, programId);
+  const res = await session(owner, programId);
   assert.equal(res.status, 200);
-  const { token, expiresAt } = await res.json();
-  assert.ok(token.length >= 20);
-  assert.ok(new Date(expiresAt) - Date.now() <= 60_000);
+  const { secret, period: seconds, serverTime } = await res.json();
+  assert.equal(secret.length, 40);
+  assert.equal(seconds, 15);
+  assert.ok(Math.abs(new Date(serverTime) - Date.now()) < 5000);
   // The card's QR tag: a secure stamp tag the shop never sees in its tag list.
   const tag = await doc(`tags/qr-${programId}`);
   assert.deepEqual(
@@ -562,45 +565,57 @@ test("QR codes: only for the shop's own active card while it is subscribed", asy
     [owner, programId, `qr1-biz-${run}`, "stamp", true, true, true],
   );
   const stored = await doc(`stampOffers/${programId}`);
-  assert.deepEqual([stored.ownerUid, stored.token, stored.tagId, stored.claimedAt], [owner, token, `qr-${programId}`, null]);
+  assert.deepEqual([stored.ownerUid, stored.secret, stored.tagId, stored.lastClaim], [owner, secret, `qr-${programId}`, null]);
+  // Another screen of the shop gets the same secret, so it shows the same codes.
+  assert.equal((await (await session(owner, programId)).json()).secret, secret);
 
   const paused = await qrShop("qr2", { active: false });
-  let r = await offer(paused.owner, paused.programId);
+  let r = await session(paused.owner, paused.programId);
   assert.deepEqual([r.status, (await r.json()).code], [409, "paused"]);
   const unpaid = await qrShop("qr3", { subscribed: false });
-  r = await offer(unpaid.owner, unpaid.programId);
+  r = await session(unpaid.owner, unpaid.programId);
   assert.deepEqual([r.status, (await r.json()).code], [402, "unsubscribed"]);
 });
 
-test("QR codes: the first scan gets a stamp ticket, after that the code is spent", async () => {
+test("QR codes: every signed code works once, for at most 45 seconds", async () => {
   const { owner, programId } = await qrShop("qr4");
-  const { token } = await (await offer(owner, programId)).json();
+  const { secret } = await (await session(owner, programId)).json();
+  const w = period();
 
-  // A made-up token doesn't work.
-  let r = await claim(`qr4-a-${run}`, programId, "x".repeat(20));
-  assert.deepEqual([r.status, (await r.json()).code], [409, "used"]);
-  assert.equal((await call("/qr-claim", { body: { programId, token } })).status, 401);
+  // Made up, signed with another secret, or not a code at all: refused.
+  for (const bad of [await qrToken("x".repeat(40), programId, w, 0), "x".repeat(20), `${w}-0-short`]) {
+    const r = await claim(`qr4-a-${run}`, programId, bad);
+    assert.deepEqual([r.status, (await r.json()).code], [409, "used"]);
+  }
+  assert.equal((await call("/qr-claim", { body: { programId, token: await qrToken(secret, programId, w, 0) } })).status, 401);
 
-  r = await claim(`qr4-a-${run}`, programId, token);
+  // The code on screen: a ticket for this client, and the shop's screen hears about it.
+  const first = await qrToken(secret, programId, w, 0);
+  let r = await claim(`qr4-a-${run}`, programId, first);
   assert.equal(r.status, 200);
   const result = await r.json();
-  assert.deepEqual(result, { tagId: `qr-${programId}`, ticketId: `qr-${programId}-${token}` });
+  assert.deepEqual(result, { tagId: `qr-${programId}`, ticketId: `qr-${programId}-${w}-0` });
   const ticket = await doc(`stampTickets/${result.ticketId}`);
   assert.deepEqual([ticket.clientUid, ticket.tagId], [`qr4-a-${run}`, `qr-${programId}`]);
-  assert.ok((await doc(`stampOffers/${programId}`)).claimedAt);
+  assert.equal((await doc(`stampOffers/${programId}`)).lastClaim, `${w}-0`);
+  assert.equal((await doc(`qrClaims/${programId}_${w}_0`)).ownerUid, owner);
 
-  // Scanned again (a photo, a shared link): spent.
-  r = await claim(`qr4-b-${run}`, programId, token);
+  // Scanned again (a photo, a shared link): spent. The next code in the same period works.
+  r = await claim(`qr4-b-${run}`, programId, first);
   assert.deepEqual([r.status, (await r.json()).code], [409, "used"]);
+  assert.equal((await claim(`qr4-b-${run}`, programId, await qrToken(secret, programId, w, 1))).status, 200);
 
-  // A new code replaces the old one, and two scans at once: only one wins.
-  const next = (await (await offer(owner, programId)).json()).token;
-  assert.equal((await claim(`qr4-c-${run}`, programId, token)).status, 409);
-  const both = await Promise.all([claim(`qr4-d-${run}`, programId, next), claim(`qr4-e-${run}`, programId, next)]);
+  // Two scans of one code at once: only one wins.
+  const same = await qrToken(secret, programId, w, 2);
+  const both = await Promise.all([claim(`qr4-c-${run}`, programId, same), claim(`qr4-d-${run}`, programId, same)]);
   assert.deepEqual(both.map((x) => x.status).sort(), [200, 409]);
 
-  // After 60 seconds the code has expired.
-  const late = (await (await offer(owner, programId)).json()).token;
-  await assert.rejects(qrClaim({ uid: `qr4-f-${run}` }, { programId, token: late }, env, Date.now() + 61_000), (e) => e.code === "expired");
-  assert.equal((await claim(`qr4-f-${run}`, programId, late)).status, 200);
+  // Two periods old still works (slow phones); three periods old has expired; a future code is refused.
+  assert.equal((await claim(`qr4-e-${run}`, programId, await qrToken(secret, programId, w - 2, 0))).status, 200);
+  r = await claim(`qr4-f-${run}`, programId, await qrToken(secret, programId, w - 3, 0));
+  assert.deepEqual([r.status, (await r.json()).code], [410, "expired"]);
+  assert.equal((await claim(`qr4-f-${run}`, programId, await qrToken(secret, programId, w + 2, 0))).status, 409);
+  // Saved for 46 seconds: expired.
+  const saved = await qrToken(secret, programId, w, 5);
+  await assert.rejects(qrClaim({ uid: `qr4-g-${run}` }, { programId, token: saved }, env, Date.now() + 46_000), (e) => e.code === "expired");
 });

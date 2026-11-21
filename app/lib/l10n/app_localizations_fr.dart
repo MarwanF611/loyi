@@ -2102,28 +2102,10 @@ class L10nFr extends L10n {
       'Faites scanner ce code par votre client avec l\'appareil photo de son téléphone.';
 
   @override
-  String codeValidFor(int seconds) {
-    return 'Valable encore $seconds s';
-  }
-
-  @override
-  String get codeExpiredTitle => 'Code expiré';
-
-  @override
-  String get codeExpiredSub =>
-      'Un code fonctionne une minute. Créez-en un nouveau pour votre client.';
-
-  @override
-  String get newCode => 'Nouveau code';
-
-  @override
   String get stampGiven => 'Tampon donné';
 
   @override
   String get stampGivenSub => 'Le tampon est sur la carte de votre client.';
-
-  @override
-  String get nextCustomer => 'Client suivant';
 
   @override
   String get chooseCardToStamp => 'Quelle carte ?';
@@ -2167,4 +2149,7 @@ class L10nFr extends L10n {
 
   @override
   String get notNow => 'Pas maintenant';
+
+  @override
+  String get giveStampChanges => 'Le code change toutes les 15 secondes.';
 }

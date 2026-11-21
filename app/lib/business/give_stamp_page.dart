@@ -10,7 +10,9 @@ import '../models.dart';
 import '../services/api.dart';
 import '../services/billing.dart';
 import '../services/language.dart';
+import '../services/qr_stamp.dart';
 import '../services/repo.dart';
+import '../services/screen_awake/screen_awake.dart';
 import '../theme.dart';
 import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
@@ -66,10 +68,12 @@ class GiveStampButton extends StatelessWidget {
   }
 }
 
-enum _Phase { loading, showing, scanned, expired, failed }
+enum _Phase { loading, showing, failed }
 
-/// Full screen at the counter: a QR code for one stamp, valid for a minute. The customer scans it with the
-/// phone's camera (`/q/<programId>/<token>`); the billing server turns the scan into a one-time stamp ticket.
+/// The counter screen: a QR code that is always there and changes every 15 seconds. The customer scans it with the
+/// phone's camera (`/q/<programId>/<period>-<n>-<signature>`). This device makes the codes itself from the card's
+/// secret (billing.qrSession), so an idle screen costs no database traffic; the billing server checks each scan and
+/// turns it into a one-time stamp ticket. After a scan the next code (n + 1) appears at once.
 class GiveStampPage extends StatefulWidget {
   const GiveStampPage({super.key, required this.programId});
 
@@ -80,48 +84,61 @@ class GiveStampPage extends StatefulWidget {
 }
 
 class _GiveStampPageState extends State<GiveStampPage> {
-  static const _validFor = Duration(seconds: 60);
-
   late final Stream<Program?> _program = repo.program(widget.programId);
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(onResume: () => keepScreenAwake(true));
   _Phase _phase = _Phase.loading;
-  String? _token;
-  DateTime _until = DateTime.now();
   String? _error;
+
+  String? _secret;
+  Duration _period = const Duration(seconds: 15);
+  Duration _clockOffset = Duration.zero;
+  int _window = -1;
+  int _n = 0;
+  String _token = '';
+
+  bool _scanned = false;
+  String? _lastClaim;
+  bool _firstClaim = true;
   Timer? _tick;
-  StreamSubscription<Object?>? _offer;
+  Timer? _scannedTimer;
+  StreamSubscription<String?>? _claims;
 
   @override
   void initState() {
     super.initState();
-    _newCode();
+    _lifecycle; // starts listening
+    keepScreenAwake(true);
+    _start();
   }
 
   @override
   void dispose() {
     _tick?.cancel();
-    _offer?.cancel();
+    _scannedTimer?.cancel();
+    _claims?.cancel();
+    _lifecycle.dispose();
+    keepScreenAwake(false);
     super.dispose();
   }
 
-  Future<void> _newCode() async {
-    _tick?.cancel();
+  Future<void> _start() async {
     setState(() {
       _phase = _Phase.loading;
       _error = null;
     });
     try {
-      final offer = await billing.qrOffer(widget.programId);
+      final session = await billing.qrSession(widget.programId);
       if (!mounted) return;
-      // Count down on this device's clock: the server decides anyway, this is what the shop sees.
-      final left = offer.expiresAt.difference(DateTime.now());
-      setState(() {
-        _token = offer.token;
-        _until = DateTime.now().add(left > Duration.zero && left <= _validFor ? left : _validFor);
-        _phase = _Phase.showing;
-      });
-      _tick = Timer.periodic(const Duration(seconds: 1), (_) => _onTick());
+      _secret = session.secret;
+      _period = session.period;
+      _clockOffset = session.clockOffset;
+      _window = -1;
       // The offer exists now (the rules only let the shop read an existing one of its own).
-      _offer ??= repo.stampOffer(widget.programId).listen(_onOffer, onError: (Object _) {});
+      _claims ??= repo.lastQrClaim(widget.programId).listen(_onClaim, onError: (Object _) {});
+      _tick?.cancel();
+      _tick = Timer.periodic(const Duration(milliseconds: 250), (_) => _refresh());
+      setState(() => _phase = _Phase.showing);
+      _refresh();
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -132,22 +149,44 @@ class _GiveStampPageState extends State<GiveStampPage> {
     }
   }
 
-  void _onTick() {
-    if (!mounted || _phase != _Phase.showing) return;
-    if (!DateTime.now().isBefore(_until)) {
-      _tick?.cancel();
-      setState(() => _phase = _Phase.expired);
-    } else {
-      setState(() {});
-    }
+  DateTime get _serverNow => DateTime.now().add(_clockOffset);
+
+  String _sign(int window, int n) => qrStampToken(_secret!, widget.programId, window, n);
+
+  void _refresh() {
+    if (!mounted || _secret == null) return;
+    final window = _serverNow.millisecondsSinceEpoch ~/ _period.inMilliseconds;
+    setState(() {
+      if (window != _window) {
+        _window = window;
+        _n = 0;
+        _token = _sign(window, 0);
+      }
+    });
   }
 
-  void _onOffer(({String token, bool claimed})? offer) {
-    if (!mounted || offer == null || offer.token != _token || !offer.claimed) return;
-    if (_phase != _Phase.showing && _phase != _Phase.expired) return;
-    _tick?.cancel();
+  void _onClaim(String? claim) {
+    // The first snapshot is whatever was scanned before this screen opened.
+    if (_firstClaim) {
+      _firstClaim = false;
+      _lastClaim = claim;
+      return;
+    }
+    if (!mounted || claim == null || claim == _lastClaim) return;
+    _lastClaim = claim;
     HapticFeedback.mediumImpact();
-    setState(() => _phase = _Phase.scanned);
+    setState(() {
+      // The code on screen was used: show the next one straight away.
+      if (claim == '$_window-$_n') {
+        _n += 1;
+        _token = _sign(_window, _n);
+      }
+      _scanned = true;
+    });
+    _scannedTimer?.cancel();
+    _scannedTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _scanned = false);
+    });
   }
 
   @override
@@ -177,7 +216,7 @@ class _GiveStampPageState extends State<GiveStampPage> {
                         Text(snap.data?.name ?? '', style: context.text.titleLarge, textAlign: TextAlign.center),
                   ),
                   const SizedBox(height: 20),
-                  AnimatedSwitcher(duration: const Duration(milliseconds: 220), child: _body(context)),
+                  _body(context),
                 ],
               ),
             ),
@@ -192,15 +231,21 @@ class _GiveStampPageState extends State<GiveStampPage> {
     final l = context.l10n;
     switch (_phase) {
       case _Phase.loading:
-        return const SizedBox(
-          key: ValueKey('loading'),
-          height: 320,
-          child: Center(child: CircularProgressIndicator()),
+        return const SizedBox(height: 320, child: Center(child: CircularProgressIndicator()));
+      case _Phase.failed:
+        return _Result(
+          icon: LoyiIcons.circleAlert,
+          background: p.accentSoft,
+          foreground: p.accent,
+          title: l.thatDidntWorkTitle,
+          body: _error ?? l.somethingWentWrong,
+          action: l.tryAgain,
+          onAction: _start,
         );
       case _Phase.showing:
-        final seconds = (_until.difference(DateTime.now()).inMilliseconds / 1000).ceil().clamp(0, 60);
+        final periodMs = _period.inMilliseconds;
+        final left = 1 - (_serverNow.millisecondsSinceEpoch % periodMs) / periodMs;
         return Column(
-          key: ValueKey(_token),
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Center(
@@ -214,7 +259,38 @@ class _GiveStampPageState extends State<GiveStampPage> {
                 child: SizedBox(
                   width: 260,
                   height: 260,
-                  child: QrImageView(data: qrStampUrl(widget.programId, _token!), padding: EdgeInsets.zero),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      QrImageView(data: qrStampUrl(widget.programId, _token), padding: EdgeInsets.zero),
+                      // A short "stamp given" over the code after a scan; the next code is already underneath.
+                      AnimatedOpacity(
+                        opacity: _scanned ? 1 : 0,
+                        duration: const Duration(milliseconds: 180),
+                        child: IgnorePointer(
+                          child: ColoredBox(
+                            color: Colors.white.withValues(alpha: 0.94),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconBadge(
+                                  icon: LoyiIcons.circleCheck,
+                                  background: p.mintSoft,
+                                  foreground: p.mint,
+                                  size: 88,
+                                ),
+                                const SizedBox(height: 14),
+                                Text(
+                                  l.stampGiven,
+                                  style: context.text.titleLarge?.copyWith(color: LoyiPalette.light.ink),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -224,45 +300,21 @@ class _GiveStampPageState extends State<GiveStampPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(LoyiIcons.timer, size: 18, color: p.inkMuted),
-                const SizedBox(width: 6),
-                Text(l.codeValidFor(seconds), style: context.text.labelLarge?.copyWith(color: p.inkMuted)),
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    value: left,
+                    strokeWidth: 2.5,
+                    color: p.inkMuted,
+                    backgroundColor: p.line,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(l.giveStampChanges, style: context.text.labelLarge?.copyWith(color: p.inkMuted)),
               ],
             ),
           ],
-        );
-      case _Phase.scanned:
-        return _Result(
-          key: const ValueKey('scanned'),
-          icon: LoyiIcons.circleCheck,
-          background: p.mintSoft,
-          foreground: p.mint,
-          title: l.stampGiven,
-          body: l.stampGivenSub,
-          action: l.nextCustomer,
-          onAction: _newCode,
-        );
-      case _Phase.expired:
-        return _Result(
-          key: const ValueKey('expired'),
-          icon: LoyiIcons.hourglass,
-          background: p.surfaceMuted,
-          foreground: p.inkMuted,
-          title: l.codeExpiredTitle,
-          body: l.codeExpiredSub,
-          action: l.newCode,
-          onAction: _newCode,
-        );
-      case _Phase.failed:
-        return _Result(
-          key: const ValueKey('failed'),
-          icon: LoyiIcons.circleAlert,
-          background: p.accentSoft,
-          foreground: p.accent,
-          title: l.thatDidntWorkTitle,
-          body: _error ?? l.somethingWentWrong,
-          action: l.tryAgain,
-          onAction: _newCode,
         );
     }
   }
@@ -270,7 +322,6 @@ class _GiveStampPageState extends State<GiveStampPage> {
 
 class _Result extends StatelessWidget {
   const _Result({
-    super.key,
     required this.icon,
     required this.background,
     required this.foreground,

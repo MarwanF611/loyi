@@ -105,8 +105,8 @@ if that becomes a problem (filter Stripe customers on status `active`).
 
 ## 6. Support
 
-- **No tag yet, or a tag that doesn't work:** the shop can stamp with **Stempel uitdelen** on the Overview (a one-time QR
-  code the customer scans with the camera). It needs no tag and no keys.
+- **No tag yet, or a tag that doesn't work:** the shop can open **Stempel uitdelen** on the Overview: a QR code on the
+  counter screen that changes every 15 seconds and that customers scan with the camera. It needs no tag and no keys.
 
 - **"This link was already used"**: someone reloaded the page or opened a saved link. Tap the tag again.
 - **Tag lost or stolen**: switch it off in the dashboard (Cards → the card → the tag's switch). A new kit tag is
