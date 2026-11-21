@@ -1,0 +1,130 @@
+<!doctype html>
+<!--
+  The Loyi tag card: what a pilot shop gets, a big, thick PVC card (A6 landscape, 148.5 x 105 mm) with one secure
+  NTAG 424 DNA sticker on the back. Four cards fill one A4 sheet. Same card for every shop.
+  Trim 148.5 x 105 mm, plus 3 mm bleed for a card printer (artwork 154.5 x 111 mm).
+
+  Front: coral, "Tik hier voor je stempel", a white disc with the NFC symbol. Customers tap this side.
+  Back:  a dashed ring where the round sticker goes (behind the disc, so the card works through the PVC),
+         and one line for the shop owner in nl/fr/en.
+
+  Open it with ?mode=…  (build.sh does this for you):
+    preview  both sides on screen            shop   2 pages 154.5 x 111 mm (front, back) for a card printer
+    sheet    2 A4 landscape pages (fronts, backs), 4 cards each, edge to edge: cut the A4 into quarters.
+             Print double-sided, flip on the SHORT edge.
+
+  Fonts come from app/assets/fonts so the PDF embeds them. Colours are the app's: coral #ff5a3c, ink #17161c.
+-->
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Loyi tag card</title>
+<style>
+  @font-face { font-family: "Jakarta"; font-weight: 400; src: url("../../app/assets/fonts/PlusJakartaSans-Regular.ttf"); }
+  @font-face { font-family: "Jakarta"; font-weight: 600; src: url("../../app/assets/fonts/PlusJakartaSans-SemiBold.ttf"); }
+  @font-face { font-family: "Jakarta"; font-weight: 700; src: url("../../app/assets/fonts/PlusJakartaSans-Bold.ttf"); }
+  @font-face { font-family: "Jakarta"; font-weight: 800; src: url("../../app/assets/fonts/PlusJakartaSans-ExtraBold.ttf"); }
+  @font-face { font-family: "Mono"; font-weight: 500; src: url("../../app/assets/fonts/JetBrainsMono-Medium.ttf"); }
+
+  :root { --coral: #ff5a3c; --coral-deep: #e0442a; --ink: #17161c; --muted: #6e6a73; --sun: #ffc83d; --warm: #f7f5f2; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "Jakarta", "Helvetica Neue", Arial, sans-serif; color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* One side of the card, 154.5 x 111 mm: the 148.5 x 105 mm trim plus 3 mm bleed all around. */
+  .face { position: relative; width: 154.5mm; height: 111mm; overflow: hidden; flex: none; }
+  .trim { position: absolute; left: 3mm; top: 3mm; width: 148.5mm; height: 105mm; }
+  .abs { position: absolute; }
+
+  /* ── Front ── */
+  .front { background: var(--coral); }
+  .front .dots { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.16) 0.5mm, transparent 0.56mm); background-size: 4.5mm 4.5mm; }
+  .logo { font-weight: 800; font-size: 13mm; line-height: 1; letter-spacing: -0.03em; color: #fff; }
+  .logo span { color: var(--sun); }
+  .ask b { display: block; font-weight: 800; font-size: 11.4mm; line-height: 1.06; letter-spacing: -0.02em; color: #fff; }
+  .ask small { display: block; margin-top: 4.2mm; font-weight: 600; font-size: 4.6mm; letter-spacing: 0.01em; color: rgba(255,255,255,.9); }
+  .ring { border-radius: 50%; border: 0.6mm solid rgba(255,255,255,.5); width: 56mm; height: 56mm; }
+  .disc { border-radius: 50%; background: #fff; width: 44mm; height: 44mm; display: flex; align-items: center; justify-content: center; }
+  .disc svg { width: 25mm; height: 25mm; color: var(--coral); }
+
+  /* ── Back ── */
+  .back { background: #fff; }
+  .guide { border-radius: 50%; border: 0.4mm dashed #b9b4bc; background: var(--warm); width: 36mm; height: 36mm; }
+  .how { display: flex; flex-direction: column; gap: 4mm; width: 66mm; }
+  .how p { margin: 0; display: grid; grid-template-columns: 9mm 1fr; column-gap: 0.6mm; font-size: 4.4mm; line-height: 1.36; color: var(--ink); text-wrap: pretty; }
+  .how i { font-style: normal; font-family: "Mono", monospace; font-weight: 500; font-size: 3.4mm; letter-spacing: 0.06em; color: var(--coral-deep); padding-top: 0.5mm; }
+  .how b { font-weight: 700; }
+  .band { background: var(--coral); }
+  .foot { display: flex; justify-content: space-between; align-items: center; font-size: 4.6mm; font-weight: 700; color: #fff; }
+  .foot span { font-weight: 500; }
+
+  /* ── Modes ── */
+  body.preview { background: #d8d4cf; padding: 10mm; display: flex; flex-direction: column; gap: 8mm; align-items: flex-start; }
+  body.preview .cap { font-family: "Mono", monospace; font-size: 2.2mm; letter-spacing: 0.06em; text-transform: uppercase; color: #5d5962; margin-bottom: 2mm; }
+  body.preview .zoom { zoom: 1.75; }
+  body.preview .face { box-shadow: 0 0.4mm 1.6mm rgba(0,0,0,.25); }
+  body.preview .face::after { content: ""; position: absolute; left: 3mm; top: 3mm; width: 148.5mm; height: 105mm; border-radius: 4mm; border: 0.15mm dashed rgba(0,0,0,.35); pointer-events: none; }
+
+  body.shop .face { page-break-after: always; break-after: page; }
+  body.shop .face:last-child { page-break-after: auto; break-after: auto; }
+
+  /* Sheet: the four trims tile the A4 exactly, so each face is cut back to its trim (no bleed inside the sheet). */
+  body.sheet .page { position: relative; width: 297mm; height: 210mm; page-break-after: always; break-after: page; overflow: hidden; }
+  body.sheet .page:last-child { page-break-after: auto; break-after: auto; }
+  body.sheet .page .face { position: absolute; clip-path: inset(3mm); }
+</style>
+</head>
+<body>
+<script>
+  const NFC = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M6 8.32a7.43 7.43 0 0 1 0 7.36"/><path d="M9.46 6.21a11.76 11.76 0 0 1 0 11.58"/>
+    <path d="M12.91 4.1a15.91 15.91 0 0 1 .01 15.8"/><path d="M16.37 2a20.16 20.16 0 0 1 0 20"/></svg>`;
+
+  // Coordinates are millimetres inside the 148.5 x 105 trim. Keep text 10 mm from the trim edge.
+  // Tap area: the disc (44 mm) sits over the sticker (25 or 29 mm); its centre is 110.5 mm from the left edge.
+  // The back is the front seen from behind (turned like a book page): the sticker ring centre is 148.5 - 110.5 = 38 mm
+  // from the LEFT, so the ring (36 mm) starts at 20 mm.
+  const front = () => `
+    <div class="face front"><div class="dots"></div><div class="trim">
+      <div class="abs logo" style="left:10mm;top:9mm">loyi<span>.</span></div>
+      <div class="abs ask" style="left:10mm;bottom:10mm"><b>Tik hier<br>voor je<br>stempel</b><small>Touchez ici · Tap here</small></div>
+      <div class="abs ring" style="left:82.5mm;top:24.5mm"></div>
+      <div class="abs disc" style="left:88.5mm;top:30.5mm">${NFC}</div>
+    </div></div>`;
+
+  const back = () => `
+    <div class="face back"><div class="trim">
+      <div class="abs guide" style="left:20mm;top:34.5mm"></div>
+      <div class="abs how" style="left:72mm;top:13mm">
+        <p><i>NL</i><span><b>Zaakvoerder?</b> Log in op loyi.be en hou je telefoon tegen deze tag.</span></p>
+        <p><i>FR</i><span><b>Commerçant ?</b> Connectez-vous sur loyi.be et approchez votre téléphone de ce tag.</span></p>
+        <p><i>EN</i><span><b>Shop owner?</b> Sign in at loyi.be and hold your phone to this tag.</span></p>
+      </div>
+      <div class="abs band" style="left:-3mm;right:-3mm;bottom:-3mm;height:15mm"></div>
+      <div class="abs foot" style="left:10mm;right:10mm;bottom:2.6mm;height:6.5mm">loyi.be<span>info@loyi.be</span></div>
+    </div></div>`;
+
+  const page = (css) => document.head.insertAdjacentHTML("beforeend", `<style>@page { size: ${css}; margin: 0; }</style>`);
+  const mode = new URLSearchParams(location.search).get("mode") || "preview";
+  document.body.className = mode;
+
+  if (mode === "shop") {
+    page("154.5mm 111mm");
+    document.body.innerHTML = front() + back();
+  } else if (mode === "sheet") {
+    page("297mm 210mm");
+    const sheet = (face) => {
+      let cells = "";
+      for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++)
+        cells += face().replace('class="face', `style="left:${c * 148.5 - 3}mm;top:${r * 105 - 3}mm" class="face`);
+      return `<div class="page">${cells}</div>`;
+    };
+    document.body.innerHTML = sheet(front) + sheet(back);
+  } else {
+    document.body.innerHTML =
+      `<div><div class="cap">Front: customers tap this side</div><div class="zoom">${front()}</div></div>
+       <div><div class="cap">Back: the sticker goes in the dashed ring, behind the disc</div><div class="zoom">${back()}</div></div>`;
+  }
+</script>
+</body>
+</html>
