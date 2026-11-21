@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHmac, createSign, createVerify, generateKeyPairSync } from "node:crypto";
-import worker, { accessToken, formEncode, resetCachesForTests, subscriptionStatus } from "../src/index.js";
+import worker, { accessToken, formEncode, qrClaim, resetCachesForTests, subscriptionStatus } from "../src/index.js";
 import { makeSun } from "../src/sun.js";
 
 const PROJECT = "demo-loyi";
@@ -517,4 +517,90 @@ test("after the pilot, a shop subscribes without a second free trial", async () 
   } finally {
     delete env.PILOT_CODE;
   }
+});
+
+// ── Stamp by QR code ─────────────────────────────────────────────────────────
+
+/** Writes typed Firestore fields straight into the emulator. */
+async function seedFields(path, fields) {
+  const res = await realFetch(`http://127.0.0.1:8085/v1/projects/${PROJECT}/databases/(default)/documents/${path}`, {
+    method: "PATCH",
+    headers: { Authorization: "Bearer owner", "Content-Type": "application/json" },
+    body: JSON.stringify({ fields }),
+  });
+  assert.ok(res.ok, await res.text());
+}
+const str = (v) => ({ stringValue: v });
+async function qrShop(name, { active = true, subscribed = true } = {}) {
+  const owner = `${name}-owner-${run}`;
+  const programId = `${name}-prog-${run}`;
+  await seedFields(`programs/${programId}`, { ownerUid: str(owner), businessId: str(`${name}-biz-${run}`), active: { booleanValue: active } });
+  if (subscribed) await seedFields(`subscriptions/${owner}`, { expiresAt: { timestampValue: new Date(Date.now() + DAY * 1000).toISOString() } });
+  return { owner, programId };
+}
+const offer = (owner, programId) => call("/qr-offer", { token: idToken(owner), body: { programId } });
+const claim = (client, programId, token) =>
+  call("/qr-claim", { token: idToken(client, { provider: "anonymous" }), body: { programId, token } });
+
+test("QR codes: only for the shop's own active card while it is subscribed", async () => {
+  const { owner, programId } = await qrShop("qr1");
+  // Not the shop's card, an anonymous client, no sign-in: refused.
+  assert.equal((await offer(`qr1-other-${run}`, programId)).status, 403);
+  assert.equal((await call("/qr-offer", { token: idToken(owner, { provider: "anonymous" }), body: { programId } })).status, 403);
+  assert.equal((await call("/qr-offer", { body: { programId } })).status, 401);
+  assert.equal((await offer(owner, "../programs/x")).status, 403);
+
+  const res = await offer(owner, programId);
+  assert.equal(res.status, 200);
+  const { token, expiresAt } = await res.json();
+  assert.ok(token.length >= 20);
+  assert.ok(new Date(expiresAt) - Date.now() <= 60_000);
+  // The card's QR tag: a secure stamp tag the shop never sees in its tag list.
+  const tag = await doc(`tags/qr-${programId}`);
+  assert.deepEqual(
+    [tag.ownerUid, tag.programId, tag.businessId, tag.type, tag.secure, tag.qr, tag.active],
+    [owner, programId, `qr1-biz-${run}`, "stamp", true, true, true],
+  );
+  const stored = await doc(`stampOffers/${programId}`);
+  assert.deepEqual([stored.ownerUid, stored.token, stored.tagId, stored.claimedAt], [owner, token, `qr-${programId}`, null]);
+
+  const paused = await qrShop("qr2", { active: false });
+  let r = await offer(paused.owner, paused.programId);
+  assert.deepEqual([r.status, (await r.json()).code], [409, "paused"]);
+  const unpaid = await qrShop("qr3", { subscribed: false });
+  r = await offer(unpaid.owner, unpaid.programId);
+  assert.deepEqual([r.status, (await r.json()).code], [402, "unsubscribed"]);
+});
+
+test("QR codes: the first scan gets a stamp ticket, after that the code is spent", async () => {
+  const { owner, programId } = await qrShop("qr4");
+  const { token } = await (await offer(owner, programId)).json();
+
+  // A made-up token doesn't work.
+  let r = await claim(`qr4-a-${run}`, programId, "x".repeat(20));
+  assert.deepEqual([r.status, (await r.json()).code], [409, "used"]);
+  assert.equal((await call("/qr-claim", { body: { programId, token } })).status, 401);
+
+  r = await claim(`qr4-a-${run}`, programId, token);
+  assert.equal(r.status, 200);
+  const result = await r.json();
+  assert.deepEqual(result, { tagId: `qr-${programId}`, ticketId: `qr-${programId}-${token}` });
+  const ticket = await doc(`stampTickets/${result.ticketId}`);
+  assert.deepEqual([ticket.clientUid, ticket.tagId], [`qr4-a-${run}`, `qr-${programId}`]);
+  assert.ok((await doc(`stampOffers/${programId}`)).claimedAt);
+
+  // Scanned again (a photo, a shared link): spent.
+  r = await claim(`qr4-b-${run}`, programId, token);
+  assert.deepEqual([r.status, (await r.json()).code], [409, "used"]);
+
+  // A new code replaces the old one, and two scans at once: only one wins.
+  const next = (await (await offer(owner, programId)).json()).token;
+  assert.equal((await claim(`qr4-c-${run}`, programId, token)).status, 409);
+  const both = await Promise.all([claim(`qr4-d-${run}`, programId, next), claim(`qr4-e-${run}`, programId, next)]);
+  assert.deepEqual(both.map((x) => x.status).sort(), [200, 409]);
+
+  // After 60 seconds the code has expired.
+  const late = (await (await offer(owner, programId)).json()).token;
+  await assert.rejects(qrClaim({ uid: `qr4-f-${run}` }, { programId, token: late }, env, Date.now() + 61_000), (e) => e.code === "expired");
+  assert.equal((await claim(`qr4-f-${run}`, programId, late)).status, 200);
 });

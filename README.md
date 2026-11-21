@@ -95,6 +95,7 @@ account and data (art. 17). `/delete-account` explains the same for Google Play.
 - `programs/{id}`: a loyalty card: `stampsRequired`, `rewards[]` (each can be switched on or off), `stampCooldownMinutes`, `active`, and `design` (card colour, optional second colour, style `solid | gradient | pattern`, stamp colour, stamp icon). Designs are limited to colours, an icon and the logo, so the same design can later become an Apple/Google Wallet pass
 - `tags/{id}`: `type: join | stamp`, linked to one program. A shop works with one secure stamp tag (`secure: true`, created only by the billing server, URL `/k?e=…&c=…`): a client's first tap creates the card with a first stamp, every next tap adds a stamp. Plain tags (`/t/<id>`, join or stamp) are optional extras
 - `kitTags/{UID}`, `stampTickets/{UID}_{counter}`: the server's record per secure tag and the one-time ticket a stamp from it spends (docs/KIT.md)
+- `stampOffers/{programId}`: the one-time QR code on a shop's screen ("Stempel uitdelen"), one per card, written by the billing server; the shop reads it to see the scan. A scan spends it for a ticket on the card's QR tag `tags/qr-{programId}` (`secure: true, qr: true`)
 - `cards/{programId_clientUid}`: a client's progress: `stamps`, `rewardsAvailable` (banked full cards)
 - `stampEvents/{cardId}_{n}`, `redemptions/{cardId}_r{n}`: the log behind the business dashboard, deleted after 2 years
 - `messages/{id}`: a shop's follow-up message: `title`, `body`, `audience`, optional `programId`, `active`, `endsAt`; public like programs
@@ -241,6 +242,18 @@ and shared by the website and the app, so a shop that signs up from the French s
 
 `marketing/` generates App Store / Google Play screenshots and 16:9 pitch slides
 from the running app with demo data (`npm run all`). See `marketing/README.md`.
+
+## Stamping without a tag: Stempel uitdelen
+
+On the Overview the shop presses **Stempel uitdelen**: its screen shows a QR code (`/q/<programId>/<token>`) that is valid for
+60 seconds and works once. The customer scans it with the phone's camera and gets the stamp (a first scan adds the card
+with a first stamp). It works on any shop device, including an iPad without NFC, and needs no secure-tag keys: the
+billing server (`/qr-offer`, `/qr-claim`) issues the same one-time stamp ticket as a secure tag, so `firestore.rules`
+accept the stamp only once.
+
+**Home screen.** Customers who saved their cards see "Zet Loyi op je beginscherm" with the steps for their phone
+(Android Chrome gets an install button). Only after saving: an iOS home-screen web app doesn't share Safari's storage,
+so the customer signs in there once (`app/lib/widgets/home_screen_prompt.dart`, `app/web/install.js`).
 
 ## Programming NFC tags
 

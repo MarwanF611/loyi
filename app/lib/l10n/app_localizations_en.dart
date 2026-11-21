@@ -1916,7 +1916,7 @@ class L10nEn extends L10n {
 
   @override
   String trialNote(int days, String price) {
-    return 'You pay nothing today. After $days days your subscription starts at $price a month, unless you cancel before then. We also post you two secure Loyi tags; Stripe asks for the address.';
+    return 'You pay nothing today. After $days days your subscription starts at $price a month, unless you cancel before then. We also post you your secure Loyi tag; Stripe asks for the address.';
   }
 
   @override
@@ -1954,7 +1954,7 @@ class L10nEn extends L10n {
 
   @override
   String get businessDetailsSub =>
-      'For your invoices, the data processing agreement and posting your two Loyi tags. Clients never see this.';
+      'For your invoices, the data processing agreement and posting your Loyi tag. Clients never see this.';
 
   @override
   String get legalName => 'Official name';
@@ -2071,4 +2071,77 @@ class L10nEn extends L10n {
   String kitLinkTo(String card) {
     return 'This tag will be linked to $card.';
   }
+
+  @override
+  String get giveStamp => 'Give a stamp';
+
+  @override
+  String get giveStampHint =>
+      'Let your customer scan this code with their phone\'s camera.';
+
+  @override
+  String codeValidFor(int seconds) {
+    return 'Valid for $seconds s';
+  }
+
+  @override
+  String get codeExpiredTitle => 'Code expired';
+
+  @override
+  String get codeExpiredSub =>
+      'A code works for one minute. Make a new one for your customer.';
+
+  @override
+  String get newCode => 'New code';
+
+  @override
+  String get stampGiven => 'Stamp given';
+
+  @override
+  String get stampGivenSub => 'The stamp is on your customer\'s card.';
+
+  @override
+  String get nextCustomer => 'Next customer';
+
+  @override
+  String get chooseCardToStamp => 'Which card?';
+
+  @override
+  String get qrCodeUsed =>
+      'This code was already used. Ask for a new one at the counter.';
+
+  @override
+  String get qrCodeExpired =>
+      'This code has expired. Ask for a new one at the counter.';
+
+  @override
+  String get homeScreenTitle => 'Put Loyi on your home screen';
+
+  @override
+  String get homeScreenSub => 'Your cards one tap away, like an app.';
+
+  @override
+  String get homeScreenIosShare =>
+      'In Safari, tap Share (on newer iPhones: •••, then Share)';
+
+  @override
+  String get homeScreenIosAdd =>
+      'Choose “Add to Home Screen” (not there? Tap More first)';
+
+  @override
+  String get homeScreenIosOpen =>
+      'Open Loyi from your home screen and sign in once';
+
+  @override
+  String get homeScreenAndroidMenu => 'In Chrome, tap the menu (three dots)';
+
+  @override
+  String get homeScreenAndroidAdd =>
+      'Choose “Add to home screen” or “Install app”';
+
+  @override
+  String get homeScreenInstall => 'Install';
+
+  @override
+  String get notNow => 'Not now';
 }

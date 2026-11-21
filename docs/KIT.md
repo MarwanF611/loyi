@@ -82,8 +82,8 @@ each tag is told apart by its UID, so nothing in the link is shop-specific and a
 Nothing on a tag belongs to a shop until the shop links it, so you can program a stock of tags ahead of time. A shop
 gets:
 
-- **one secure tag** for the counter, as a sticker or sealed in the counter stand (`kit/3d/loyi-stand.scad`; the
-  stamp card model `kit/3d/loyi-card.scad` is optional now);
+- **one secure tag** for the counter, as a sticker on the back of the **PVC Loyi tag card** (`kit/card/`, print-ready
+  PDFs and how to order it) or sealed in a 3D-printed card or stand (`kit/3d/`, optional);
 - the **instruction card** (`kit/instructions.html`, A6, one page each in Dutch, French and English: print the shop's
   language, or all three).
 
@@ -104,6 +104,9 @@ Trial cost: the kit + postage, also for shops that cancel during the trial. Send
 if that becomes a problem (filter Stripe customers on status `active`).
 
 ## 6. Support
+
+- **No tag yet, or a tag that doesn't work:** the shop can stamp with **Stempel uitdelen** on the Overview (a one-time QR
+  code the customer scans with the camera). It needs no tag and no keys.
 
 - **"This link was already used"**: someone reloaded the page or opened a saved link. Tap the tag again.
 - **Tag lost or stolen**: switch it off in the dashboard (Cards → the card → the tag's switch). A new kit tag is

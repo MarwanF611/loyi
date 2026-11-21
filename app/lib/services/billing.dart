@@ -57,6 +57,18 @@ class Billing {
     return body['tagId'] as String;
   }
 
+  /// "Stempel uitdelen": a one-time QR code, valid for a minute, for one stamp on [programId].
+  Future<({String token, DateTime expiresAt})> qrOffer(String programId) async {
+    final body = await _post('/qr-offer', {'programId': programId});
+    return (token: body['token'] as String, expiresAt: DateTime.parse(body['expiresAt'] as String).toLocal());
+  }
+
+  /// Spends a QR code from a shop's screen: the card's QR tag and a ticket for one stamp.
+  Future<({String tagId, String ticketId})> qrClaim(String programId, String token) async {
+    final body = await _post('/qr-claim', {'programId': programId, 'token': token});
+    return (tagId: body['tagId'] as String, ticketId: body['ticketId'] as String);
+  }
+
   /// Account deletion: cancel the subscription so the shop is never charged again.
   Future<void> cancelForAccountDeletion() async {
     if (!available) return;
@@ -87,6 +99,15 @@ class Billing {
           'linked' => l10n.kitAlreadyLinked,
           'expired' => l10n.kitTapAgain,
           'unavailable' => l10n.kitUnavailable,
+          _ when res.statusCode == 401 => l10n.signInAgain,
+          _ => l10n.somethingWentWrong,
+        },
+        (_, '/qr-offer' || '/qr-claim') => switch (body['code']) {
+          'used' => l10n.qrCodeUsed,
+          'expired' => l10n.qrCodeExpired,
+          'paused' => l10n.cardPaused,
+          'unsubscribed' => l10n.shopNotActive,
+          'forbidden' => l10n.noPermission,
           _ when res.statusCode == 401 => l10n.signInAgain,
           _ => l10n.somethingWentWrong,
         },

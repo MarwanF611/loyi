@@ -235,6 +235,7 @@ class LoyiTag {
     required this.tapCount,
     this.lastTapAt,
     this.secure = false,
+    this.qr = false,
   });
 
   final String id;
@@ -249,6 +250,9 @@ class LoyiTag {
   /// one-time link at every tap, which the server checks (`/k?e=…&c=…`).
   final bool secure;
 
+  /// The card's QR tag behind "Stempel uitdelen" (made by the billing server), not a physical tag.
+  final bool qr;
+
   factory LoyiTag.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final d = doc.data()!;
     return LoyiTag(
@@ -260,6 +264,7 @@ class LoyiTag {
       tapCount: d['tapCount'] as int? ?? 0,
       lastTapAt: _date(d['lastTapAt']),
       secure: d['secure'] as bool? ?? false,
+      qr: d['qr'] as bool? ?? false,
     );
   }
 }

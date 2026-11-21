@@ -476,6 +476,13 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // "Stempel uitdelen": the one-time QR code on a shop's screen, one per card, written by the billing server.
+    // The shop's screen reads it to see the scan; account deletion removes it. No client writes.
+    match /stampOffers/{programId} {
+      allow get, list, delete: if isBusinessUser() && resource.data.ownerUid == uid();
+      allow create, update: if false;
+    }
+
     // Secure tags: the server's record per physical tag (UID → tag, last tap counter). Server only.
     match /kitTags/{tagUid} {
       allow read, write: if false;

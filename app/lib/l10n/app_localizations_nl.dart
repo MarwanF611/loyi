@@ -1924,7 +1924,7 @@ class L10nNl extends L10n {
 
   @override
   String trialNote(int days, String price) {
-    return 'Vandaag betaal je niets. Na $days dagen start je abonnement aan $price per maand, tenzij je eerder opzegt. We sturen je ook twee beveiligde Loyi-tags op; Stripe vraagt het adres.';
+    return 'Vandaag betaal je niets. Na $days dagen start je abonnement aan $price per maand, tenzij je eerder opzegt. We sturen je ook je beveiligde Loyi-tag op; Stripe vraagt het adres.';
   }
 
   @override
@@ -1962,7 +1962,7 @@ class L10nNl extends L10n {
 
   @override
   String get businessDetailsSub =>
-      'Voor je facturen, de verwerkersovereenkomst en het opsturen van je twee Loyi-tags. Klanten zien dit nooit.';
+      'Voor je facturen, de verwerkersovereenkomst en het opsturen van je Loyi-tag. Klanten zien dit nooit.';
 
   @override
   String get legalName => 'Officiële naam';
@@ -2078,4 +2078,79 @@ class L10nNl extends L10n {
   String kitLinkTo(String card) {
     return 'Deze tag wordt gekoppeld aan $card.';
   }
+
+  @override
+  String get giveStamp => 'Stempel uitdelen';
+
+  @override
+  String get giveStampHint =>
+      'Laat je klant deze code scannen met de camera van zijn telefoon.';
+
+  @override
+  String codeValidFor(int seconds) {
+    return 'Nog $seconds s geldig';
+  }
+
+  @override
+  String get codeExpiredTitle => 'Code verlopen';
+
+  @override
+  String get codeExpiredSub =>
+      'Een code werkt één minuut. Maak een nieuwe voor je klant.';
+
+  @override
+  String get newCode => 'Nieuwe code';
+
+  @override
+  String get stampGiven => 'Stempel gegeven';
+
+  @override
+  String get stampGivenSub => 'De stempel staat op de kaart van je klant.';
+
+  @override
+  String get nextCustomer => 'Volgende klant';
+
+  @override
+  String get chooseCardToStamp => 'Welke kaart?';
+
+  @override
+  String get qrCodeUsed =>
+      'Deze code is al gebruikt. Vraag aan de toog een nieuwe.';
+
+  @override
+  String get qrCodeExpired =>
+      'Deze code is verlopen. Vraag aan de toog een nieuwe.';
+
+  @override
+  String get homeScreenTitle => 'Zet Loyi op je beginscherm';
+
+  @override
+  String get homeScreenSub =>
+      'Je kaarten met één tik bij de hand, net als een app.';
+
+  @override
+  String get homeScreenIosShare =>
+      'Tik in Safari op Deel (op nieuwere iPhones: ••• en dan Deel)';
+
+  @override
+  String get homeScreenIosAdd =>
+      'Kies „Zet op beginscherm” (staat het er niet? Tik eerst op Toon meer)';
+
+  @override
+  String get homeScreenIosOpen =>
+      'Open Loyi via je beginscherm en log één keer in';
+
+  @override
+  String get homeScreenAndroidMenu =>
+      'Tik in Chrome op het menu (drie puntjes)';
+
+  @override
+  String get homeScreenAndroidAdd =>
+      'Kies „Toevoegen aan startscherm” of „App installeren”';
+
+  @override
+  String get homeScreenInstall => 'Installeren';
+
+  @override
+  String get notNow => 'Niet nu';
 }

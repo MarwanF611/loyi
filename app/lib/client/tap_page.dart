@@ -3,18 +3,27 @@ import 'package:go_router/go_router.dart';
 
 import '../services/api.dart';
 import '../services/auth_service.dart';
+import '../services/billing.dart';
 import '../services/language.dart';
 import '../theme.dart';
 import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
 
-/// Landing page for `/t/<tagId>`, the URL written on every NFC tag.
-/// Joins/stamps on the server, then replaces the URL with the card page so a
-/// browser refresh can't trigger a second stamp.
+/// Landing page for `/t/<tagId>`, the URL written on every NFC tag, and for
+/// `/q/<programId>/<token>`, the one-time QR code on a shop's screen.
+/// Joins/stamps, then replaces the URL with the card page so a browser refresh
+/// can't trigger a second stamp.
 class TapPage extends StatefulWidget {
-  const TapPage({super.key, required this.tagId});
+  const TapPage({super.key, required String this.tagId}) : qr = null;
 
-  final String tagId;
+  /// A scanned "Stempel uitdelen" code: the billing server spends it and hands out
+  /// the card's QR tag with a ticket for one stamp (firestore.rules require it).
+  const TapPage.qr({super.key, required String programId, required String token})
+    : tagId = null,
+      qr = (programId: programId, token: token);
+
+  final String? tagId;
+  final ({String programId, String token})? qr;
 
   @override
   State<TapPage> createState() => _TapPageState();
@@ -33,11 +42,18 @@ class _TapPageState extends State<TapPage> {
     setState(() => _error = null);
     try {
       await auth.ensureClientSession();
-      final result = await api.tap(widget.tagId);
+      final result = await _run();
       if (mounted) context.go('/c/${result.cardId}', extra: result);
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
     }
+  }
+
+  Future<TapResult> _run() async {
+    final qr = widget.qr;
+    if (qr == null) return api.tap(widget.tagId!);
+    final claim = await billing.qrClaim(qr.programId, qr.token);
+    return api.tap(claim.tagId, ticketId: claim.ticketId);
   }
 
   @override
@@ -82,7 +98,8 @@ class _TapPageState extends State<TapPage> {
                         const SizedBox(height: 6),
                         Text(_error!, style: context.text.bodyMedium, textAlign: TextAlign.center),
                         const SizedBox(height: 28),
-                        FilledButton(onPressed: _tap, child: Text(context.l10n.tryAgain)),
+                        // A QR code works once: trying the same one again can't help.
+                        if (widget.qr == null) FilledButton(onPressed: _tap, child: Text(context.l10n.tryAgain)),
                         const SizedBox(height: 8),
                         TextButton(onPressed: () => context.go('/cards'), child: Text(context.l10n.goToMyCards)),
                       ],

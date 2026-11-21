@@ -11,6 +11,7 @@ import '../services/repo.dart';
 import '../theme.dart';
 import '../widgets/loyalty_card_view.dart';
 import '../widgets/loyi_icons.dart';
+import '../widgets/home_screen_prompt.dart';
 import '../widgets/save_cards_prompt.dart';
 import '../widgets/ui.dart';
 import 'card_data.dart';
@@ -164,6 +165,7 @@ class _CardListState extends State<_CardList> {
                     const SizedBox(height: 18),
                   ],
                   if (cards.length == 1 && anonymous) const SaveCardsPrompt(),
+                  if (cards.isNotEmpty && !anonymous) const HomeScreenPrompt(),
                   const SizedBox(height: 28),
                   Center(
                     child: TextButton.icon(

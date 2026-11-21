@@ -6,6 +6,7 @@ import 'business/account_page.dart';
 import 'business/cards_page.dart';
 import 'business/clients_page.dart';
 import 'business/dashboard_page.dart';
+import 'business/give_stamp_page.dart';
 import 'business/insights_page.dart';
 import 'business/login_page.dart';
 import 'business/program_page.dart';
@@ -54,6 +55,11 @@ GoRouter buildRouter() => GoRouter(
       path: '/k',
       builder: (_, s) => KitTapPage(e: s.uri.queryParameters['e'] ?? '', c: s.uri.queryParameters['c'] ?? ''),
     ),
+    // The one-time QR code on a shop's screen ("Stempel uitdelen").
+    GoRoute(
+      path: '/q/:programId/:token',
+      builder: (_, s) => TapPage.qr(programId: s.pathParameters['programId']!, token: s.pathParameters['token']!),
+    ),
     // Try-it card for the website: no account, nothing saved.
     GoRoute(path: '/demo', builder: (_, _) => const DemoPage()),
     GoRoute(path: '/cards', builder: (_, _) => const MyCardsPage()),
@@ -89,6 +95,11 @@ GoRouter buildRouter() => GoRouter(
             GoRoute(path: 'subscribe', parentNavigatorKey: _root, builder: (_, _) => const SubscribePage()),
             GoRoute(path: 'account', parentNavigatorKey: _root, builder: (_, _) => const BusinessAccountPage()),
             GoRoute(path: 'programs/new', parentNavigatorKey: _root, builder: (_, _) => const ProgramPage()),
+            GoRoute(
+              path: 'give-stamp/:programId',
+              parentNavigatorKey: _root,
+              builder: (_, s) => GiveStampPage(programId: s.pathParameters['programId']!),
+            ),
             GoRoute(
               path: 'programs/:programId',
               parentNavigatorKey: _root,

@@ -15,6 +15,7 @@ import '../widgets/confetti.dart';
 import '../widgets/loyalty_card_view.dart';
 import '../widgets/loyi_icons.dart';
 import '../widgets/message_card.dart';
+import '../widgets/home_screen_prompt.dart';
 import '../widgets/save_cards_prompt.dart';
 import '../widgets/ui.dart';
 import 'card_data.dart';
@@ -290,6 +291,7 @@ class _CardDetailsState extends State<_CardDetails> {
                     ],
                   ),
                   if (anonymous && !saveFirst) ...[const SizedBox(height: 14), const SaveCardsPrompt()],
+                  if (!anonymous) const HomeScreenPrompt(),
                 ],
               ),
             ),

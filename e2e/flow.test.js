@@ -449,6 +449,57 @@ test("Loyi rules: full flow and abuse attempts", async (t) => {
     assert.equal((await getDoc(cardRef)).get("totalStamps"), 1);
   });
 
+  await t.test("QR codes (Stempel uitdelen): the shop reads its own offer; a stamp needs the server ticket", async () => {
+    // The billing Worker makes the card's QR tag (a secure stamp tag) and the offer on the shop's screen.
+    const qrTag = admin.collection("tags").doc(`qr-${programRef.id}`);
+    await qrTag.set({
+      businessId: bizRef.id,
+      ownerUid: owner.uid,
+      programId: programRef.id,
+      type: "stamp",
+      label: "QR",
+      active: true,
+      tapCount: 0,
+      secure: true,
+      qr: true,
+      createdAt: Timestamp.now(),
+    });
+    await admin.doc(`stampOffers/${programRef.id}`).set({
+      ownerUid: owner.uid,
+      tagId: qrTag.id,
+      token: `tok-${run}`,
+      expiresAt: Timestamp.fromMillis(Date.now() + 60_000),
+      claimedAt: null,
+      createdAt: Timestamp.now(),
+    });
+    const offerDoc = (db) => doc(db, "stampOffers", programRef.id);
+
+    // The shop's screen reads its offer; clients don't; nobody writes it except the server.
+    assert.equal((await getDoc(offerDoc(biz.db))).get("token"), `tok-${run}`);
+    assert.equal((await getDocs(query(collection(biz.db, "stampOffers"), where("ownerUid", "==", owner.uid)))).size, 1);
+    await denied(getDoc(offerDoc(bob.db)));
+    await denied(updateDoc(offerDoc(biz.db), { claimedAt: serverTimestamp() }));
+    await denied(setDoc(doc(biz.db, "stampOffers", `x-${run}`), { ownerUid: owner.uid, token: "t" }));
+
+    // A new customer: the QR tag alone is refused; with the server's ticket the card comes with a first stamp.
+    const scanner = client("qr-scanner");
+    await signInAnonymously(scanner.auth);
+    await denied(tap(scanner.db, scanner.uid(), qrTag.id));
+    await admin.doc(`stampTickets/qr-${run}`).set({
+      tagId: qrTag.id,
+      clientUid: scanner.uid(),
+      expiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
+    });
+    assert.equal((await tap(scanner.db, scanner.uid(), qrTag.id, { ticketId: `qr-${run}` })).outcome, "stamped");
+    const card = (await getDoc(doc(scanner.db, "cards", `${programRef.id}_${scanner.uid()}`))).data();
+    assert.deepEqual([card.stamps, card.totalStamps], [1, 1]);
+    await denied(tap(scanner.db, scanner.uid(), qrTag.id, { ticketId: `qr-${run}` }));
+
+    // Account deletion: the shop removes its own offer.
+    await deleteDoc(offerDoc(biz.db));
+    assert.equal((await admin.doc(`stampOffers/${programRef.id}`).get()).exists, false);
+  });
+
   await t.test("card design validation", async () => {
     const design = { background: 0xff6d4c41, background2: null, style: "pattern", stampColor: 0xffffffff, stampIcon: "coffee" };
     await updateDoc(programRef, { design });

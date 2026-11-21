@@ -18,6 +18,9 @@ String get publicBaseUrl =>
 
 String tagUrl(String tagId) => '$publicBaseUrl/t/$tagId';
 
+/// The one-time QR code on a shop's screen ("Stempel uitdelen").
+String qrStampUrl(String programId, String token) => '$publicBaseUrl/q/$programId/$token';
+
 // ── Production keys ─────────────────────────────────────────────────────────
 // Set in config/prod.json and passed with `--dart-define-from-file=config/prod.json`.
 // All of these are public client keys (they ship inside the app), not secrets.

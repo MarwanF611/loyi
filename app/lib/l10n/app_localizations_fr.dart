@@ -1935,7 +1935,7 @@ class L10nFr extends L10n {
 
   @override
   String trialNote(int days, String price) {
-    return 'Vous ne payez rien aujourd\'hui. Après $days jours, votre abonnement démarre à $price par mois, sauf si vous résiliez avant. Nous vous envoyons aussi deux tags Loyi sécurisés ; Stripe vous demande l\'adresse.';
+    return 'Vous ne payez rien aujourd\'hui. Après $days jours, votre abonnement démarre à $price par mois, sauf si vous résiliez avant. Nous vous envoyons aussi votre tag Loyi sécurisé ; Stripe vous demande l\'adresse.';
   }
 
   @override
@@ -1973,7 +1973,7 @@ class L10nFr extends L10n {
 
   @override
   String get businessDetailsSub =>
-      'Pour vos factures, l\'accord de traitement des données et l\'envoi de vos deux tags Loyi. Les clients ne voient jamais ces informations.';
+      'Pour vos factures, l\'accord de traitement des données et l\'envoi de votre tag Loyi. Les clients ne voient jamais ces informations.';
 
   @override
   String get legalName => 'Nom officiel';
@@ -2093,4 +2093,78 @@ class L10nFr extends L10n {
   String kitLinkTo(String card) {
     return 'Ce tag sera associé à $card.';
   }
+
+  @override
+  String get giveStamp => 'Donner un tampon';
+
+  @override
+  String get giveStampHint =>
+      'Faites scanner ce code par votre client avec l\'appareil photo de son téléphone.';
+
+  @override
+  String codeValidFor(int seconds) {
+    return 'Valable encore $seconds s';
+  }
+
+  @override
+  String get codeExpiredTitle => 'Code expiré';
+
+  @override
+  String get codeExpiredSub =>
+      'Un code fonctionne une minute. Créez-en un nouveau pour votre client.';
+
+  @override
+  String get newCode => 'Nouveau code';
+
+  @override
+  String get stampGiven => 'Tampon donné';
+
+  @override
+  String get stampGivenSub => 'Le tampon est sur la carte de votre client.';
+
+  @override
+  String get nextCustomer => 'Client suivant';
+
+  @override
+  String get chooseCardToStamp => 'Quelle carte ?';
+
+  @override
+  String get qrCodeUsed =>
+      'Ce code a déjà été utilisé. Demandez-en un nouveau au comptoir.';
+
+  @override
+  String get qrCodeExpired =>
+      'Ce code a expiré. Demandez-en un nouveau au comptoir.';
+
+  @override
+  String get homeScreenTitle => 'Mettez Loyi sur votre écran d\'accueil';
+
+  @override
+  String get homeScreenSub => 'Vos cartes à portée de doigt, comme une app.';
+
+  @override
+  String get homeScreenIosShare =>
+      'Dans Safari, touchez Partager (sur les iPhone récents : ••• puis Partager)';
+
+  @override
+  String get homeScreenIosAdd =>
+      'Choisissez « Sur l\'écran d\'accueil » (absent ? Touchez d\'abord Plus)';
+
+  @override
+  String get homeScreenIosOpen =>
+      'Ouvrez Loyi depuis l\'écran d\'accueil et connectez-vous une fois';
+
+  @override
+  String get homeScreenAndroidMenu =>
+      'Dans Chrome, touchez le menu (trois points)';
+
+  @override
+  String get homeScreenAndroidAdd =>
+      'Choisissez « Ajouter à l\'écran d\'accueil » ou « Installer l\'application »';
+
+  @override
+  String get homeScreenInstall => 'Installer';
+
+  @override
+  String get notNow => 'Pas maintenant';
 }

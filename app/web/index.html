@@ -17,6 +17,8 @@
   <link rel="manifest" href="manifest.json">
   <!-- The app code starts downloading with the page instead of after the loader scripts. -->
   <link rel="preload" href="main.dart.js" as="script">
+  <!-- "Put Loyi on your home screen": catches Android's install prompt before the app loads. -->
+  <script src="install.js"></script>
   <!-- Light/dark choice shared with the website (localStorage), applied before Flutter loads. -->
   <script src="site/theme.js"></script>
   <style>

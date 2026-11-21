@@ -53,7 +53,11 @@ class _TagsSectionState extends State<TagsSection> {
         StreamBuilder<List<LoyiTag>>(
           stream: _tags,
           builder: (context, snap) {
-            final tags = snap.data ?? const <LoyiTag>[];
+            // The QR tag behind "Stempel uitdelen" isn't a physical tag: leave it out.
+            final tags = [
+              for (final t in snap.data ?? const <LoyiTag>[])
+                if (!t.qr) t,
+            ];
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

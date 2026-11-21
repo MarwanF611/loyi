@@ -59,7 +59,7 @@ PRIVACY = {
         file is your own responsibility as controller.</li>
       <li>Subscription: whether it is active or in its free trial, when it renews and how you pay. Payments are
         handled by Stripe; we never see your card or bank details. Stripe also asks for the address where we post your
-        starter kit (two secure tags); we use it only for that.</li>
+        Loyi tag (one secure tag); we use it only for that.</li>
     </ul>
   </div>
 
@@ -177,7 +177,7 @@ PRIVACY = {
         bestand doet, valt onder je eigen verantwoordelijkheid als verwerkingsverantwoordelijke.</li>
       <li>Abonnement: of het actief is of in de gratis proefperiode zit, wanneer het verlengd wordt en hoe je betaalt.
         Betalingen lopen via Stripe; wij zien nooit je kaart- of bankgegevens. Stripe vraagt ook het adres waar we je
-        starterkit (twee beveiligde tags) naartoe sturen; we gebruiken het alleen daarvoor.</li>
+        Loyi-tag (één beveiligde tag) naartoe sturen; we gebruiken het alleen daarvoor.</li>
     </ul>
   </div>
 
@@ -307,7 +307,7 @@ PRIVACY = {
         faites de ce fichier relève de votre propre responsabilité de responsable du traitement.</li>
       <li>Abonnement : s'il est actif ou en période d'essai gratuite, quand il se renouvelle et comment vous payez.
         Les paiements passent par Stripe ; nous ne voyons jamais vos données de carte ou bancaires. Stripe vous demande
-        aussi l'adresse à laquelle nous envoyons votre kit de démarrage (deux tags sécurisés) ; nous ne l'utilisons que
+        aussi l'adresse à laquelle nous envoyons votre tag Loyi (un tag sécurisé) ; nous ne l'utilisons que
         pour cela.</li>
     </ul>
   </div>
@@ -425,8 +425,8 @@ TERMS = {
       Loyi apps don't sell subscriptions.</li>
     <li><strong>The first 14 days are free</strong> (one free trial per shop). Stripe asks for your payment method at
       the start; the first payment is taken when the trial ends, unless you cancel before then.</li>
-    <li>With your subscription we post you a starter kit with two secure Loyi tags. They're yours to keep, also if you
-      cancel during the trial, and only work with Loyi.</li>
+    <li>With your subscription we post you a secure Loyi tag. It's yours to keep, also if you cancel during the
+      trial, and only works with Loyi.</li>
     <li><strong>It renews automatically every month</strong> until you cancel. You cancel at any time on the website
       under Settings → Subscription → Manage subscription. Deleting your Loyi account also cancels your
       subscription.</li>
@@ -510,8 +510,8 @@ TERMS = {
     <li><strong>De eerste 14 dagen zijn gratis</strong> (één gratis proefperiode per zaak). Stripe vraagt je
       betaalmiddel bij de start; de eerste betaling gebeurt op het einde van de proefperiode, tenzij je voordien
       opzegt.</li>
-    <li>Bij je abonnement sturen we je een starterkit met twee beveiligde Loyi-tags op. Je mag ze houden, ook als je
-      tijdens de proefperiode opzegt, en ze werken alleen met Loyi.</li>
+    <li>Bij je abonnement sturen we je een beveiligde Loyi-tag op. Je mag hem houden, ook als je tijdens de
+      proefperiode opzegt, en hij werkt alleen met Loyi.</li>
     <li><strong>Het wordt elke maand automatisch verlengd</strong> tot je opzegt. Je zegt op wanneer je wilt via de
       website onder Instellingen → Abonnement → Abonnement beheren. Als je je Loyi-account verwijdert, wordt je
       abonnement ook stopgezet.</li>
@@ -600,8 +600,8 @@ TERMS = {
       apps Loyi ne vendent pas d'abonnement.</li>
     <li><strong>Les 14 premiers jours sont gratuits</strong> (un seul essai gratuit par commerce). Stripe vous demande
       un moyen de paiement au départ ; le premier paiement a lieu à la fin de l'essai, sauf si vous résiliez avant.</li>
-    <li>Avec votre abonnement, nous vous envoyons un kit de démarrage avec deux tags Loyi sécurisés. Vous pouvez les
-      garder, même si vous résiliez pendant l'essai, et ils ne fonctionnent qu'avec Loyi.</li>
+    <li>Avec votre abonnement, nous vous envoyons un tag Loyi sécurisé. Vous pouvez le garder, même si vous résiliez
+      pendant l'essai, et il ne fonctionne qu'avec Loyi.</li>
     <li><strong>Il se renouvelle automatiquement chaque mois</strong> jusqu'à sa résiliation. Vous résiliez à tout
       moment sur le site via Réglages → Abonnement → Gérer l'abonnement. La suppression de votre compte Loyi résilie
       aussi votre abonnement.</li>

@@ -3264,7 +3264,7 @@ abstract class L10n {
   /// No description provided for @trialNote.
   ///
   /// In en, this message translates to:
-  /// **'You pay nothing today. After {days} days your subscription starts at {price} a month, unless you cancel before then. We also post you two secure Loyi tags; Stripe asks for the address.'**
+  /// **'You pay nothing today. After {days} days your subscription starts at {price} a month, unless you cancel before then. We also post you your secure Loyi tag; Stripe asks for the address.'**
   String trialNote(int days, String price);
 
   /// No description provided for @trialUntil.
@@ -3324,7 +3324,7 @@ abstract class L10n {
   /// No description provided for @businessDetailsSub.
   ///
   /// In en, this message translates to:
-  /// **'For your invoices, the data processing agreement and posting your two Loyi tags. Clients never see this.'**
+  /// **'For your invoices, the data processing agreement and posting your Loyi tag. Clients never see this.'**
   String get businessDetailsSub;
 
   /// No description provided for @legalName.
@@ -3536,6 +3536,132 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'This tag will be linked to {card}.'**
   String kitLinkTo(String card);
+
+  /// No description provided for @giveStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Give a stamp'**
+  String get giveStamp;
+
+  /// No description provided for @giveStampHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Let your customer scan this code with their phone\'s camera.'**
+  String get giveStampHint;
+
+  /// No description provided for @codeValidFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid for {seconds} s'**
+  String codeValidFor(int seconds);
+
+  /// No description provided for @codeExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Code expired'**
+  String get codeExpiredTitle;
+
+  /// No description provided for @codeExpiredSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A code works for one minute. Make a new one for your customer.'**
+  String get codeExpiredSub;
+
+  /// No description provided for @newCode.
+  ///
+  /// In en, this message translates to:
+  /// **'New code'**
+  String get newCode;
+
+  /// No description provided for @stampGiven.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamp given'**
+  String get stampGiven;
+
+  /// No description provided for @stampGivenSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The stamp is on your customer\'s card.'**
+  String get stampGivenSub;
+
+  /// No description provided for @nextCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Next customer'**
+  String get nextCustomer;
+
+  /// No description provided for @chooseCardToStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Which card?'**
+  String get chooseCardToStamp;
+
+  /// No description provided for @qrCodeUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'This code was already used. Ask for a new one at the counter.'**
+  String get qrCodeUsed;
+
+  /// No description provided for @qrCodeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This code has expired. Ask for a new one at the counter.'**
+  String get qrCodeExpired;
+
+  /// No description provided for @homeScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Put Loyi on your home screen'**
+  String get homeScreenTitle;
+
+  /// No description provided for @homeScreenSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cards one tap away, like an app.'**
+  String get homeScreenSub;
+
+  /// No description provided for @homeScreenIosShare.
+  ///
+  /// In en, this message translates to:
+  /// **'In Safari, tap Share (on newer iPhones: •••, then Share)'**
+  String get homeScreenIosShare;
+
+  /// No description provided for @homeScreenIosAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose “Add to Home Screen” (not there? Tap More first)'**
+  String get homeScreenIosAdd;
+
+  /// No description provided for @homeScreenIosOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Loyi from your home screen and sign in once'**
+  String get homeScreenIosOpen;
+
+  /// No description provided for @homeScreenAndroidMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'In Chrome, tap the menu (three dots)'**
+  String get homeScreenAndroidMenu;
+
+  /// No description provided for @homeScreenAndroidAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose “Add to home screen” or “Install app”'**
+  String get homeScreenAndroidAdd;
+
+  /// No description provided for @homeScreenInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get homeScreenInstall;
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

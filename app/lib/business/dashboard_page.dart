@@ -12,6 +12,7 @@ import '../services/repo.dart';
 import '../theme.dart';
 import '../widgets/loyi_icons.dart';
 import '../widgets/ui.dart';
+import 'give_stamp_page.dart';
 import 'insights/analytics.dart';
 import 'messages.dart';
 import 'shell.dart';
@@ -109,6 +110,8 @@ class _OverviewPageState extends State<OverviewPage> {
       children: [
         const SubscriptionBanner(),
         _Hero(stats: _stats, days: _days),
+        const SizedBox(height: 16),
+        const GiveStampButton(),
         const SizedBox(height: 16),
         _Kpis(stats: _stats),
         const SizedBox(height: 36),
